@@ -17,5 +17,5 @@ React native (Expo) + NativeWind
 # How to install and use
 
 `yarn install` & `yarn start`
-You can use Android Studio Virtual Device Manager or Physical Device for testing
+You can use Android Studio Virtual Device Manager or Physical Device for testing <br />
 First launch the Android Device, then `yarn start` and press `a` to preview
