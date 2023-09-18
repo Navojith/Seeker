@@ -4,7 +4,7 @@ Use dev branch
 
 # Colors => tailwindcss.config.js
 
-# Button => Use provided buttons (pass props) in components/buttons (create new buttons if needed)
+# Button => Use provided buttons (pass props) in components/common/buttons (create new buttons if needed)
 
 React native (Expo) + NativeWind
 
