@@ -1,11 +1,37 @@
 import { KeyboardAvoidingView, TextInput, View, Text } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import MainButton from '../components/common/buttons/MainButton';
 import SecondaryButton from '../components/common/buttons/SecondaryButton';
+import { auth } from '../firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useNavigation } from '@react-navigation/core';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        navigation.replace('home');
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const handleLogin = () => {
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        console.log('Signed in with ', user.email);
+      })
+      .catch((error) => {
+        console.log(error.code, error.message);
+        alert(error.message);
+      });
+  };
 
   return (
     <KeyboardAvoidingView
@@ -32,10 +58,14 @@ const LoginScreen = () => {
         />
       </View>
       <View>
-        <MainButton containerStyles={'mt-4'} onPress={''} text="Login" />
+        <MainButton
+          containerStyles={'mt-4'}
+          onPress={handleLogin}
+          text="Login"
+        />
         <SecondaryButton
           containerStyles={'mt-2'}
-          onPress={''}
+          onPress={() => navigation.replace('register')}
           text="Register"
         />
       </View>
