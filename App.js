@@ -1,12 +1,15 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { auth } from './firebase';
-import HomeScreen from './screens/HomeScreen';
-import ProfileScreen from './screens/ProfileScreen';
+
+import HomeScreenWithoutAuth from './screens/HomeScreen';
+import ProfileScreenWithoutAuth from './screens/ProfileScreen';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
+import AuthCheck from './util/manageUser/AuthCheck';
 
 const Stack = createNativeStackNavigator();
+const ProfileScreen = AuthCheck(ProfileScreenWithoutAuth);
+const HomeScreen = AuthCheck(HomeScreenWithoutAuth);
 
 export default function App() {
   return (
