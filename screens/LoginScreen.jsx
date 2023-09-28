@@ -1,13 +1,16 @@
 import { KeyboardAvoidingView, TextInput, View, Text } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import MainButton from '../components/common/buttons/MainButton';
 import SecondaryButton from '../components/common/buttons/SecondaryButton';
 
 const LoginScreen = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
   return (
     <KeyboardAvoidingView
-      behavior="padding"
-      className="flex-1 justify-center items-center"
+      behavior="height"
+      className="flex-1 mt-4 justify-center items-center"
     >
       <Text className="text-3xl text-dark-blue font-bold mb-4 text-center">
         Welcome !
@@ -16,13 +19,15 @@ const LoginScreen = () => {
         <TextInput
           className="bg-white mb-2 px-4 py-2 border-[3px] border-dark-blue text-dark-blue rounded-xl"
           placeholder="Email"
-          value={''}
+          value={email}
+          onChangeText={(text) => setEmail(text)}
           type="email"
         />
         <TextInput
           className="bg-white mb-2 px-4 py-2 border-[3px] border-dark-blue text-dark-blue rounded-xl"
           placeholder="Password"
-          value={''}
+          value={password}
+          onChangeText={(text) => setPassword(text)}
           secureTextEntry
         />
       </View>
