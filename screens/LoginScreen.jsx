@@ -14,7 +14,7 @@ const LoginScreen = () => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        navigation.replace('home');
+        navigation.replace('Home');
       }
     });
 
@@ -65,7 +65,7 @@ const LoginScreen = () => {
         />
         <SecondaryButton
           containerStyles={'mt-2'}
-          onPress={() => navigation.replace('register')}
+          onPress={() => navigation.replace('Register')}
           text="Register"
         />
       </View>
