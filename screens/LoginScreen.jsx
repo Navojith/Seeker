@@ -1,7 +1,7 @@
 import { KeyboardAvoidingView, TextInput, View, Text } from 'react-native';
 import React from 'react';
-import MainButton from '../components/buttons/MainButton';
-import SecondaryButton from '../components/buttons/SecondaryButton';
+import MainButton from '../components/common/buttons/MainButton';
+import SecondaryButton from '../components/common/buttons/SecondaryButton';
 
 const LoginScreen = () => {
   return (
