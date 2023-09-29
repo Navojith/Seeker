@@ -47,13 +47,28 @@ const LoginScreen = () => {
       })
       .catch((error) => {
         console.log(error.code, error.message);
-        //TwoButtonAlert('sds', error.message);
-        setIsError((prev) => ({
-          ...prev,
-          visibility: true,
-          title: 'Error !',
-          message: error.message + ' - ' + error.code,
-        }));
+        if (error.code === 'auth/invalid-email') {
+          setIsError((prev) => ({
+            ...prev,
+            visibility: true,
+            title: 'Error !',
+            message: 'Please enter a valid email !',
+          }));
+        } else if (error.code === 'auth/invalid-login-credentials') {
+          setIsError((prev) => ({
+            ...prev,
+            visibility: true,
+            title: 'Error !',
+            message: 'Invalid email or password !',
+          }));
+        } else {
+          setIsError((prev) => ({
+            ...prev,
+            visibility: true,
+            title: 'Error !',
+            message: error.message + ' - ' + error.code,
+          }));
+        }
       });
   };
 

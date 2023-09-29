@@ -5,6 +5,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import MainButton from '../components/common/buttons/MainButton';
 import SecondaryButton from '../components/common/buttons/SecondaryButton';
 import { useNavigation } from '@react-navigation/core';
+import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 
 const RegisterScreen = () => {
   const [email, setEmail] = useState('');
@@ -12,10 +13,32 @@ const RegisterScreen = () => {
   const [fullName, setFullName] = useState('');
   const [rePassword, setRePassword] = useState('');
   const navigation = useNavigation();
+  const [isError, setIsError] = useState({
+    visibility: false,
+    viewStyles: 'border border-4 border-red-600',
+    title: null,
+    titleStyles: 'text-red-600',
+    message: null,
+    messageStyles: 'text-red-600 font-bold',
+  });
 
   const handleSignUp = () => {
-    if (password !== rePassword) {
-      alert('Passwords do not match');
+    if (!email || !password || !fullName || !rePassword) {
+      setIsError((prev) => ({
+        ...prev,
+        visibility: true,
+        title: 'Error !',
+        message: 'Please fill all the fields !',
+      }));
+      return;
+    } else if (password !== rePassword) {
+      setIsError((prev) => ({
+        ...prev,
+        visibility: true,
+        title: 'Error !',
+        message: 'Passwords do not match !',
+      }));
+      return;
     } else {
       createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
@@ -23,8 +46,30 @@ const RegisterScreen = () => {
           console.log('Registered user: ' + user.email);
         })
         .catch((error) => {
-          console.log(error.errorCode, error.errorMessage);
-          alert(error.errorMessage);
+          console.log(error.code);
+          if (error.code === 'auth/email-already-in-use') {
+            setIsError((prev) => ({
+              ...prev,
+              visibility: true,
+              title: 'Error !',
+              message: 'Email already in use !',
+            }));
+            return;
+          } else if (error.code === 'auth/invalid-email') {
+            setIsError((prev) => ({
+              ...prev,
+              visibility: true,
+              title: 'Error !',
+              message: 'Please enter a valid email !',
+            }));
+          } else {
+            setIsError((prev) => ({
+              ...prev,
+              visibility: true,
+              title: 'Error !',
+              message: error.message + ' - ' + error.code,
+            }));
+          }
         });
     }
   };
@@ -44,6 +89,9 @@ const RegisterScreen = () => {
       behavior="height"
       className="flex-1 justify-center items-center"
     >
+      {isError.visibility && (
+        <DismissibleAlert data={isError} setData={setIsError} />
+      )}
       <Text className="text-3xl text-dark-blue font-bold mb-4 text-center">
         Welcome !
       </Text>
