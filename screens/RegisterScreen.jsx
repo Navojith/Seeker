@@ -4,15 +4,13 @@ import { auth } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import MainButton from '../components/common/buttons/MainButton';
 import SecondaryButton from '../components/common/buttons/SecondaryButton';
-import { useNavigation } from '@react-navigation/core';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 
-const RegisterScreen = () => {
+const RegisterScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [rePassword, setRePassword] = useState('');
-  const navigation = useNavigation();
   const [isError, setIsError] = useState({
     visibility: false,
     viewStyles: 'border border-4 border-red-600',
@@ -73,16 +71,6 @@ const RegisterScreen = () => {
         });
     }
   };
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        navigation.replace('Home');
-      }
-    });
-
-    return unsubscribe;
-  }, []);
 
   return (
     <KeyboardAvoidingView
