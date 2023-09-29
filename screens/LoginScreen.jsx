@@ -4,13 +4,12 @@ import MainButton from '../components/common/buttons/MainButton';
 import SecondaryButton from '../components/common/buttons/SecondaryButton';
 import { auth } from '../firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { useNavigation } from '@react-navigation/core';
+
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigation = useNavigation();
   const [isError, setIsError] = useState({
     visibility: false,
     viewStyles: 'border border-4 border-red-600',
@@ -19,16 +18,6 @@ const LoginScreen = () => {
     message: null,
     messageStyles: 'text-red-600 font-bold',
   });
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        navigation.replace('Home');
-      }
-    });
-
-    return unsubscribe;
-  }, []);
 
   const handleLogin = () => {
     if (!email || !password) {
