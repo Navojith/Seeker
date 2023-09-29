@@ -1,9 +1,12 @@
-import { View, Text } from 'react-native';
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
-import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import ProfileIcon from 'react-native-vector-icons/EvilIcons';
+import LeaderBoardIcon from 'react-native-vector-icons/SimpleLineIcons';
+import LeaderBoard from '../screens/LeaderBoardScreen';
+import FoundScreen from '../screens/FoundScreen';
+import LostScreen from '../screens/LostScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -11,7 +14,7 @@ const UserStack = () => {
   return (
     <NavigationContainer>
       <Tab.Navigator
-        screenOptions={{
+        screenOptions={({ route }) => ({
           tabBarStyle: {
             backgroundColor: '#0284C7',
             height: 70,
@@ -24,17 +27,41 @@ const UserStack = () => {
             borderBottomWidth: 0,
             borderColor: '#000',
           },
-        }}
-        sceneContainerStyle={{}}
+          tabBarLabelStyle: {
+            fontWeight: 'bold',
+            color: '#000',
+            fontSize: 14,
+          },
+        })}
       >
-        <Tab.Screen name="Home" component={HomeScreen} 
+        <Tab.Screen
+          name="Leader Board"
+          component={LeaderBoard}
+          options={{
+            tabBarIcon: () => <LeaderBoardIcon name="chart" size={30} />,
+          }}
         />
-        <Tab.Screen name="Profile" component={ProfileScreen} 
-        options={{
-            tabBarIcon: ({focused} => (
-                
-            ))
-        }}/>
+        <Tab.Screen
+          name="Found"
+          component={FoundScreen}
+          options={{
+            tabBarIcon: () => <ProfileIcon name="user" size={48} />,
+          }}
+        />
+        <Tab.Screen
+          name="Missing"
+          component={LostScreen}
+          options={{
+            tabBarIcon: () => <ProfileIcon name="user" size={48} />,
+          }}
+        />
+        <Tab.Screen
+          name="Profile"
+          component={ProfileScreen}
+          options={{
+            tabBarIcon: () => <ProfileIcon name="user" size={48} />,
+          }}
+        />
       </Tab.Navigator>
     </NavigationContainer>
   );
