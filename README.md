@@ -4,7 +4,7 @@ Use dev branch
 
 # Colors => tailwindcss.config.js
 
-# Button => Use provided buttons (pass props) in components/common/buttons (create new buttons if needed)
+# Button => Use provided buttons/alertboxes (pass props) in components/common/ (create new buttons/alerts if needed)
 
 React native (Expo) + NativeWind
 
@@ -19,3 +19,9 @@ React native (Expo) + NativeWind
 `yarn install` & `yarn start`
 You can use Android Studio Virtual Device Manager or Physical Device for testing <br />
 First launch the Android Device, then `yarn start` and press `a` to preview
+
+# DB Credentials
+<ul>
+  <li>Gmail : seekerlostandfound@gmail.com</li>
+  <li>Password: Qwerty@123</li>
+</ul>

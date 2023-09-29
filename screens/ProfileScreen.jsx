@@ -1,16 +1,14 @@
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import React from 'react';
 import MainButton from '../components/common/buttons/MainButton';
 import { auth } from '../firebase';
-import { useNavigation } from '@react-navigation/core';
 
 const ProfileScreen = () => {
-  const navigation = useNavigation();
   const handleSignOut = () => {
     auth
       .signOut()
       .then(() => {
-        navigation.replace('Login');
+        console.log('Signed out');
       })
       .catch((error) => {
         console.log(error.code, error.message);

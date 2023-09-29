@@ -4,24 +4,31 @@ import MainButton from '../components/common/buttons/MainButton';
 import SecondaryButton from '../components/common/buttons/SecondaryButton';
 import { auth } from '../firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { useNavigation } from '@react-navigation/core';
 
-const LoginScreen = () => {
+import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
+
+const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigation = useNavigation();
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        navigation.replace('Home');
-      }
-    });
-
-    return unsubscribe;
-  }, []);
+  const [isError, setIsError] = useState({
+    visibility: false,
+    viewStyles: 'border border-4 border-red-600',
+    title: null,
+    titleStyles: 'text-red-600',
+    message: null,
+    messageStyles: 'text-red-600 font-bold',
+  });
 
   const handleLogin = () => {
+    if (!email || !password) {
+      setIsError((prev) => ({
+        ...prev,
+        visibility: true,
+        title: 'Error !',
+        message: 'Please enter email and password !',
+      }));
+      return;
+    }
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
@@ -29,7 +36,28 @@ const LoginScreen = () => {
       })
       .catch((error) => {
         console.log(error.code, error.message);
-        alert(error.message);
+        if (error.code === 'auth/invalid-email') {
+          setIsError((prev) => ({
+            ...prev,
+            visibility: true,
+            title: 'Error !',
+            message: 'Please enter a valid email !',
+          }));
+        } else if (error.code === 'auth/invalid-login-credentials') {
+          setIsError((prev) => ({
+            ...prev,
+            visibility: true,
+            title: 'Error !',
+            message: 'Invalid email or password !',
+          }));
+        } else {
+          setIsError((prev) => ({
+            ...prev,
+            visibility: true,
+            title: 'Error !',
+            message: error.message + ' - ' + error.code,
+          }));
+        }
       });
   };
 
@@ -38,6 +66,9 @@ const LoginScreen = () => {
       behavior="height"
       className="flex-1 mt-4 justify-center items-center"
     >
+      {isError.visibility && (
+        <DismissibleAlert data={isError} setData={setIsError} />
+      )}
       <Text className="text-3xl text-dark-blue font-bold mb-4 text-center">
         Welcome !
       </Text>
@@ -48,6 +79,7 @@ const LoginScreen = () => {
           value={email}
           onChangeText={(text) => setEmail(text)}
           type="email"
+          required
         />
         <TextInput
           className="bg-white mb-2 px-4 py-2 border-[3px] border-dark-blue text-dark-blue rounded-xl"
@@ -55,6 +87,7 @@ const LoginScreen = () => {
           value={password}
           onChangeText={(text) => setPassword(text)}
           secureTextEntry
+          required
         />
       </View>
       <View>
