@@ -4,9 +4,16 @@ import { NavigationContainer } from '@react-navigation/native';
 import ProfileScreen from '../screens/ProfileScreen';
 import ProfileIcon from 'react-native-vector-icons/EvilIcons';
 import LeaderBoardIcon from 'react-native-vector-icons/SimpleLineIcons';
-import LeaderBoard from '../screens/LeaderBoardScreen';
+import LeaderBoardScreen from '../screens/LeaderBoardScreen';
 import FoundScreen from '../screens/FoundScreen';
-import LostScreen from '../screens/LostScreen';
+import LostItemStack from './LostItemStack';
+import {
+  Profile,
+  LeaderBoard,
+  FoundItems,
+  LostItems,
+} from '../constants/RouteConstants';
+import { ScreenContainer } from 'react-native-screens';
 import Header from '../components/header'
 
 const Tab = createBottomTabNavigator();
@@ -33,11 +40,13 @@ const UserStack = () => {
             color: '#000',
             fontSize: 14,
           },
+          tabBarHideOnKeyboard: true,
         })}
+        sceneContainerStyle={{ backgroundColor: '#F0F9FF' }}
       >
         <Tab.Screen
-          name="Leader Board"
-          component={LeaderBoard}
+          name={LeaderBoard}
+          component={LeaderBoardScreen}
           options={{
             tabBarIcon: () => <LeaderBoardIcon name="chart" size={30} />,
             headerStyle: {
@@ -52,7 +61,7 @@ const UserStack = () => {
           }}
         />
         <Tab.Screen
-          name="Found"
+          name={FoundItems}
           component={FoundScreen}
           options={{
             tabBarIcon: () => <ProfileIcon name="user" size={48} />,
@@ -68,8 +77,8 @@ const UserStack = () => {
           }}
         />
         <Tab.Screen
-          name="Missing"
-          component={LostScreen}
+          name={LostItems}
+          component={LostItemStack}
           options={{
             tabBarIcon: () => <ProfileIcon name="user" size={48} />,
             headerStyle: {
@@ -84,7 +93,7 @@ const UserStack = () => {
           }}
         />
         <Tab.Screen
-          name="Profile"
+          name={Profile}
           component={ProfileScreen}
           options={{
             header: () => <Header title="Profile" />,
