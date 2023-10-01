@@ -8,7 +8,12 @@ const Stack = createStackNavigator();
 
 const LostItemStack = () => {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        cardStyle: { backgroundColor: '#F0F9FF' },
+      }}
+    >
       <Stack.Screen name="Lost" component={LostScreen} />
       <Stack.Screen name={AddLostItem} component={CreateLostItemScreen} />
     </Stack.Navigator>

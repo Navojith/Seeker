@@ -11,7 +11,12 @@ const Stack = createStackNavigator();
 const GuestStack = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          cardStyle: { backgroundColor: '#F0F9FF' },
+        }}
+      >
         <Stack.Screen
           name={Login}
           options={{ headerShown: false }}

@@ -13,6 +13,7 @@ import {
   FoundItems,
   LostItems,
 } from '../constants/RouteConstants';
+import { ScreenContainer } from 'react-native-screens';
 
 const Tab = createBottomTabNavigator();
 
@@ -39,6 +40,7 @@ const UserStack = () => {
             fontSize: 14,
           },
         })}
+        sceneContainerStyle={{ backgroundColor: '#F0F9FF' }}
       >
         <Tab.Screen
           name={LeaderBoard}
