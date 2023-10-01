@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Modal from 'react-native-modal';
 import MainButton from '../buttons/MainButton';
 
+// see LoginScreen for example usage
 const DismissibleAlert = ({ data, setData }) => {
   const toggleModal = () => {
     setData((prev) => ({ ...data, visibility: false }));

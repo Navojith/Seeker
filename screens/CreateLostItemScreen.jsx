@@ -4,10 +4,31 @@ import AddImage from '../assets/images/PostCreation/AddImage.png';
 import { Picker } from '@react-native-picker/picker';
 import data from '../assets/data/SLIITLocations/index.json';
 import MainButton from '../components/common/buttons/MainButton';
+import { FireStore, auth } from '../firebase';
+import { collection, addDoc } from 'firebase/firestore';
+import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
+import { useNavigation } from '@react-navigation/native';
+import { LostItems } from '../constants/RouteConstants';
 
 const CreateLostItemScreen = () => {
-  const [selectedLocation, setSelectedLocation] = useState('Select Location');
+  const navigation = useNavigation();
+
+  const [selectedLocation, setSelectedLocation] = useState(data.locations[0]);
   const [otherVisibility, setOtherVisibility] = useState(false);
+  const [itemName, setItemName] = useState('');
+  const [serialNumber, setSerialNumber] = useState('');
+  const [color, setColor] = useState('');
+  const [description, setDescription] = useState('');
+  const [other, setOther] = useState('');
+  const [error, setError] = useState({
+    visibility: false,
+    viewStyles: 'border border-4 border-red-600',
+    title: null,
+    titleStyles: 'text-red-600',
+    message: null,
+    messageStyles: 'text-red-600 font-bold',
+  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (selectedLocation === 'Other') {
@@ -17,8 +38,59 @@ const CreateLostItemScreen = () => {
     }
   }, [selectedLocation]);
 
+  const handleSubmit = async () => {
+    if (itemName === '' || description === '') {
+      setError((prev) => ({
+        ...prev,
+        visibility: true,
+        title: 'Error !',
+        message: 'Please enter item name and description !',
+      }));
+    } else {
+      try {
+        setLoading(true);
+        await addDoc(
+          collection(FireStore, 'lostItems', auth.currentUser.uid, 'posted'),
+          {
+            userId: auth.currentUser.uid,
+            itemName: itemName,
+            serialNumber: serialNumber ?? null,
+            color: color ?? null,
+            location: selectedLocation,
+            other: other ?? null,
+            description: description,
+          }
+        );
+
+        setError({
+          visibility: true,
+          viewStyles: 'border border-4 border-green-600',
+          titleStyles: 'text-green-600',
+          messageStyles: 'text-green-600 font-bold',
+          title: 'Success !',
+          message: 'Your post has been created successfully !',
+        });
+        setLoading(false);
+        setItemName('');
+        setColor('');
+        setDescription('');
+        setOther('');
+        setSerialNumber('');
+      } catch (error) {
+        console.log(error);
+        setError((prev) => ({
+          ...prev,
+          visibility: true,
+          title: 'Error !',
+          message: error.message + ' - ' + error.code,
+        }));
+      }
+    }
+  };
+
   return (
     <ScrollView className="p-4 flex-1  ">
+      <DismissibleAlert data={error} setData={setError} />
       <Image
         className="mx-auto mb-4"
         source={AddImage}
@@ -27,16 +99,22 @@ const CreateLostItemScreen = () => {
       />
       <Text className="text-black text-lg font-bold mb-2">Item Name</Text>
       <TextInput
+        value={itemName}
+        onChangeText={(value) => setItemName(value)}
         placeholder=""
         className="border border-4 px-4 py-2 border-light-blue rounded-xl text-black mb-4"
       />
       <Text className="text-black text-lg font-bold mb-2">Serial Number</Text>
       <TextInput
+        value={serialNumber}
+        onChangeText={(value) => setSerialNumber(value)}
         placeholder="( Optional )"
         className="border border-4 px-4 py-2 border-light-blue rounded-xl text-black mb-4"
       />
       <Text className="text-black text-lg font-bold mb-2">Color</Text>
       <TextInput
+        value={color}
+        onChangeText={(value) => setColor(value)}
         placeholder="( Optional )"
         className="border border-4 px-4 py-2 border-light-blue rounded-xl text-black  mb-4"
       />
@@ -64,6 +142,8 @@ const CreateLostItemScreen = () => {
             Please Specify
           </Text>
           <TextInput
+            value={other}
+            onChangeText={(value) => setOther(value)}
             placeholder=""
             className="border border-4 px-4 py-2 border-light-blue rounded-xl text-black mb-4"
           />
@@ -71,14 +151,21 @@ const CreateLostItemScreen = () => {
       )}
       <Text className="text-black text-lg font-bold mb-2">Description</Text>
       <TextInput
+        value={description}
+        onChangeText={(value) => setDescription(value)}
         multiline={true}
         numberOfLines={10}
         textAlignVertical="top"
         placeholder=""
         className="border border-4 px-4 py-6 border-light-blue rounded-xl text-black mb-4"
       />
+      {loading && (
+        <Text className="text-light-blue text-lg font-bold mt-2">
+          Sending... Please wait....
+        </Text>
+      )}
       <MainButton
-        onPress={''}
+        onPress={handleSubmit}
         text={'Create Post'}
         containerStyles={'mt-6 mb-12 rounded-full w-full drop-shadow-md'}
       />
