@@ -5,10 +5,15 @@ import { Picker } from '@react-native-picker/picker';
 import data from '../assets/data/SLIITLocations/index.json';
 import MainButton from '../components/common/buttons/MainButton';
 import { FireStore, auth } from '../firebase';
+import { collection, addDoc } from 'firebase/firestore';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
+import { useNavigation } from '@react-navigation/native';
+import { LostItems } from '../constants/RouteConstants';
 
 const CreateLostItemScreen = () => {
-  const [selectedLocation, setSelectedLocation] = useState('Select Location');
+  const navigation = useNavigation();
+
+  const [selectedLocation, setSelectedLocation] = useState(data.locations[0]);
   const [otherVisibility, setOtherVisibility] = useState(false);
   const [itemName, setItemName] = useState('');
   const [serialNumber, setSerialNumber] = useState('');
@@ -23,6 +28,7 @@ const CreateLostItemScreen = () => {
     message: null,
     messageStyles: 'text-red-600 font-bold',
   });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (selectedLocation === 'Other') {
@@ -42,25 +48,34 @@ const CreateLostItemScreen = () => {
       }));
     } else {
       try {
-        const res = await FireStore.collection('Lost').add({
-          userId: auth.currentUser.uid,
-          itemName: itemName,
-          serialNumber: serialNumber ?? null,
-          color: color ?? null,
-          location: selectedLocation,
-          other: other ?? null,
-          description: description,
+        setLoading(true);
+        await addDoc(
+          collection(FireStore, 'lostItems', auth.currentUser.uid, 'posted'),
+          {
+            userId: auth.currentUser.uid,
+            itemName: itemName,
+            serialNumber: serialNumber ?? null,
+            color: color ?? null,
+            location: selectedLocation,
+            other: other ?? null,
+            description: description,
+          }
+        );
+
+        setError({
+          visibility: true,
+          viewStyles: 'border border-4 border-green-600',
+          titleStyles: 'text-green-600',
+          messageStyles: 'text-green-600 font-bold',
+          title: 'Success !',
+          message: 'Your post has been created successfully !',
         });
-        if (res.ok) {
-          setError({
-            visibility: true,
-            viewStyles: 'border border-4 border-green-600',
-            titleStyles: 'text-red-600',
-            messageStyles: 'text-green-600 font-bold',
-            title: 'Success !',
-            message: 'Your post has been created successfully !',
-          });
-        }
+        setLoading(false);
+        setItemName('');
+        setColor('');
+        setDescription('');
+        setOther('');
+        setSerialNumber('');
       } catch (error) {
         console.log(error);
         setError((prev) => ({
@@ -144,6 +159,11 @@ const CreateLostItemScreen = () => {
         placeholder=""
         className="border border-4 px-4 py-6 border-light-blue rounded-xl text-black mb-4"
       />
+      {loading && (
+        <Text className="text-light-blue text-lg font-bold mt-2">
+          Sending... Please wait....
+        </Text>
+      )}
       <MainButton
         onPress={handleSubmit}
         text={'Create Post'}
