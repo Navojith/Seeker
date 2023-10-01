@@ -7,6 +7,7 @@ import LeaderBoardIcon from 'react-native-vector-icons/SimpleLineIcons';
 import LeaderBoard from '../screens/LeaderBoardScreen';
 import FoundScreen from '../screens/FoundScreen';
 import LostScreen from '../screens/LostScreen';
+import Header from '../components/header'
 
 const Tab = createBottomTabNavigator();
 
@@ -39,6 +40,15 @@ const UserStack = () => {
           component={LeaderBoard}
           options={{
             tabBarIcon: () => <LeaderBoardIcon name="chart" size={30} />,
+            headerStyle: {
+              backgroundColor: '#0369A1',
+            },
+            headerTintColor: '#fff', // Change this color for the text/icon color
+            headerTitleStyle: {
+              fontWeight: 'bold',
+              fontSize: 28,
+            },
+            headerTitleAlign: 'center',
           }}
         />
         <Tab.Screen
@@ -46,6 +56,15 @@ const UserStack = () => {
           component={FoundScreen}
           options={{
             tabBarIcon: () => <ProfileIcon name="user" size={48} />,
+            headerStyle: {
+              backgroundColor: '#0369A1',
+            },
+            headerTintColor: '#fff', // Change this color for the text/icon color
+            headerTitleStyle: {
+              fontWeight: 'bold',
+              fontSize: 28,
+            },
+            headerTitleAlign: 'center',
           }}
         />
         <Tab.Screen
@@ -53,12 +72,22 @@ const UserStack = () => {
           component={LostScreen}
           options={{
             tabBarIcon: () => <ProfileIcon name="user" size={48} />,
+            headerStyle: {
+              backgroundColor: '#0369A1',
+            },
+            headerTintColor: '#fff', // Change this color for the text/icon color
+            headerTitleStyle: {
+              fontWeight: 'bold',
+              fontSize: 28,
+            },
+            headerTitleAlign: 'center',
           }}
         />
         <Tab.Screen
           name="Profile"
           component={ProfileScreen}
           options={{
+            header: () => <Header title="Profile" />,
             tabBarIcon: () => <ProfileIcon name="user" size={48} />,
           }}
         />
