@@ -39,6 +39,7 @@ const UserStack = () => {
             color: '#000',
             fontSize: 14,
           },
+          tabBarHideOnKeyboard: true,
         })}
         sceneContainerStyle={{ backgroundColor: '#F0F9FF' }}
       >
