@@ -14,6 +14,7 @@ import {
   LostItems,
 } from '../constants/RouteConstants';
 import { ScreenContainer } from 'react-native-screens';
+import Header from '../components/header'
 
 const Tab = createBottomTabNavigator();
 
@@ -48,6 +49,15 @@ const UserStack = () => {
           component={LeaderBoardScreen}
           options={{
             tabBarIcon: () => <LeaderBoardIcon name="chart" size={30} />,
+            headerStyle: {
+              backgroundColor: '#0369A1',
+            },
+            headerTintColor: '#fff', // Change this color for the text/icon color
+            headerTitleStyle: {
+              fontWeight: 'bold',
+              fontSize: 28,
+            },
+            headerTitleAlign: 'center',
           }}
         />
         <Tab.Screen
@@ -55,6 +65,15 @@ const UserStack = () => {
           component={FoundScreen}
           options={{
             tabBarIcon: () => <ProfileIcon name="user" size={48} />,
+            headerStyle: {
+              backgroundColor: '#0369A1',
+            },
+            headerTintColor: '#fff', // Change this color for the text/icon color
+            headerTitleStyle: {
+              fontWeight: 'bold',
+              fontSize: 28,
+            },
+            headerTitleAlign: 'center',
           }}
         />
         <Tab.Screen
@@ -62,12 +81,22 @@ const UserStack = () => {
           component={LostItemStack}
           options={{
             tabBarIcon: () => <ProfileIcon name="user" size={48} />,
+            headerStyle: {
+              backgroundColor: '#0369A1',
+            },
+            headerTintColor: '#fff', // Change this color for the text/icon color
+            headerTitleStyle: {
+              fontWeight: 'bold',
+              fontSize: 28,
+            },
+            headerTitleAlign: 'center',
           }}
         />
         <Tab.Screen
           name={Profile}
           component={ProfileScreen}
           options={{
+            header: () => <Header title="Profile" />,
             tabBarIcon: () => <ProfileIcon name="user" size={48} />,
           }}
         />
