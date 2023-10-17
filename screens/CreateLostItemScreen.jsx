@@ -7,12 +7,9 @@ import MainButton from '../components/common/buttons/MainButton';
 import { FireStore, auth } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
-import { useNavigation } from '@react-navigation/native';
-import { LostItems } from '../constants/RouteConstants';
+import TwoButtonModal from '../components/common/modals/TwoButtonModal';
 
 const CreateLostItemScreen = () => {
-  const navigation = useNavigation();
-
   const [selectedLocation, setSelectedLocation] = useState(data.locations[0]);
   const [otherVisibility, setOtherVisibility] = useState(false);
   const [itemName, setItemName] = useState('');
@@ -29,6 +26,8 @@ const CreateLostItemScreen = () => {
     messageStyles: 'text-red-600 font-bold',
   });
   const [loading, setLoading] = useState(false);
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
     if (selectedLocation === 'Other') {
@@ -91,6 +90,14 @@ const CreateLostItemScreen = () => {
 
   return (
     <ScrollView className="p-4 flex-1  ">
+      <TwoButtonModal
+        isVisible={isModalVisible}
+        setIsVisible={setIsModalVisible}
+        heading={'Do you want to Boost the Post?'}
+        infoMessage={
+          'Posts that you create can be boosted so that more people can see the post and more people will be motivated to find the item.'
+        }
+      />
       <DismissibleAlert data={error} setData={setError} />
       <Image
         className="mx-auto mb-4"
@@ -166,7 +173,7 @@ const CreateLostItemScreen = () => {
         </Text>
       )}
       <MainButton
-        onPress={handleSubmit}
+        onPress={() => setIsModalVisible(true)}
         text={'Create Post'}
         containerStyles={'mt-6 mb-12 rounded-full w-full drop-shadow-md'}
       />
