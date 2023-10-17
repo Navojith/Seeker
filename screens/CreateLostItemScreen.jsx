@@ -7,12 +7,8 @@ import MainButton from '../components/common/buttons/MainButton';
 import { FireStore, auth } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
-import { useNavigation } from '@react-navigation/native';
-import { LostItems } from '../constants/RouteConstants';
 
 const CreateLostItemScreen = () => {
-  const navigation = useNavigation();
-
   const [selectedLocation, setSelectedLocation] = useState(data.locations[0]);
   const [otherVisibility, setOtherVisibility] = useState(false);
   const [itemName, setItemName] = useState('');
