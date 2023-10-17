@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import ProfileScreen from '../screens/ProfileScreen';
 import ProfileIcon from 'react-native-vector-icons/EvilIcons';
-import LeaderBoardIcon from 'react-native-vector-icons/SimpleLineIcons';
+import LeaderBoardIcon from '../assets/icons/LeaderboadIcon';
 import LeaderBoardScreen from '../screens/LeaderBoardScreen';
 import FoundScreen from '../screens/FoundScreen';
 import LostItemStack from './LostItemStack';
@@ -14,7 +14,7 @@ import {
   LostItems,
 } from '../constants/RouteConstants';
 import { ScreenContainer } from 'react-native-screens';
-import Header from '../components/header'
+import Header from '../components/header';
 
 const Tab = createBottomTabNavigator();
 
