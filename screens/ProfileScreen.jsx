@@ -1,9 +1,18 @@
-import { View } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import React from 'react';
 import MainButton from '../components/common/buttons/MainButton';
 import { auth } from '../firebase';
 
 const ProfileScreen = () => {
+
+  const styles = StyleSheet.create({
+    signOut: {
+        
+        marginTop: 250,
+        marginHorizontal: 40
+    }
+  });
+
   const handleSignOut = () => {
     auth
       .signOut()
@@ -16,8 +25,8 @@ const ProfileScreen = () => {
       });
   };
   return (
-    <View>
-      <MainButton onPress={handleSignOut} text={'Sign Out'} />
+    <View style={styles.signOut}>
+      <MainButton onPress={handleSignOut} text={'Sign Out'}   />
     </View>
   );
 };
