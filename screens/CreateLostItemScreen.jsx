@@ -55,6 +55,7 @@ const CreateLostItemScreen = () => {
             location: selectedLocation,
             other: other ?? null,
             description: description,
+            timestamp: new Date(),
           }
         );
 
