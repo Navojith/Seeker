@@ -90,7 +90,11 @@ const CreateLostItemScreen = () => {
 
   return (
     <ScrollView className="p-4 flex-1  ">
-      <TwoButtonModal isVisible={isModalVisible} />
+      <TwoButtonModal
+        isVisible={isModalVisible}
+        setIsVisible={setIsModalVisible}
+        heading={'Do you want to Boost the Post?'}
+      />
       <DismissibleAlert data={error} setData={setError} />
       <Image
         className="mx-auto mb-4"
