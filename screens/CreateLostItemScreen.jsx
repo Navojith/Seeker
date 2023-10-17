@@ -9,8 +9,9 @@ import { collection, addDoc } from 'firebase/firestore';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import TwoButtonModal from '../components/common/modals/TwoButtonModal';
 
-const CreateLostItemScreen = () => {
+const CreateLostItemScreen = ({ navigation }) => {
   const [selectedLocation, setSelectedLocation] = useState(data.locations[0]);
+  const [createdItemId, setCreatedItemId] = useState(null);
   const [otherVisibility, setOtherVisibility] = useState(false);
   const [itemName, setItemName] = useState('');
   const [serialNumber, setSerialNumber] = useState('');
@@ -37,19 +38,26 @@ const CreateLostItemScreen = () => {
     }
   }, [selectedLocation]);
 
+  const navToBuyBoost = () => {
+    navigation.navigate('purchase-boost', { itemId: createdItemId });
+  };
+
   const handleSubmit = async () => {
     if (itemName === '' || description === '') {
       setError((prev) => ({
         ...prev,
         visibility: true,
+        viewStyles: 'border border-4 border-red-600',
+        titleStyles: 'text-red-600',
+        messageStyles: 'text-red-600 font-bold',
         title: 'Error !',
         message: 'Please enter item name and description !',
       }));
     } else {
       try {
         setLoading(true);
-        await addDoc(
-          collection(FireStore, 'lostItems', auth.currentUser.uid, 'posted'),
+        const res = await addDoc(
+          collection(FireStore, 'lostItems', auth.currentUser.uid, 'drafted'),
           {
             userId: auth.currentUser.uid,
             itemName: itemName,
@@ -62,13 +70,15 @@ const CreateLostItemScreen = () => {
           }
         );
 
+        setCreatedItemId(res.id);
+
         setError({
           visibility: true,
           viewStyles: 'border border-4 border-green-600',
           titleStyles: 'text-green-600',
           messageStyles: 'text-green-600 font-bold',
           title: 'Success !',
-          message: 'Your post has been created successfully !',
+          message: 'Post created successfully !',
         });
         setLoading(false);
         setItemName('');
@@ -76,6 +86,7 @@ const CreateLostItemScreen = () => {
         setDescription('');
         setOther('');
         setSerialNumber('');
+        setIsModalVisible(true);
       } catch (error) {
         console.log(error);
         setError((prev) => ({
@@ -97,6 +108,7 @@ const CreateLostItemScreen = () => {
         infoMessage={
           'Posts that you create can be boosted so that more people can see the post and more people will be motivated to find the item.'
         }
+        onPressConfirm={navToBuyBoost}
       />
       <DismissibleAlert data={error} setData={setError} />
       <Image
@@ -173,7 +185,7 @@ const CreateLostItemScreen = () => {
         </Text>
       )}
       <MainButton
-        onPress={() => setIsModalVisible(true)}
+        onPress={handleSubmit}
         text={'Create Post'}
         containerStyles={'mt-6 mb-12 rounded-full w-full drop-shadow-md'}
       />
