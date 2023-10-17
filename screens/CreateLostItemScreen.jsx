@@ -94,6 +94,9 @@ const CreateLostItemScreen = () => {
         isVisible={isModalVisible}
         setIsVisible={setIsModalVisible}
         heading={'Do you want to Boost the Post?'}
+        infoMessage={
+          'Posts that you create can be boosted so that more people can see the post and more people will be motivated to find the item.'
+        }
       />
       <DismissibleAlert data={error} setData={setError} />
       <Image

@@ -1,7 +1,8 @@
 import { View, Text, Button, TouchableOpacity } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import Modal from 'react-native-modal';
 import InformationIcon from '../../../assets/icons/InformationIcon';
+import DismissibleAlert from '../alerts/DismissibleAlert';
 
 const TwoButtonModal = ({
   isVisible,
@@ -17,8 +18,23 @@ const TwoButtonModal = ({
   confirmText,
   cancelText,
   showInfoIcon,
-  onPressInfo,
+  infoMessage,
+  infoViewStyles,
+  infoButtonText,
+  infoButtonTextStyle,
+  infoContainerStyles,
+  infoMessageStyles,
 }) => {
+  const [showInfoModal, setShowInfoModal] = useState({
+    visibility: false,
+    viewStyles: ` pt-8 flex justify-center border rounded-[42px] border-[6px] border-dark-blue ${infoViewStyles}`,
+    message: infoMessage,
+    buttonText: infoButtonText ?? 'Close',
+    buttonContainerStyles: ` w-[100px] mx-auto rounded-full bg-dark-blue ${infoContainerStyles}`,
+    buttonTextStyles: ` font-bold ${infoButtonTextStyle}`,
+    messageStyles: ` text-2xl font-bold ${infoMessageStyles}`,
+  });
+
   return (
     <Modal
       isVisible={isVisible}
@@ -49,11 +65,17 @@ const TwoButtonModal = ({
           {showInfoIcon !== false && (
             <TouchableOpacity
               className="absolute top-4 right-3 box-shadow-xl"
-              onPress={onPressInfo}
+              onPress={() =>
+                setShowInfoModal({
+                  ...showInfoModal,
+                  visibility: true,
+                })
+              }
             >
               <InformationIcon />
             </TouchableOpacity>
           )}
+          <DismissibleAlert data={showInfoModal} setData={setShowInfoModal} />
           <Text className={'text-3xl font-bold text-center my-8'}>
             {heading}
           </Text>
