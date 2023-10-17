@@ -6,6 +6,7 @@ import { auth } from '../firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
+import { passwordPattern } from '../util/regex/regexPatterns';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -17,6 +18,10 @@ const LoginScreen = ({ navigation }) => {
     titleStyles: 'text-red-600',
     message: null,
     messageStyles: 'text-red-600 font-bold',
+  });
+  const [passwordError, setPasswordError] = useState({
+    visibility: false,
+    message: null,
   });
 
   const handleLogin = () => {
@@ -61,6 +66,23 @@ const LoginScreen = ({ navigation }) => {
       });
   };
 
+  const handleChange = (text) => {
+    if (!passwordPattern().exec(text)) {
+      setPasswordError((prev) => ({
+        ...prev,
+        visibility: true,
+        message: 'Password must be at least 8 characters long and contain... !',
+      }));
+    } else {
+      setPasswordError((prev) => ({
+        ...prev,
+        visibility: false,
+        message: null,
+      }));
+    }
+    setPassword(text);
+  };
+
   return (
     <KeyboardAvoidingView
       behavior="height"
@@ -85,10 +107,15 @@ const LoginScreen = ({ navigation }) => {
           className="bg-white mb-2 px-4 py-2 border-[3px] border-dark-blue text-dark-blue rounded-xl"
           placeholder="Password"
           value={password}
-          onChangeText={(text) => setPassword(text)}
-          secureTextEntry
+          onChangeText={(text) => handleChange(text)}
+          // secureTextEntry
           required
         />
+        {passwordError.visibility && (
+          <Text className="text-red-600 font-bold">
+            {passwordError.message}
+          </Text>
+        )}
       </View>
       <View>
         <MainButton
