@@ -7,6 +7,7 @@ import MainButton from '../components/common/buttons/MainButton';
 import { FireStore, auth } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
+import TwoButtonModal from '../components/common/modals/TwoButtonModal';
 
 const CreateLostItemScreen = () => {
   const [selectedLocation, setSelectedLocation] = useState(data.locations[0]);
@@ -25,6 +26,8 @@ const CreateLostItemScreen = () => {
     messageStyles: 'text-red-600 font-bold',
   });
   const [loading, setLoading] = useState(false);
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
     if (selectedLocation === 'Other') {
@@ -87,6 +90,7 @@ const CreateLostItemScreen = () => {
 
   return (
     <ScrollView className="p-4 flex-1  ">
+      <TwoButtonModal isVisible={isModalVisible} />
       <DismissibleAlert data={error} setData={setError} />
       <Image
         className="mx-auto mb-4"
@@ -162,7 +166,7 @@ const CreateLostItemScreen = () => {
         </Text>
       )}
       <MainButton
-        onPress={handleSubmit}
+        onPress={() => setIsModalVisible(true)}
         text={'Create Post'}
         containerStyles={'mt-6 mb-12 rounded-full w-full drop-shadow-md'}
       />
