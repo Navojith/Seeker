@@ -14,7 +14,7 @@ import {
   LostItems,
 } from '../constants/RouteConstants';
 import { ScreenContainer } from 'react-native-screens';
-import Header from '../components/header'
+import PostedLostItemStack from './PostedLostItemStack';
 
 const Tab = createBottomTabNavigator();
 
@@ -94,10 +94,11 @@ const UserStack = () => {
         />
         <Tab.Screen
           name={Profile}
-          component={ProfileScreen}
+          component={PostedLostItemStack}
           options={{
-            header: () => <Header title="Profile" />,
+            // header: () => <Header title="Profile" />,
             tabBarIcon: () => <ProfileIcon name="user" size={48} />,
+            headerShown: false,
           }}
         />
       </Tab.Navigator>
