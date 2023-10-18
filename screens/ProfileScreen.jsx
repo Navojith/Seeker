@@ -1,8 +1,8 @@
 import { View , StyleSheet , TouchableOpacity , Button , Image, Text} from 'react-native';
 import React , {useEffect, useState} from 'react';
 import { auth } from '../firebase';
+import CustomHeader from '../components/header';
 import { useNavigation } from '@react-navigation/native';
-import Header from '../components/header'
 const img = require('../assets/profilepic.png');
 
 const ProfileScreen = () => {
@@ -54,18 +54,29 @@ const ProfileScreen = () => {
   const handleSignOut = () => {
     auth
       .signOut()
-      .then(() => {
-        console.log('Signed out');
-      })
-      .catch((error) => {
-        console.log(error.code, error.message);
         alert(error.message);
-      });
-  };
+      };
 
   return (
-    <View style={styles.signOut}>
-      <MainButton onPress={handleSignOut} text={'Sign Out'}   />
+    <View>
+      <CustomHeader title="Profile"/>
+      <View style={styles.container}>
+        <Image source = {img} style={styles.profilepic}/>
+        <Text style={styles.profileDetails}>UserName</Text>
+        <Text style={styles.profileDetails}>TelNo</Text>
+        <Text style={styles.profileDetails}>Points : </Text>
+      </View>
+      <TouchableOpacity>
+      <Button onPress={handleSignOut} style={styles.itemButton} title="Sign Out" />
+      <Button 
+        onPress={handlePostedLostItems} 
+        style={styles.itemButton}
+        title="Posted Lost Items"/> 
+      <Button 
+        onPress={handlePostedFoundItems} 
+        style={styles.itemButton}
+        title="Posted Found Items"/> 
+      </TouchableOpacity>  
     </View>
   );
 };

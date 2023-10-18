@@ -5,6 +5,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 import ProfileIcon from 'react-native-vector-icons/EvilIcons';
 import LeaderBoardIcon from '../assets/icons/LeaderboadIcon';
 import LeaderBoardScreen from '../screens/LeaderBoardScreen';
+import CustomHeader from '../components/header';
 import FoundScreen from '../screens/FoundScreen';
 import LostItemStack from './LostItemStack';
 import {
@@ -49,7 +50,7 @@ const UserStack = () => {
           name={LeaderBoard}
           component={LeaderBoardScreen}
           options={{
-            header: () => <Header title="Leaderboard" />,
+            header: () => <CustomHeader title="Leaderboard" />,
             tabBarIcon: () => <LeaderBoardIcon name="chart" size={30} />,
           }}
         />
