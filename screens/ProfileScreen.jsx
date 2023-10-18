@@ -4,6 +4,7 @@ import { auth } from '../firebase';
 import CustomHeader from '../components/header';
 import { useNavigation } from '@react-navigation/native';
 const img = require('../assets/profilepic.png');
+import { unregisterIndieDevice } from 'native-notify';
 
 const ProfileScreen = () => {
   const [user , setUser] = useState(null)
@@ -56,6 +57,8 @@ const ProfileScreen = () => {
       .signOut()
       .then(() => {
         console.log('Signed out');
+        //unregister notify
+        unregisterIndieDevice(auth.currentUser.uid, 13599, 'gTBeP5h5evCxHcHdDs0yVQ');
       })
       .catch((error) => {
         console.log(error.code, error.message);

@@ -5,6 +5,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import MainButton from '../components/common/buttons/MainButton';
 import SecondaryButton from '../components/common/buttons/SecondaryButton';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
+import { registerIndieID } from 'native-notify';
 
 const RegisterScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -42,6 +43,9 @@ const RegisterScreen = ({ navigation }) => {
         .then((userCredential) => {
           const user = userCredential.user;
           console.log('Registered user: ' + user.email);
+
+          //register notify
+        registerIndieID(user.uid, 13599, 'gTBeP5h5evCxHcHdDs0yVQ');
         })
         .catch((error) => {
           console.log(error.code);

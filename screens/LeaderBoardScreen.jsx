@@ -20,9 +20,22 @@ import {
   limit,
 } from 'firebase/firestore';
 import UserIcon from '../assets/icons/UserIcon';
+import { getPushDataObject } from "native-notify";
+import { useNavigation } from "@react-navigation/native";
+import { Item } from "../constants/RouteConstants";
 
 const LeaderBoard = () => {
   const [users, setUsers] = useState([]);
+  const navigation = useNavigation();
+
+  let pushDataObject = getPushDataObject();
+  
+  useEffect(() => {
+    console.log(pushDataObject);
+    if (pushDataObject && pushDataObject.type === "search") {
+      navigation.navigate(Item, { pushDataObject });
+    }
+  }, [pushDataObject]);
 
   const styles = StyleSheet.create({
     pageStyle: {
