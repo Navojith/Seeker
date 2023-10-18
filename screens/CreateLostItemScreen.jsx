@@ -8,6 +8,8 @@ import { FireStore, auth } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import TwoButtonModal from '../components/common/modals/TwoButtonModal';
+import { PostBoosting } from '../constants/RouteConstants';
+import { useNavigation } from '@react-navigation/native';
 
 const CreateLostItemScreen = ({ navigation }) => {
   const [selectedLocation, setSelectedLocation] = useState(data.locations[0]);
@@ -27,6 +29,7 @@ const CreateLostItemScreen = ({ navigation }) => {
     messageStyles: 'text-red-600 font-bold',
   });
   const [loading, setLoading] = useState(false);
+  const navigation = useNavigation();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -99,6 +102,11 @@ const CreateLostItemScreen = ({ navigation }) => {
     }
   };
 
+  const handleBoosting = () => {
+    setIsModalVisible(false);
+    navigation.navigate(PostBoosting);
+  };
+
   return (
     <ScrollView className="p-4 flex-1  ">
       <TwoButtonModal
@@ -108,7 +116,11 @@ const CreateLostItemScreen = ({ navigation }) => {
         infoMessage={
           'Posts that you create can be boosted so that more people can see the post and more people will be motivated to find the item.'
         }
+<<<<<<< HEAD
         onPressConfirm={navToBuyBoost}
+=======
+        onPressConfirm={handleBoosting}
+>>>>>>> dev
       />
       <DismissibleAlert data={error} setData={setError} />
       <Image
