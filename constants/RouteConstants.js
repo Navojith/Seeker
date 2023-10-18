@@ -14,4 +14,6 @@ export const Login = 'Login';
 
 export const Register = 'Register';
 
+export const PostBoosting = 'Post Boosting';
+
 export const Items = 'Item';
