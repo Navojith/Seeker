@@ -5,6 +5,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 import ProfileIcon from 'react-native-vector-icons/EvilIcons';
 import LeaderBoardIcon from '../assets/icons/LeaderboadIcon';
 import LeaderBoardScreen from '../screens/LeaderBoardScreen';
+import CustomHeader from '../components/header';
 import FoundScreen from '../screens/FoundScreen';
 import LostItemStack from './LostItemStack';
 import {
@@ -14,7 +15,7 @@ import {
   LostItems,
 } from '../constants/RouteConstants';
 import { ScreenContainer } from 'react-native-screens';
-import Header from '../components/header';
+import PostedItemStack from './PostedItemStack';
 
 const Tab = createBottomTabNavigator();
 
@@ -49,7 +50,7 @@ const UserStack = () => {
           name={LeaderBoard}
           component={LeaderBoardScreen}
           options={{
-            header: () => <Header title="Leaderboard" />,
+            header: () => <CustomHeader title="Leaderboard" />,
             tabBarIcon: () => <LeaderBoardIcon name="chart" size={30} />,
           }}
         />
@@ -87,10 +88,11 @@ const UserStack = () => {
         />
         <Tab.Screen
           name={Profile}
-          component={ProfileScreen}
+          component={PostedItemStack}
           options={{
-            header: () => <Header title="Profile" />,
+            // header: () => <Header title="Profile" />,
             tabBarIcon: () => <ProfileIcon name="user" size={48} />,
+            headerShown: false,
           }}
         />
       </Tab.Navigator>
