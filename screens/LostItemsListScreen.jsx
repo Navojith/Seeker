@@ -123,7 +123,7 @@ const LostItemsListScreen = () => {
       }
     };
     getLostItems();
-  });
+  }, []);
 
   // Filter the items based on the search query
   const filteredItems = lostItems.filter(

@@ -41,6 +41,7 @@ const UserStack = () => {
             fontSize: 14,
           },
           tabBarHideOnKeyboard: true,
+          headerShown: route.name !== LostItems ? true : false,
         })}
         sceneContainerStyle={{ backgroundColor: '#F0F9FF' }}
       >
@@ -48,16 +49,8 @@ const UserStack = () => {
           name={LeaderBoard}
           component={LeaderBoardScreen}
           options={{
+            header: () => <Header title="Leaderboard" />,
             tabBarIcon: () => <LeaderBoardIcon name="chart" size={30} />,
-            headerStyle: {
-              backgroundColor: '#0369A1',
-            },
-            headerTintColor: '#fff', // Change this color for the text/icon color
-            headerTitleStyle: {
-              fontWeight: 'bold',
-              fontSize: 28,
-            },
-            headerTitleAlign: 'center',
           }}
         />
         <Tab.Screen
@@ -81,15 +74,15 @@ const UserStack = () => {
           component={LostItemStack}
           options={{
             tabBarIcon: () => <ProfileIcon name="user" size={48} />,
-            headerStyle: {
-              backgroundColor: '#0369A1',
-            },
-            headerTintColor: '#fff', // Change this color for the text/icon color
-            headerTitleStyle: {
-              fontWeight: 'bold',
-              fontSize: 28,
-            },
-            headerTitleAlign: 'center',
+            // headerStyle: {
+            //   backgroundColor: '#0369A1',
+            // },
+            // headerTintColor: '#fff', // Change this color for the text/icon color
+            // headerTitleStyle: {
+            //   fontWeight: 'bold',
+            //   fontSize: 28,
+            // },
+            // headerTitleAlign: 'center',
           }}
         />
         <Tab.Screen
