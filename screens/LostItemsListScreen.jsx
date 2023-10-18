@@ -18,6 +18,8 @@ import {
 } from 'firebase/firestore';
 const tempimage = require('../assets/images/PostCreation/AddImage.png');
 import data from '../assets/data/SLIITLocations/index.json';
+import { Picker } from '@react-native-picker/picker';
+//import axios from "axios";
 
 const locationOptions = data.locations;
 
@@ -105,7 +107,9 @@ const LostItemsListScreen = () => {
   });
 
   useEffect(() => {
+    console.log('lost item use effect ran');
     const getLostItems = async () => {
+      console.log('get lost items');
       try {
         const querySnapshot = await getDocs(
           collectionGroup(FireStore, 'posted')
@@ -114,7 +118,7 @@ const LostItemsListScreen = () => {
           console.log('No matching documents.');
         } else {
           const items = querySnapshot.docs.map((doc) => doc.data());
-          console.log('Retrieved items:', items);
+          //console.log('Retrieved items:', items);
           setLostItems(items);
         }
       } catch (error) {
@@ -123,6 +127,19 @@ const LostItemsListScreen = () => {
       }
     };
     getLostItems();
+
+    // const fire = () => {
+    //     console.log("fire ran");
+    //     axios.post(`https://app.nativenotify.com/api/indie/notification`, {
+    //       subID: auth.currentUser.uid,
+    //       appId: 13582,
+    //       appToken: "4bB2Wq6pPQwKoSbjJdg1Ef",
+    //       title: "put your push notification title here as a string",
+    //       message: "put your push notification message here as a string",
+    //     });
+    // }
+
+    // fire();
   }, []);
 
   // Filter the items based on the search query
@@ -170,24 +187,31 @@ const LostItemsListScreen = () => {
       >
         <View style={styles.filterModal}>
           <Text>Filter by Location:</Text>
-          {locationOptions.map((location) => (
-            <TouchableOpacity
-              key={location}
-              onPress={() => {
-                setSelectedLocation(location);
-                setFilterModalVisible(false);
-              }}
-            >
-              <Text>{location}</Text>
-            </TouchableOpacity>
-          ))}
+
+          <Picker
+            className="border border-4 px-4 py-2 border-light-blue"
+            placeholder="Select Location"
+            selectedValue={selectedLocation}
+            dropdownIconColor={'black'}
+            dropdownIconRippleColor={'#0284C7'}
+            selectionColor={'#0284C7'}
+            onValueChange={(itemValue) => {
+              setSelectedLocation(itemValue);
+              setFilterModalVisible(false);
+            }}
+          >
+            {locationOptions.map((location, index) => (
+              <Picker.Item key={index} label={location} value={location} />
+            ))}
+          </Picker>
           <TouchableOpacity
+            style={styles.filterButton}
             onPress={() => {
               setSelectedLocation(null);
               setFilterModalVisible(false);
             }}
           >
-            <Text>Clear Filter</Text>
+            <Text style={styles.filterButtonText}>Clear Filter</Text>
           </TouchableOpacity>
         </View>
       </Modal>
