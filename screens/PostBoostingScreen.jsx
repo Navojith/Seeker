@@ -6,7 +6,6 @@ import MainButton from '../components/common/buttons/MainButton';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import { FireStore, auth } from '../firebase';
 import { getDocs, collectionGroup } from 'firebase/firestore';
-import firestore from '@react-native-firebase/firestore';
 
 const PostBoostingScreen = () => {
   const [level, setLevel] = useState(0);
