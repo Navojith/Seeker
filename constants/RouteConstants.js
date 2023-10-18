@@ -17,3 +17,5 @@ export const Register = 'Register';
 export const BuyBoost = 'purchase-boost';
 
 export const PostBoosting = 'Post Boosting';
+
+export const Items = 'Item';

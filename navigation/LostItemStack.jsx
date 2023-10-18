@@ -10,7 +10,7 @@ import {
 } from '../constants/RouteConstants';
 import Header from '../components/header';
 import BuyBoostScreen from '../screens/purchase/BuyBoost';
-
+import LostItem from '../screens/LostItem';
 const Stack = createStackNavigator();
 
 const LostItemStack = ({ navigation }) => {
@@ -67,6 +67,7 @@ const LostItemStack = ({ navigation }) => {
           header: () => <Header title="Purchase Boost" />,
         }}
       />
+      <Stack.Screen name="Item" component={LostItem} />
     </Stack.Navigator>
   );
 };
