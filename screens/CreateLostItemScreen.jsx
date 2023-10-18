@@ -41,10 +41,6 @@ const CreateLostItemScreen = ({ navigation }) => {
     }
   }, [selectedLocation]);
 
-  const navToBuyBoost = () => {
-    navigation.navigate('purchase-boost', { itemId: createdItemId });
-  };
-
   const handleSubmit = async () => {
     if (itemName === '' || description === '') {
       setError((prev) => ({
@@ -104,7 +100,7 @@ const CreateLostItemScreen = ({ navigation }) => {
 
   const handleBoosting = () => {
     setIsModalVisible(false);
-    navigation.navigate(PostBoosting);
+    navigation.navigate(PostBoosting, { itemId: createdItemId });
   };
 
   return (
@@ -116,11 +112,7 @@ const CreateLostItemScreen = ({ navigation }) => {
         infoMessage={
           'Posts that you create can be boosted so that more people can see the post and more people will be motivated to find the item.'
         }
-<<<<<<< HEAD
-        onPressConfirm={navToBuyBoost}
-=======
         onPressConfirm={handleBoosting}
->>>>>>> dev
       />
       <DismissibleAlert data={error} setData={setError} />
       <Image
