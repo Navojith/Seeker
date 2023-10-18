@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { FireStore, auth } from '../firebase';
-import podium from '../assets/podium.png';
 import {
   collectionGroup,
   getDocs,
@@ -20,57 +19,10 @@ import {
   orderBy,
   limit,
 } from 'firebase/firestore';
-// import Header from '../components/header';
 import UserIcon from '../assets/icons/UserIcon';
 
 const LeaderBoard = () => {
-  const [users, setUsers] = useState([
-    {
-      displayedName: 'Dinal',
-      points: '120',
-      key: '1',
-    },
-    {
-      displayedName: 'Dinal1',
-      points: '1200',
-      key: '2',
-    },
-    {
-      displayedName: 'Dinal2',
-      points: '120',
-      key: '3',
-    },
-    {
-      displayedName: 'Dinal1',
-      points: '1200',
-      key: '4',
-    },
-    {
-      displayedName: 'Dinal2',
-      points: '120',
-      key: '5',
-    },
-    {
-      displayedName: 'Dinal1',
-      points: '1200',
-      key: '6',
-    },
-    {
-      displayedName: 'Dinal2',
-      points: '120',
-      key: '7',
-    },
-    {
-      displayedName: 'Dinal1',
-      points: '1200',
-      key: '8',
-    },
-    {
-      displayedName: 'Dinal2',
-      points: '120',
-      key: '9',
-    },
-  ]);
+  const [users, setUsers] = useState([]);
 
   const styles = StyleSheet.create({
     pageStyle: {
@@ -209,7 +161,7 @@ const LeaderBoard = () => {
             </View>
           )}
           keyExtractor={(item) => {
-            return item.id;
+            return item.key;
           }}
         />
       </View>
