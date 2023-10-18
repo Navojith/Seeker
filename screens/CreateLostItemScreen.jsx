@@ -5,10 +5,18 @@ import { Picker } from '@react-native-picker/picker';
 import data from '../assets/data/SLIITLocations/index.json';
 import MainButton from '../components/common/buttons/MainButton';
 import { FireStore, auth } from '../firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import {
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+} from 'firebase/firestore';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import TwoButtonModal from '../components/common/modals/TwoButtonModal';
 import { PostBoosting } from '../constants/RouteConstants';
+import axios from 'axios';
 
 const CreateLostItemScreen = ({ navigation }) => {
   const [selectedLocation, setSelectedLocation] = useState(data.locations[0]);
@@ -28,6 +36,7 @@ const CreateLostItemScreen = ({ navigation }) => {
     messageStyles: 'text-red-600 font-bold',
   });
   const [loading, setLoading] = useState(false);
+  const [leaderboardUsers, setLeaderboardUsers] = useState([]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -39,7 +48,46 @@ const CreateLostItemScreen = ({ navigation }) => {
     }
   }, [selectedLocation]);
 
+  useEffect(() => {
+    const getLeaderboardUsers = async () => {
+      try {
+        const leadeboardQuery = query(
+          collection(FireStore, 'userDetails'),
+          orderBy('points', 'desc'),
+          limit(10)
+        );
+        const querySnapshot = await getDocs(leadeboardQuery);
+        if (querySnapshot.empty) {
+          console.log('No matching documents.');
+        } else {
+          const users = querySnapshot.docs.map((doc) => doc.data().userId);
+          setLeaderboardUsers(users);
+          // console.log(users);
+          // console.log(leaderboardUsers);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getLeaderboardUsers();
+  }, []);
+
+  const handleNotification = async () => {
+    const res = await axios.post(
+      `https://app.nativenotify.com/api/indie/group/notification`,
+      {
+        subIDs: leaderboardUsers,
+        appId: 13599,
+        appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
+        title: 'Seeker',
+        message: 'Lost item reported near you',
+        pushData: '{ "item": "sqKcNh8KhglJahnouMvO" }',
+      }
+    );
+  };
+
   const handleSubmit = async () => {
+    handleNotification();
     if (itemName === '' || description === '') {
       setError((prev) => ({
         ...prev,

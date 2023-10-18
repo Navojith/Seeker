@@ -24,9 +24,13 @@ import { getPushDataObject } from 'native-notify';
 import { useNavigation } from '@react-navigation/native';
 import { Item } from '../constants/RouteConstants';
 import * as Location from 'expo-location';
+import { getDistanceFromLatLonInKm } from '../util/distance/getDistance';
+import siteLocation from '../assets/data/SLIITLocations/location.json';
 
 const LeaderBoard = () => {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const navigation = useNavigation();
 
   let pushDataObject = getPushDataObject();
@@ -127,6 +131,7 @@ const LeaderBoard = () => {
   useEffect(() => {
     const getLeaderboardUsers = async () => {
       try {
+        setLoading(true);
         const leadeboardQuery = query(
           collection(FireStore, 'userDetails'),
           orderBy('points', 'desc'),
@@ -140,8 +145,10 @@ const LeaderBoard = () => {
           // console.log('Retrieved users:', users);
           setUsers(users);
         }
+        setLoading(false);
       } catch (error) {
         console.error(error);
+        setLoading(false);
         // Handle error here
       }
     };
@@ -160,11 +167,20 @@ const LeaderBoard = () => {
         timeout: 5000,
       });
       setLocation(currentLocation);
-      console.log(currentLocation);
+      console.log(currentLocation.coords.latitude);
+      console.log(siteLocation.locations.Auditorium);
+      console.log(
+        getDistanceFromLatLonInKm(
+          currentLocation.coords.latitude,
+          currentLocation.coords.longitude,
+          siteLocation.locations.Auditorium.lat,
+          siteLocation.locations.Auditorium.lng
+        ) * 1000
+      );
     };
 
     getPermissions();
-  });
+  }, []);
 
   return (
     <View style={styles.pageStyle}>
@@ -198,6 +214,11 @@ const LeaderBoard = () => {
           }}
         />
       </View>
+      {loading && (
+        <Text className="text-light-blue text-lg font-bold mt-5 ml-12">
+          Loading... Please wait....
+        </Text>
+      )}
     </View>
   );
 };
