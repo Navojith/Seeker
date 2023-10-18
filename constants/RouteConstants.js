@@ -13,3 +13,5 @@ export const Profile = 'Profile';
 export const Login = 'Login';
 
 export const Register = 'Register';
+
+export const PostBoosting = 'Post Boosting';
