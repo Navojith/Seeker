@@ -90,7 +90,6 @@ const PostedLostItemsScreen = () => {
   return (
     <View>
       <SafeAreaView>
-      <Text>FoundScreen</Text>
       <FlatList 
         data={DATA} 
         renderItem={({item})=>(

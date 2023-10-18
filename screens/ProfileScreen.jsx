@@ -54,9 +54,14 @@ const ProfileScreen = () => {
   const handleSignOut = () => {
     auth
       .signOut()
+      .then(() => {
+        console.log('Signed out');
+      })
+      .catch((error) => {
+        console.log(error.code, error.message);
         alert(error.message);
-      };
-
+      });
+  };
   return (
     <View>
       <CustomHeader title="Profile"/>
