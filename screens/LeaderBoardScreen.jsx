@@ -20,9 +20,11 @@ import {
   limit,
 } from 'firebase/firestore';
 import UserIcon from '../assets/icons/UserIcon';
+import * as Location from 'expo-location';
 
 const LeaderBoard = () => {
   const [users, setUsers] = useState([]);
+  const [location, setLocation] = useState(null);
 
   const styles = StyleSheet.create({
     pageStyle: {
@@ -122,7 +124,7 @@ const LeaderBoard = () => {
           console.log('No matching documents.');
         } else {
           const users = querySnapshot.docs.map((doc) => doc.data());
-          console.log('Retrieved users:', users);
+          // console.log('Retrieved users:', users);
           setUsers(users);
         }
       } catch (error) {
@@ -132,6 +134,24 @@ const LeaderBoard = () => {
     };
     getLeaderboardUsers();
   }, []);
+
+  useEffect(() => {
+    getPermissions = async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Permission to access location was denied');
+      }
+      let currentLocation = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Highest,
+        maximumAge: 10000,
+        timeout: 5000,
+      });
+      setLocation(currentLocation);
+      console.log(currentLocation);
+    };
+
+    getPermissions();
+  });
 
   return (
     <View style={styles.pageStyle}>
@@ -161,7 +181,7 @@ const LeaderBoard = () => {
             </View>
           )}
           keyExtractor={(item) => {
-            return item.key;
+            return item.userId;
           }}
         />
       </View>
