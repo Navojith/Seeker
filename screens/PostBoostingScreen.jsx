@@ -58,7 +58,6 @@ const PostBoostingScreen = ({ route, navigation }) => {
 
         if (!querySnapshot.empty) {
           result = querySnapshot.docs.map((doc) => doc.data());
-          console.log(result);
 
           result = result.filter(
             (user) => user.userId === auth.currentUser.uid

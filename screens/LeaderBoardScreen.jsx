@@ -20,22 +20,28 @@ import {
   limit,
 } from 'firebase/firestore';
 import UserIcon from '../assets/icons/UserIcon';
-import { getPushDataObject } from "native-notify";
-import { useNavigation } from "@react-navigation/native";
-import { Item } from "../constants/RouteConstants";
+import { getPushDataObject } from 'native-notify';
+import { useNavigation } from '@react-navigation/native';
+import { Item } from '../constants/RouteConstants';
+import * as Location from 'expo-location';
+import { getDistanceFromLatLonInKm } from '../util/distance/getDistance';
+import siteLocation from '../assets/data/SLIITLocations/location.json';
 
 const LeaderBoard = () => {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const navigation = useNavigation();
 
   let pushDataObject = getPushDataObject();
-  
+
   useEffect(() => {
     console.log(pushDataObject);
-    if (pushDataObject && pushDataObject.type === "search") {
+    if (pushDataObject && pushDataObject.type === 'search') {
       navigation.navigate(Item, { pushDataObject });
     }
   }, [pushDataObject]);
+  const [location, setLocation] = useState(null);
 
   const styles = StyleSheet.create({
     pageStyle: {
@@ -125,6 +131,7 @@ const LeaderBoard = () => {
   useEffect(() => {
     const getLeaderboardUsers = async () => {
       try {
+        setLoading(true);
         const leadeboardQuery = query(
           collection(FireStore, 'userDetails'),
           orderBy('points', 'desc'),
@@ -135,15 +142,44 @@ const LeaderBoard = () => {
           console.log('No matching documents.');
         } else {
           const users = querySnapshot.docs.map((doc) => doc.data());
-          console.log('Retrieved users:', users);
+          // console.log('Retrieved users:', users);
           setUsers(users);
         }
+        setLoading(false);
       } catch (error) {
         console.error(error);
+        setLoading(false);
         // Handle error here
       }
     };
     getLeaderboardUsers();
+  }, []);
+
+  useEffect(() => {
+    getPermissions = async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Permission to access location was denied');
+      }
+      let currentLocation = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Highest,
+        maximumAge: 10000,
+        timeout: 5000,
+      });
+      setLocation(currentLocation);
+      console.log(currentLocation.coords.latitude);
+      console.log(siteLocation.locations.Auditorium);
+      console.log(
+        getDistanceFromLatLonInKm(
+          currentLocation.coords.latitude,
+          currentLocation.coords.longitude,
+          siteLocation.locations.Auditorium.lat,
+          siteLocation.locations.Auditorium.lng
+        ) * 1000
+      );
+    };
+
+    getPermissions();
   }, []);
 
   return (
@@ -174,10 +210,15 @@ const LeaderBoard = () => {
             </View>
           )}
           keyExtractor={(item) => {
-            return item.key;
+            return item.userId;
           }}
         />
       </View>
+      {loading && (
+        <Text className="text-light-blue text-lg font-bold mt-5 ml-12">
+          Loading... Please wait....
+        </Text>
+      )}
     </View>
   );
 };
