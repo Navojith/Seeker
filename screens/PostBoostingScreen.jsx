@@ -5,12 +5,14 @@ import InformationIcon from '../assets/icons/InformationIcon';
 import MainButton from '../components/common/buttons/MainButton';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import { FireStore, auth } from '../firebase';
-import { getDocs, collectionGroup } from 'firebase/firestore';
+import { getDocs, collectionGroup, getDoc } from 'firebase/firestore';
+import TwoButtonModal from '../components/common/modals/TwoButtonModal';
 
 const PostBoostingScreen = () => {
-  const [level, setLevel] = useState(0);
-  const [needed, setNeeded] = useState('');
+  const [level, setLevel] = useState(1);
+  const [needed, setNeeded] = useState(10);
   const [available, setAvailable] = useState('');
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [showInfoLevelModal, setShowInfoLevelModal] = useState({
     visibility: false,
     viewStyles: ` pt-8 flex justify-center border rounded-[42px] border-[6px] border-dark-blue`,
@@ -34,39 +36,53 @@ const PostBoostingScreen = () => {
 
   useEffect(() => {
     setNeeded(
-      level === 0
-        ? 0
-        : level === 1
+      level === 1
         ? 10
         : level === 2
-        ? 20
+        ? 15
         : level === 3
         ? 30
         : level === 4
-        ? 40
-        : 50
+        ? 50
+        : 0
     );
   }, [level]);
 
   useEffect(() => {
     async function getPoints() {
-      console.log(auth.currentUser.uid);
-      const querySnapshot = await getDocs(
-        collectionGroup(FireStore, 'userDetails')
-      );
+      try {
+        const querySnapshot = await getDocs(
+          collectionGroup(FireStore, 'userDetails')
+        );
 
-      if (!querySnapshot.empty) {
-        points = querySnapshot.docs.map((doc) => doc.data().points);
-        console.log(points);
+        if (!querySnapshot.empty) {
+          result = querySnapshot.docs.map((doc) => doc.data());
+          console.log(result);
 
-        setAvailable(points);
-      } else {
-        console.log('No matching documents.');
-        setAvailable(0);
+          result = result.filter(
+            (user) => user.userId === auth.currentUser.uid
+          );
+
+          setAvailable(result[0].points);
+        } else {
+          console.log('No matching documents.');
+          setAvailable(0);
+        }
+      } catch (error) {
+        console.log(error);
       }
     }
     getPoints();
   }, []);
+
+  const handleConfirm = () => {
+    if (available >= needed) {
+      // Do something here
+      console.log('boosting');
+    } else {
+      setIsModalVisible(true);
+    }
+  };
 
   // console.log(level, needed);
 
@@ -119,9 +135,9 @@ const PostBoostingScreen = () => {
           Points needed
         </Text>
         <TextInput
-          value={needed}
+          value={needed.toString()}
           className="border-4 px-4 py-2 border-light-blue rounded-xl text-black mb-4
-          w-10/12 mx-auto"
+          w-10/12 mx-auto font-bold"
           readOnly
         />
         <View className="flex-row">
@@ -140,15 +156,24 @@ const PostBoostingScreen = () => {
           </TouchableOpacity>
         </View>
         <TextInput
-          value={available}
+          value={available.toString()}
           className="border-4 px-4 py-2 border-light-blue rounded-xl text-black  mb-4
-          w-10/12 mx-auto"
+          w-10/12 mx-auto font-bold"
           readOnly
         />
         <MainButton
           text="Confirm"
           containerStyles="w-6/12 mx-auto mt-2 mb-1 "
-          onPress={() => {}}
+          onPress={() => {
+            handleConfirm();
+          }}
+        />
+        <TwoButtonModal
+          isVisible={isModalVisible}
+          setIsVisible={setIsModalVisible}
+          infoMessage={"Sorry you don't have enough points. Buy boost level?"}
+          //navigate to you page
+          onPressConfirm={() => {}}
         />
       </View>
     </View>
