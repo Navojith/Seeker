@@ -64,25 +64,8 @@ const ProfileScreen = () => {
   };
 
   return (
-    <View>
-      <Header title="Profile"/>
-      <View style={styles.container}>
-        <Image source = {img} style={styles.profilepic}/>
-        <Text style={styles.profileDetails}>UserName</Text>
-        <Text style={styles.profileDetails}>TelNo</Text>
-        <Text style={styles.profileDetails}>Points : </Text>
-      </View>
-      <TouchableOpacity>
-      <Button onPress={handleSignOut} style={styles.itemButton} title="Sign Out" />
-      <Button 
-        onPress={handlePostedLostItems} 
-        style={styles.itemButton}
-        title="Posted Lost Items"/> 
-      <Button 
-        onPress={handlePostedFoundItems} 
-        style={styles.itemButton}
-        title="Posted Found Items"/> 
-      </TouchableOpacity>  
+    <View style={styles.signOut}>
+      <MainButton onPress={handleSignOut} text={'Sign Out'}   />
     </View>
   );
 };

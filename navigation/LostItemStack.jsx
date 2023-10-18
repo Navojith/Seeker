@@ -2,7 +2,9 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import CreateLostItemScreen from '../screens/CreateLostItemScreen';
 import LostScreen from '../screens/LostScreen';
-import { AddLostItem } from '../constants/RouteConstants';
+import PostBoostingScreen from '../screens/PostBoostingScreen';
+import { AddLostItem, PostBoosting } from '../constants/RouteConstants';
+import Header from '../components/header';
 
 const Stack = createStackNavigator();
 
@@ -10,12 +12,48 @@ const LostItemStack = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: false,
+        // headerShown: false,
         cardStyle: { backgroundColor: '#F0F9FF' },
+        headerTitleAlign: 'center',
       }}
     >
-      <Stack.Screen name="Lost" component={LostScreen} />
-      <Stack.Screen name={AddLostItem} component={CreateLostItemScreen} />
+      <Stack.Screen
+        name="Lost"
+        component={LostScreen}
+        options={{
+          headerStyle: {
+            backgroundColor: '#0369A1',
+          },
+          headerTintColor: '#fff', // Change this color for the text/icon color
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 28,
+          },
+          headerTitle: 'Lost Items',
+        }}
+      />
+      <Stack.Screen
+        name={AddLostItem}
+        component={CreateLostItemScreen}
+        options={{
+          headerStyle: {
+            backgroundColor: '#0369A1',
+          },
+          headerTintColor: '#fff', // Change this color for the text/icon color
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 28,
+          },
+        }}
+      />
+      <Stack.Screen
+        name={PostBoosting}
+        component={PostBoostingScreen}
+        options={{
+          headerShown: true,
+          header: () => <Header title="Post Boosting" />,
+        }}
+      />
     </Stack.Navigator>
   );
 };
