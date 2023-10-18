@@ -7,6 +7,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import { passwordPattern } from '../util/regex/regexPatterns';
+import { registerIndieID } from 'native-notify';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -38,6 +39,10 @@ const LoginScreen = ({ navigation }) => {
       .then((userCredential) => {
         const user = userCredential.user;
         console.log('Signed in with ', user.email);
+
+        //register notify
+        registerIndieID(user.uid, 13599, 'gTBeP5h5evCxHcHdDs0yVQ');
+        
       })
       .catch((error) => {
         console.log(error.code, error.message);
