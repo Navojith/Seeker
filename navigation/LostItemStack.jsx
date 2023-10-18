@@ -3,8 +3,13 @@ import { createStackNavigator } from '@react-navigation/stack';
 import CreateLostItemScreen from '../screens/CreateLostItemScreen';
 import LostScreen from '../screens/LostScreen';
 import PostBoostingScreen from '../screens/PostBoostingScreen';
-import { AddLostItem, PostBoosting } from '../constants/RouteConstants';
+import {
+  AddLostItem,
+  BuyBoost,
+  PostBoosting,
+} from '../constants/RouteConstants';
 import Header from '../components/header';
+import BuyBoostScreen from '../screens/purchase/BuyBoost';
 
 const Stack = createStackNavigator();
 
@@ -52,6 +57,14 @@ const LostItemStack = ({ navigation }) => {
         options={{
           headerShown: true,
           header: () => <Header title="Post Boosting" />,
+        }}
+      />
+      <Stack.Screen
+        name={BuyBoost}
+        component={BuyBoostScreen}
+        options={{
+          headerShown: false,
+          header: () => <Header title="Purchase Boost" />,
         }}
       />
     </Stack.Navigator>

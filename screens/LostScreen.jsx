@@ -1,7 +1,11 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { AddLostItem } from '../constants/RouteConstants';
+import {
+  AddLostItem,
+  BuyBoost,
+  PostBoosting,
+} from '../constants/RouteConstants';
 import LostItemsListScreen from './LostItemsListScreen';
 
 const LostScreen = () => {
@@ -18,6 +22,14 @@ const LostScreen = () => {
       </View>
       <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
         <Text style={styles.buttonText}>+</Text>
+      </TouchableOpacity>
+
+      {/* Temparary added for testing purposes */}
+      <TouchableOpacity
+        style={styles.Temp}
+        onPress={() => navigation.navigate(BuyBoost)}
+      >
+        <Text style={styles.buttonTextTemp}>Temp</Text>
       </TouchableOpacity>
     </View>
   );
@@ -36,8 +48,8 @@ const styles = StyleSheet.create({
     bottom: 25,
     right: 25,
     backgroundColor: '#0369A1',
-    borderRadius: 50, 
-    width: 60, 
+    borderRadius: 50,
+    width: 60,
     height: 60,
     alignItems: 'center',
     justifyContent: 'center',
@@ -45,8 +57,27 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'white',
-    fontSize: 40, 
-    // fontWeight: 'bold', 
+    fontSize: 40,
+    // fontWeight: 'bold',
+  },
+
+  //Temparary added for testing purposes
+  buttonTextTemp: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+
+  Temp: {
+    position: 'absolute',
+    bottom: 25,
+    left: 25,
+    backgroundColor: '#0369A1',
+    borderRadius: 50,
+    width: 60,
+    height: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5,
   },
 });
 

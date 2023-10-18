@@ -9,7 +9,6 @@ import { collection, addDoc } from 'firebase/firestore';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import TwoButtonModal from '../components/common/modals/TwoButtonModal';
 import { PostBoosting } from '../constants/RouteConstants';
-import { useNavigation } from '@react-navigation/native';
 
 const CreateLostItemScreen = ({ navigation }) => {
   const [selectedLocation, setSelectedLocation] = useState(data.locations[0]);
@@ -29,7 +28,6 @@ const CreateLostItemScreen = ({ navigation }) => {
     messageStyles: 'text-red-600 font-bold',
   });
   const [loading, setLoading] = useState(false);
-  const navigation = useNavigation();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
