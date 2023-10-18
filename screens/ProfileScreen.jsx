@@ -32,11 +32,11 @@ const ProfileScreen = () => {
   })
 
   const handlePostedLostItems = () => {
-    navigation.navigate('postedLostItems');
+    navigation.navigate('Posted Lost Items');
   };
 
   const handlePostedFoundItems = () => {
-    navigation.navigate('postedFoundItems');
+    navigation.navigate('Posted Found Items');
   }
 
 
