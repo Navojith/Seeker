@@ -7,28 +7,29 @@ import {
   TextInput,
   TouchableOpacity,
   Modal,
-} from 'react-native';
-import React, { useState, useEffect } from 'react';
-import { FireStore, auth } from '../firebase';
+} from "react-native";
+import React, { useState, useEffect } from "react";
+import { FireStore, auth } from "../firebase";
 import {
   collectionGroup,
   getDocs,
   addDoc,
   collection,
-} from 'firebase/firestore';
-const tempimage = require('../assets/images/PostCreation/AddImage.png');
-import data from '../assets/data/SLIITLocations/index.json';
-import { Picker } from '@react-native-picker/picker';
-//import axios from "axios";
+} from "firebase/firestore";
+const tempimage = require("../assets/images/PostCreation/AddImage.png");
+import data from "../assets/data/SLIITLocations/index.json";
+import { Picker } from "@react-native-picker/picker";
+import { useNavigation } from "@react-navigation/native";
 
 const locationOptions = data.locations;
 
 const LostItemsListScreen = () => {
   const [lostItems, setLostItems] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const userId = auth.currentUser.uid;
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const navigation = useNavigation();
 
   const styles = StyleSheet.create({
     container: {
@@ -40,15 +41,15 @@ const LostItemsListScreen = () => {
     searchBar: {
       height: 50,
       padding: 16,
-      backgroundColor: '#fff',
+      backgroundColor: "#fff",
       borderRadius: 10,
       elevation: 3,
-      shadowColor: '#000',
+      shadowColor: "#000",
       shadowOffset: { width: 1, height: 1 },
       shadowOpacity: 0.3,
       shadowRadius: 2,
       borderWidth: 3,
-      borderColor: '#0369A1',
+      borderColor: "#0369A1",
       marginHorizontal: 25,
       marginTop: 20,
     },
@@ -57,65 +58,66 @@ const LostItemsListScreen = () => {
     },
     card: {
       margin: 4,
-      width: '48%', // Adjust as needed to fit two cards per row
+      width: "48%", // Adjust as needed to fit two cards per row
       padding: 16,
-      backgroundColor: '#fff',
+      backgroundColor: "#fff",
       borderRadius: 25,
       elevation: 3,
-      shadowColor: '#000',
+      shadowColor: "#000",
       shadowOffset: { width: 1, height: 1 },
       shadowOpacity: 0.3,
       shadowRadius: 2,
       borderWidth: 3,
-      borderColor: '#0369A1',
+      borderColor: "#0369A1",
     },
     itemImage: {
-      width: '100%',
+      width: "100%",
       height: 100,
-      resizeMode: 'cover',
+      resizeMode: "cover",
       marginBottom: 8,
     },
     filterButton: {
-      backgroundColor: '#0369A1',
+      backgroundColor: "#0369A1",
       padding: 10,
       margin: 10,
       marginHorizontal: 20,
       borderRadius: 25,
-      alignItems: 'center',
+      alignItems: "center",
       marginHorizontal: 40,
     },
     filterButtonText: {
-      color: 'white',
+      color: "white",
       fontSize: 16,
-      fontWeight: 'bold',
+      fontWeight: "bold",
     },
     filterModal: {
-      backgroundColor: 'white',
+      backgroundColor: "white",
       padding: 20,
       marginTop: 200,
       marginHorizontal: 20,
-      backgroundColor: '#fff',
+      backgroundColor: "#fff",
       borderRadius: 25,
       elevation: 3,
-      shadowColor: '#000',
+      shadowColor: "#000",
       shadowOffset: { width: 1, height: 1 },
       shadowOpacity: 0.3,
       shadowRadius: 2,
       borderWidth: 3,
-      borderColor: '#0369A1',
+      borderColor: "#0369A1",
     },
   });
 
   useEffect(() => {
-    console.log('lost item use effect ran');
+    console.log("lost item use effect ran");
+
     const getLostItems = async () => {
-      console.log('get lost items');
+      console.log("get lost items");
       try {
         const querySnapshot = await getDocs(
-          collectionGroup(FireStore, 'posted')
+          collectionGroup(FireStore, "posted")
         );
         if (querySnapshot.empty) {
-          console.log('No matching documents.');
+          console.log("No matching documents.");
         } else {
           const items = querySnapshot.docs.map((doc) => doc.data());
           //console.log('Retrieved items:', items);
@@ -127,19 +129,6 @@ const LostItemsListScreen = () => {
       }
     };
     getLostItems();
-
-    // const fire = () => {
-    //     console.log("fire ran");
-    //     axios.post(`https://app.nativenotify.com/api/indie/notification`, {
-    //       subID: auth.currentUser.uid,
-    //       appId: 13582,
-    //       appToken: "4bB2Wq6pPQwKoSbjJdg1Ef",
-    //       title: "put your push notification title here as a string",
-    //       message: "put your push notification message here as a string",
-    //     });
-    // }
-
-    // fire();
   }, []);
 
   // Filter the items based on the search query
@@ -152,15 +141,15 @@ const LostItemsListScreen = () => {
   // Function to save the search query to Firestore
   const saveSearchQueryToFirestore = async () => {
     try {
-      const searchCollectionRef = collection(FireStore, 'search');
+      const searchCollectionRef = collection(FireStore, "search");
       await addDoc(searchCollectionRef, {
         userId: userId,
         query: searchQuery,
         timestamp: new Date(),
       });
-      console.log('Search query saved to Firestore.');
+      console.log("Search query saved to Firestore.");
     } catch (error) {
-      console.error('Error saving search query:', error);
+      console.error("Error saving search query:", error);
     }
   };
 
@@ -192,9 +181,9 @@ const LostItemsListScreen = () => {
             className="border border-4 px-4 py-2 border-light-blue"
             placeholder="Select Location"
             selectedValue={selectedLocation}
-            dropdownIconColor={'black'}
-            dropdownIconRippleColor={'#0284C7'}
-            selectionColor={'#0284C7'}
+            dropdownIconColor={"black"}
+            dropdownIconRippleColor={"#0284C7"}
+            selectionColor={"#0284C7"}
             onValueChange={(itemValue) => {
               setSelectedLocation(itemValue);
               setFilterModalVisible(false);
@@ -215,16 +204,24 @@ const LostItemsListScreen = () => {
           </TouchableOpacity>
         </View>
       </Modal>
+
       <View style={styles.container}>
         <FlatList
           data={filteredItems}
           numColumns={2}
           renderItem={({ item }) => (
-            <View style={styles.card}>
-              <Image source={tempimage} style={styles.itemImage} />
-              <Text style={styles.itemText}>{item.itemName}</Text>
-              {/* Other item details */}
-            </View>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => {
+                navigation.navigate("Item", { item });
+              }}
+            >
+              <View>
+                <Image source={tempimage} style={styles.itemImage} />
+                <Text style={styles.itemText}>{item.itemName}</Text>
+                {/* Other item details */}
+              </View>
+            </TouchableOpacity>
           )}
           keyExtractor={(item) => item.id}
         />
