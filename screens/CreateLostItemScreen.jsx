@@ -9,10 +9,10 @@ import { collection, addDoc } from 'firebase/firestore';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import TwoButtonModal from '../components/common/modals/TwoButtonModal';
 import { PostBoosting } from '../constants/RouteConstants';
-import { useNavigation } from '@react-navigation/native';
 
-const CreateLostItemScreen = () => {
+const CreateLostItemScreen = ({ navigation }) => {
   const [selectedLocation, setSelectedLocation] = useState(data.locations[0]);
+  const [createdItemId, setCreatedItemId] = useState(null);
   const [otherVisibility, setOtherVisibility] = useState(false);
   const [itemName, setItemName] = useState('');
   const [serialNumber, setSerialNumber] = useState('');
@@ -28,7 +28,6 @@ const CreateLostItemScreen = () => {
     messageStyles: 'text-red-600 font-bold',
   });
   const [loading, setLoading] = useState(false);
-  const navigation = useNavigation();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -45,14 +44,17 @@ const CreateLostItemScreen = () => {
       setError((prev) => ({
         ...prev,
         visibility: true,
+        viewStyles: 'border border-4 border-red-600',
+        titleStyles: 'text-red-600',
+        messageStyles: 'text-red-600 font-bold',
         title: 'Error !',
         message: 'Please enter item name and description !',
       }));
     } else {
       try {
         setLoading(true);
-        await addDoc(
-          collection(FireStore, 'lostItems', auth.currentUser.uid, 'posted'),
+        const res = await addDoc(
+          collection(FireStore, 'lostItems', auth.currentUser.uid, 'drafted'),
           {
             userId: auth.currentUser.uid,
             itemName: itemName,
@@ -65,13 +67,15 @@ const CreateLostItemScreen = () => {
           }
         );
 
+        setCreatedItemId(res.id);
+
         setError({
           visibility: true,
           viewStyles: 'border border-4 border-green-600',
           titleStyles: 'text-green-600',
           messageStyles: 'text-green-600 font-bold',
           title: 'Success !',
-          message: 'Your post has been created successfully !',
+          message: 'Post created successfully !',
         });
         setLoading(false);
         setItemName('');
@@ -79,6 +83,7 @@ const CreateLostItemScreen = () => {
         setDescription('');
         setOther('');
         setSerialNumber('');
+        setIsModalVisible(true);
       } catch (error) {
         console.log(error);
         setError((prev) => ({
@@ -93,7 +98,7 @@ const CreateLostItemScreen = () => {
 
   const handleBoosting = () => {
     setIsModalVisible(false);
-    navigation.navigate(PostBoosting);
+    navigation.navigate(PostBoosting, { itemId: createdItemId });
   };
 
   return (
@@ -182,7 +187,7 @@ const CreateLostItemScreen = () => {
         </Text>
       )}
       <MainButton
-        onPress={() => setIsModalVisible(true)}
+        onPress={handleSubmit}
         text={'Create Post'}
         containerStyles={'mt-6 mb-12 rounded-full w-full drop-shadow-md'}
       />

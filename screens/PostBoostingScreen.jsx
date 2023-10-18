@@ -7,8 +7,9 @@ import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import { FireStore, auth } from '../firebase';
 import { getDocs, collectionGroup, getDoc } from 'firebase/firestore';
 import TwoButtonModal from '../components/common/modals/TwoButtonModal';
+import { BuyBoost } from '../constants/RouteConstants';
 
-const PostBoostingScreen = () => {
+const PostBoostingScreen = ({ route, navigation }) => {
   const [level, setLevel] = useState(1);
   const [needed, setNeeded] = useState(10);
   const [available, setAvailable] = useState('');
@@ -173,7 +174,9 @@ const PostBoostingScreen = () => {
           setIsVisible={setIsModalVisible}
           infoMessage={"Sorry you don't have enough points. Buy boost level?"}
           //navigate to you page
-          onPressConfirm={() => {}}
+          onPressConfirm={() =>
+            navigation.navigate(BuyBoost, { itemId: route.params.itemId })
+          }
         />
       </View>
     </View>
