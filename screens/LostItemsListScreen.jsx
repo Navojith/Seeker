@@ -96,6 +96,7 @@ const LostItemsListScreen = () => {
 
     useEffect(() => {
         const getLostItems = async () => {
+            console.log("get lost items useeffect");
             try {
                 const querySnapshot = await getDocs(collectionGroup(FireStore, 'posted'));
                 if (querySnapshot.empty) {
@@ -111,7 +112,7 @@ const LostItemsListScreen = () => {
             }
         };
         getLostItems();
-    });
+    }, []);
 
     // Filter the items based on the search query
     const filteredItems = lostItems.filter((item) =>
