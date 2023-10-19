@@ -42,7 +42,7 @@ const DATA = [
   },
 ];
 
-const ResponseScreen = () => {
+const RequestScreen = () => {
   // const currentUser = auth.currentUser.uid;
   // console.log(currentUser);
 
@@ -127,6 +127,6 @@ const ResponseScreen = () => {
   );
 };
 
-export default ResponseScreen;
+export default RequestScreen;
 
   

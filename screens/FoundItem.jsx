@@ -1,8 +1,25 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { auth } from '../firebase';
+import { Firestore, addDoc, collection } from "firebase/firestore";
 const tempimage = require("../assets/images/PostCreation/AddImage.png");
+
+
 const FoundItem = ({ route }) => {
-  const { item, pushDataObject } = route.params;
+const { item, pushDataObject } = route.params;
+
+  // const handleClaim = (item) =>{
+  //     console.log(item);
+  //     const currentUser = auth.currentUser.uid;
+  //     console.log(item , currentUser);
+
+  //     const res = addDoc(collection(Firestore , 'requests'),{
+  //      user : currentUser,
+  //      itemDetails : item
+  //     });
+  //     console.log(res);
+  // }
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -72,7 +89,9 @@ const FoundItem = ({ route }) => {
           <Text style={styles.itemDescription}>Serial No: {item.serialNumber}</Text>
           <Text style={styles.itemDescription}>Date: {}</Text>
           <View style={styles.claimButtonContainer}>
-            <TouchableOpacity style={styles.claimButton}>
+            <TouchableOpacity style={styles.claimButton}
+            //  onPress={handleClaim(item)}
+            >
               <Text style={styles.claimButtonText}>Claim</Text>
             </TouchableOpacity>
           </View>

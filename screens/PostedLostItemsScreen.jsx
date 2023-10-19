@@ -4,6 +4,8 @@ import { FireStore } from '../firebase';
 import { collectionGroup, getDocs } from 'firebase/firestore';
 import { TouchableOpacity } from 'react-native';
 import { auth } from '../firebase';
+import MainButton  from '../components/common/buttons/MainButton';
+import { useNavigation } from '@react-navigation/native';
 // const deleteIcon = '../assets/images/delete.png';
 const tempimage = require('../assets/delete.png');
 const imageIcon = require('../assets/imageIcon.png');
@@ -42,8 +44,9 @@ const imageIcon = require('../assets/imageIcon.png');
 // ];
 
 const PostedLostItemsScreen = () => {
-  const [user , setUser] = useState(null);
+  // const [user , setUser] = useState(null);
   const [posts , setPosts] = useState([]);
+  const navigation = useNavigation();
   
   // useEffect(() => {
   //   const currentUser = auth.currentUser.uid;
