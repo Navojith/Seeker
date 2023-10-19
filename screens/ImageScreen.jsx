@@ -1,17 +1,25 @@
-import React  , {useState , useEffect} from "react";
-import { View  , Text , StyleSheet , TouchableOpacity , Button} from "react-native";
+import React, { useEffect, useState } from "react";
+import { StyleSheet ,Image , View , Text , Button} from "react-native";
 import Header from '../components/header';
-import { Image } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
-const addImage = require("../assets/images/PostCreation/AddImage.png");
-
 
 const ImageScreen =() =>{
-    const [galleryPermission , setGalleryPermission] = useState(null);
-    // const [isTfReady , setIsTfReady] = useState(false);
-    // const [result , setresult] = useState('');
     const [image , setImage] = useState(null);
+
+    const pickImage = async () =>{
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes : ImagePicker.MediaTypeOptions.Images,
+            allowsEditing:true,
+            aspect:[4,3],
+            quality:1,
+        });
+        console.log(result);
+
+        if(!result.cancelled){
+            setImage(result.uri);
+            console.log(image);
+        }
+    }
 
     const styles = StyleSheet.create({
         container: {
@@ -41,52 +49,22 @@ const ImageScreen =() =>{
           },
     })
 
-    // useEffect(() => {
-    //     (async () =>{
-    //         const galleryStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    //         setGalleryPermission(galleryStatus.status === 'granted');
-    //     })();
-    // },[])
-
-    //choose image
-    const pickImage= async ()=>{
-        console.log("pick an image");
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            // allowsEditing: true,
-            aspect:[4,3],
-            quality: 1,
-        });
-        console.log(result);
-
-        if (!result.canceled) {
-            setImage(result.assets[0].uri);
-            console.log(image);
-        }
-    };
-
-    // if(galleryPermission === false){
-    //     return <Text>No access to Internal Storage</Text>
-    // }
-
     return(
         <View>
-            <Header title="Scan Item" />
+           <Header title="Scan Item" />
             <View style={styles.container}>
-            <Text style={styles.title}>Upload Image</Text>
-            {/* Show a button to open the image picker */}
-            {/* <Image source={addImage} onPress={pickImage} ></Image> */}
-            <Button onPress={pickImage} title="Add image"></Button>
-            {image && <Image source={{uri:image}} />}
-            <TouchableOpacity 
-            // onPress={handleUploadedImage} 
-            style={styles.itemButton}>
-                <Text style={styles.buttonText}>Scan</Text>
-            </TouchableOpacity>
-            </View>
-        </View>
+             <Text style={styles.title}>Upload Image</Text>
+             <Button title="Pick an image" onPress={pickImage}/>
+             {image && (
+                <View>
+                    <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />
+                    <Text>Image URI: {image}</Text>
+                </View>
+              )}
+           </View>
+       </View>
     )
 
-}
+ }
 
 export default ImageScreen;
