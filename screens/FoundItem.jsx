@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 const tempimage = require("../assets/images/PostCreation/AddImage.png");
-const LostItem = ({ route }) => {
+const FoundItem = ({ route }) => {
   const { item, pushDataObject } = route.params;
   const styles = StyleSheet.create({
     container: {
@@ -73,7 +73,7 @@ const LostItem = ({ route }) => {
           <Text style={styles.itemDescription}>Date: {}</Text>
           <View style={styles.claimButtonContainer}>
             <TouchableOpacity style={styles.claimButton}>
-              <Text style={styles.claimButtonText}>Return</Text>
+              <Text style={styles.claimButtonText}>Claim</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -82,4 +82,4 @@ const LostItem = ({ route }) => {
   );
 };
 
-export default LostItem;
+export default FoundItem;

@@ -16,6 +16,7 @@ import {
 } from '../constants/RouteConstants';
 import { ScreenContainer } from 'react-native-screens';
 import PostedItemStack from './PostedItemStack';
+import FoundItemStack from './FoundItemStack';
 
 const Tab = createBottomTabNavigator();
 
@@ -42,7 +43,7 @@ const UserStack = () => {
             fontSize: 14,
           },
           tabBarHideOnKeyboard: true,
-          headerShown: route.name !== LostItems ? true : false,
+          headerShown: route.name !== LostItems && route.name !== FoundItems  ? true : false,
         })}
         sceneContainerStyle={{ backgroundColor: '#F0F9FF' }}
       >
@@ -56,18 +57,18 @@ const UserStack = () => {
         />
         <Tab.Screen
           name={FoundItems}
-          component={FoundScreen}
+          component={FoundItemStack}
           options={{
             tabBarIcon: () => <ProfileIcon name="user" size={48} />,
-            headerStyle: {
-              backgroundColor: '#0369A1',
-            },
-            headerTintColor: '#fff', // Change this color for the text/icon color
-            headerTitleStyle: {
-              fontWeight: 'bold',
-              fontSize: 28,
-            },
-            headerTitleAlign: 'center',
+            // headerStyle: {
+            //   backgroundColor: '#0369A1',
+            // },
+            // headerTintColor: '#fff', // Change this color for the text/icon color
+            // headerTitleStyle: {
+            //   fontWeight: 'bold',
+            //   fontSize: 28,
+            // },
+            // headerTitleAlign: 'center',
           }}
         />
         <Tab.Screen

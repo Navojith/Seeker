@@ -23,7 +23,7 @@ import { useNavigation, useIsFocused } from "@react-navigation/native";
 
 const locationOptions = data.locations;
 
-const LostItemsListScreen = () => {
+const FoundItemsListScreen = () => {
   const [lostItems, setLostItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const userId = auth.currentUser.uid;
@@ -110,11 +110,10 @@ const LostItemsListScreen = () => {
 
   useEffect(() => {
     const getLostItems = async () => {
-      console.log("get lost items");
+      console.log("get found items");
       try {
-        const querySnapshot = await getDocs(
-          collectionGroup(FireStore, "posted")
-        );
+        const collectionRef = collection(FireStore, "foundItems"); // Get a reference to the collection
+        const querySnapshot = await getDocs(collectionRef);
         if (querySnapshot.empty) {
           console.log("No matching documents.");
         } else {
@@ -128,7 +127,7 @@ const LostItemsListScreen = () => {
       }
     };
     getLostItems();
-  }, []);//can add isFocused here to reload the screen once an item is added. for now removed since its making api calls often
+  }, []); //can add isFocused here to reload the screen once an item is added. for now removed since its making api calls often
 
   // Filter the items based on the search query
   const filteredItems = lostItems.filter(
@@ -140,7 +139,7 @@ const LostItemsListScreen = () => {
   // Function to save the search query to Firestore
   const saveSearchQueryToFirestore = async () => {
     try {
-      const searchCollectionRef = collection(FireStore, "search");
+      const searchCollectionRef = collection(FireStore, "searchFoundItems");
       await addDoc(searchCollectionRef, {
         userId: userId,
         query: searchQuery,
@@ -212,7 +211,7 @@ const LostItemsListScreen = () => {
             <TouchableOpacity
               style={styles.card}
               onPress={() => {
-                navigation.navigate("Item", { item });
+                navigation.navigate("FoundItem", { item });
               }}
             >
               <View>
@@ -229,4 +228,4 @@ const LostItemsListScreen = () => {
   );
 };
 
-export default LostItemsListScreen;
+export default FoundItemsListScreen;
