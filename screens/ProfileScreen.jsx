@@ -53,6 +53,10 @@ const ProfileScreen = () => {
     navigation.navigate("Posted Found Items");
   };
 
+  const handleUploadedImage = () =>{
+    navigation.navigate("Upload Image");
+  }
+
   useEffect(() => {
     const currentUser = auth.currentUser;
 
@@ -94,6 +98,9 @@ const ProfileScreen = () => {
         </TouchableOpacity>
         <TouchableOpacity onPress={handlePostedFoundItems} style={styles.itemButton}>
           <Text style={styles.buttonText}>Posted Found Items</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleUploadedImage} style={styles.itemButton}>
+          <Text style={styles.buttonText}>Upload Image</Text>
         </TouchableOpacity>
       </View>
     </View>
