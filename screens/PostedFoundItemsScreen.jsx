@@ -1,97 +1,3 @@
-<<<<<<< HEAD
-import { View, Text , SafeAreaView , FlatList , Image , StyleSheet , Button} from 'react-native';
-import React, { useState , useEffect } from 'react';
-import { FireStore } from '../firebase';
-import { collectionGroup, getDocs } from 'firebase/firestore';
-import { TouchableOpacity } from 'react-native';
-import SecondaryButton from '../components/common/buttons/SecondaryButton';
-import MainButton from '../components/common/buttons/MainButton';
-import { auth } from '../firebase';
-// const deleteIcon = '../assets/images/delete.png';
-const imageIcon = require('../assets/imageIcon.png');
-
-// const DATA = [
-//   {
-//     id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-//     title: 'First Item',
-//     location: 'qwe',
-//     image : 'https://cdn-icons-png.flaticon.com/128/739/739249.png',
-//   },
-//   {
-//     id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-//     title: 'Second Item',
-//     location: 'qwe',
-//     image : 'https://cdn-icons-png.flaticon.com/128/739/739249.png',
-//   },
-//   {
-//     id: '58694a0f-3da1-471f-bd96-145571e29d72',
-//     title: 'Third Item',
-//     location: 'qwe',
-//     image : 'https://cdn-icons-png.flaticon.com/128/739/739249.png',
-//   },
-//   {
-//     id: '58694a0f-3da1-471f-bd96-145571e29op2',
-//     title: 'Fourth Item',
-//     location: 'qwe',
-//     image : 'https://cdn-icons-png.flaticon.com/128/739/739249.png',
-//   },
-//   {
-//     id: '58694a0f-3da1-471f-bd96-145571e2456',
-//     title: 'Fifth Item',
-//     location: 'qwe',
-//     image : 'https://cdn-icons-png.flaticon.com/128/739/739249.png',
-//   },
-// ];
-
-const PostedFoundItemsScreen = () => {
-  const [user , setUser] = useState(null);
-  const [posts , setPosts] = useState([]);
-
-  // useEffect(() => {
-  //   const currentUser = auth.currentUser.uid;
-
-  //   if (currentUser) {
-  //     setUser(currentUser);
-  //     console.log(currentUser);
-  //   }
-  //   console.log(currentUser);
-  
-  // },[])
-
-  useEffect(() =>{
-    const currentUser = auth.currentUser.uid;
-
-    // if (currentUser) {
-    //   setUser(currentUser);
-    //   console.log(currentUser);
-    // }
-    // console.log(currentUser);
-  
-    // console.log("user" , user);
-
-    const getPostedFoundItems = async () =>{
-      console.log("get posted found items");
-      try{
-        const postedItemquery = await getDocs(collectionGroup(FireStore, 'foundItems'));
-        
-        if(postedItemquery.empty){
-          console.log("No documents");
-        }else{
-          const posts = postedItemquery.docs
-            .filter((doc) => doc.data().userId === currentUser)
-            .map((doc) => doc.data());
-          console.log(posts);
-          setPosts(posts);
-          console.log(posts);
-        }
-
-      }catch (error) {
-          console.error(error);
-      }
-    }
-    getPostedFoundItems();
-  },[])
-=======
 import React, { useState, useEffect } from 'react';
 import { View, Text, SafeAreaView, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { FireStore, auth } from '../firebase';
@@ -120,7 +26,6 @@ const PostedFoundItemsScreen = () => {
     };
     getFoundItems();
   }, []);
->>>>>>> aceceb801abad19f47955c1c2a875c2efbd0ae1a
 
   const styles = StyleSheet.create({
     container: {
@@ -182,18 +87,6 @@ const PostedFoundItemsScreen = () => {
   return (
     <View>
       <SafeAreaView>
-<<<<<<< HEAD
-      <FlatList 
-        data={posts} 
-        renderItem={({item})=>(
-          <TouchableOpacity >
-            <View key={item.id} style={styles.card}>
-              <View style={styles.itemDetails}>
-                <Image source={imageIcon} style={styles.itemImage}/>
-                  <View style={styles.postDetails}>
-                    <Text style={styles.itemText}>Item : {item.itemName}</Text>
-                    <Text style={styles.itemText}>Location : {item.location}</Text>
-=======
         <FlatList
           data={foundItems}
           renderItem={({ item }) => (
@@ -204,7 +97,6 @@ const PostedFoundItemsScreen = () => {
                   <View style={styles.postDetails}>
                     <Text style={styles.itemText}>Item: {item.itemName}</Text>
                     <Text style={styles.itemText}>Location: {item.location}</Text>
->>>>>>> aceceb801abad19f47955c1c2a875c2efbd0ae1a
                   </View>
                 </View>
                 <View style={styles.buttonContainer}>
