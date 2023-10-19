@@ -8,16 +8,72 @@ import {
 } from 'react-native';
 import React, { useState } from 'react';
 import InformationIcon from '../../assets/icons/InformationIcon';
+import MainButton from '../../components/common/buttons/MainButton';
+import { LinearGradient } from 'expo-linear-gradient';
+import UltraIcon from '../../assets/images/Tiers/Ultra.jsx';
+import UltraText from '../../assets/images/Tiers/UltraText.jsx';
+import SuperiorIcon from '../../assets/images/Tiers/Superior.jsx';
+import SuperiorText from '../../assets/images/Tiers/SuperiorText.jsx';
+import ModerateIcon from '../../assets/images/Tiers/Moderate.jsx';
+import ModerateText from '../../assets/images/Tiers/ModerateText.jsx';
+import MinorIcon from '../../assets/images/Tiers/Minor.jsx';
+import MinorText from '../../assets/images/Tiers/MinorText.jsx';
+import { TouchableOpacity } from 'react-native';
 
 const BuyBoost = ({ route, navigation }) => {
   // const { itemId } = route.params;
   const [cardNo, setCardNo] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [cvv, setCvv] = useState('');
+  const [selected, setSelected] = useState('');
+
+  const tiers = [
+    {
+      name: 'Ultra',
+      icon: <UltraIcon />,
+      text: <UltraText style={{ marginTop: 10 }} />,
+      colors: ['#8146FF', '#7928B9', '#902AE0'],
+      price: 500.0,
+    },
+    {
+      name: 'Superior',
+      icon: <SuperiorIcon />,
+      text: <SuperiorText style={{ marginTop: 0, marginBottom: 8 }} />,
+      colors: ['#0066FE', '#6AA4FB'],
+      price: 300.0,
+    },
+    {
+      name: 'Moderate',
+      icon: <ModerateIcon />,
+      text: <ModerateText style={{ marginTop: 10, marginBottom: 8 }} />,
+      colors: ['#780202', '#7479F3'],
+      price: 150.0,
+    },
+    {
+      name: 'Minor',
+      icon: <MinorIcon />,
+      text: <MinorText style={{ marginTop: 5, marginBottom: 12 }} />,
+      colors: ['#CECCCC', '#161616'],
+      price: 100.0,
+    },
+  ];
+
+  const handleTierSelect = (item) => {
+    setSelected(item);
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView styles={{ padding: 30, display: 'flex', flex: 1 }}>
+      <ScrollView
+        style={{
+          paddingTop: 30,
+          paddingHorizontal: 30,
+
+          display: 'flex',
+          flex: 1,
+          marginTop: 200,
+        }}
+      >
         <View>
           <Text style={styles.textLabel}>Credit / Debit Card Number</Text>
           <TextInput
@@ -38,13 +94,85 @@ const BuyBoost = ({ route, navigation }) => {
             value={cvv}
             onChangeText={(value) => setCvv(value)}
             placeholder=""
-            cstyle={styles.input}
+            style={styles.input}
           />
         </View>
         <View className="flex flex-row flex-wrap mt-8">
           <Text style={styles.textLabel}>Select a Tier</Text>
           <InformationIcon className="ml-auto" />
         </View>
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'space-between',
+            marginBottom: 40,
+          }}
+        >
+          {tiers.map((tier) => (
+            <TouchableOpacity
+              key={tier.name}
+              onPress={() => handleTierSelect(tier)}
+            >
+              <LinearGradient
+                colors={tier.colors}
+                style={
+                  selected.name === tier.name
+                    ? { marginTop: 15, padding: 5, borderRadius: 10 }
+                    : { marginTop: 15, padding: 5, borderRadius: 10 }
+                }
+              >
+                <View
+                  style={
+                    selected.name === tier.name
+                      ? {
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: 150,
+                          height: 130,
+                          backgroundColor: 'white',
+                          borderRadius: 8,
+                          borderStyle: 'dotted',
+                          borderWidth: 10,
+                          borderColor: 'white',
+                        }
+                      : {
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: 150,
+                          height: 130,
+                          backgroundColor: 'white',
+                          borderRadius: 10,
+                        }
+                  }
+                >
+                  {tier.icon}
+                  {tier.text}
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <Text
+          style={{
+            fontSize: 30,
+            fontWeight: 800,
+            marginBottom: 20,
+            textAlign: 'center',
+          }}
+        >
+          Total fee: {parseFloat(selected.price).toFixed(2)} lkr
+        </Text>
+        <MainButton
+          text="Confirm Payment"
+          containerStyles={'mb-20 py-4 w-full rounded rounded-full'}
+          textStyles={'text-2xl'}
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -64,6 +192,27 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     marginBottom: 16,
     color: 'black',
+  },
+  linearGradient: {
+    flex: 1,
+    paddingLeft: 15,
+    paddingRight: 15,
+    borderRadius: 5,
+  },
+  buttonText: {
+    fontSize: 18,
+    fontFamily: 'Gill Sans',
+    textAlign: 'center',
+    margin: 10,
+    color: '#ffffff',
+    backgroundColor: 'transparent',
+  },
+  gradientTextContainer: {
+    borderRadius: 5, // Adjust this value as needed
+  },
+  gradientText: {
+    fontSize: 24, // Adjust this value as needed
+    color: 'white', // Text color
   },
 });
 
