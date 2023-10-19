@@ -19,6 +19,7 @@ import ModerateText from '../../assets/images/Tiers/ModerateText.jsx';
 import MinorIcon from '../../assets/images/Tiers/Minor.jsx';
 import MinorText from '../../assets/images/Tiers/MinorText.jsx';
 import { TouchableOpacity } from 'react-native';
+import DismissibleAlert from '../../components/common/alerts/DismissibleAlert';
 
 const BuyBoost = ({ route, navigation }) => {
   // const { itemId } = route.params;
@@ -26,6 +27,16 @@ const BuyBoost = ({ route, navigation }) => {
   const [expiryDate, setExpiryDate] = useState('');
   const [cvv, setCvv] = useState('');
   const [selected, setSelected] = useState('');
+  const [infoButton, setInfoButton] = useState({
+    visibility: false,
+    message:
+      'Ultra boost : Maximum level of post visibility, Awards 40 points to the finders \n\nSuperior boost : High level of post visibility, Awards 30 points to the finders\n\nModerate boost: Moderate level of post visibility, Awards  20 points to the finders \n\nMinor boost: Some level of post visibility, Awards 10 points to the finders',
+    buttonText: 'Close',
+    messageStyles: 'font-bold text-left',
+    buttonContainerStyles: 'w-[150px] rounded rounded-full mx-auto',
+    viewStyles:
+      'py-8 px-6 border border-[6px] rounded rounded-[42px] border-dark-blue',
+  });
 
   const tiers = [
     {
@@ -97,9 +108,15 @@ const BuyBoost = ({ route, navigation }) => {
             style={styles.input}
           />
         </View>
+        <DismissibleAlert data={infoButton} setData={setInfoButton} />
         <View className="flex flex-row flex-wrap mt-8">
           <Text style={styles.textLabel}>Select a Tier</Text>
-          <InformationIcon className="ml-auto" />
+          <InformationIcon
+            className="ml-auto"
+            onPress={() =>
+              setInfoButton((prev) => ({ ...prev, visibility: true }))
+            }
+          />
         </View>
         <View
           style={{
@@ -166,7 +183,8 @@ const BuyBoost = ({ route, navigation }) => {
             textAlign: 'center',
           }}
         >
-          Total fee: {parseFloat(selected.price).toFixed(2)} lkr
+          Total fee:{' '}
+          {selected.price ? parseFloat(selected.price).toFixed(2) : '0.00'} lkr
         </Text>
         <MainButton
           text="Confirm Payment"
