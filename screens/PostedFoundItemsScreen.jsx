@@ -102,7 +102,7 @@ const PostedFoundItemsScreen = () => {
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
                     onPress={() => {
-                      // Handle return to owner action
+                      console.log("Return to owner");
                     }}
                     style={styles.button}
                   >
@@ -110,7 +110,7 @@ const PostedFoundItemsScreen = () => {
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => {
-                      // Handle handover to security action
+                      console.log("Handover to Security");
                     }}
                     style={styles.button}
                   >
