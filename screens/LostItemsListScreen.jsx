@@ -112,9 +112,8 @@ const LostItemsListScreen = () => {
     const getLostItems = async () => {
       console.log("get lost items");
       try {
-        const querySnapshot = await getDocs(
-          collectionGroup(FireStore, "posted")
-        );
+        const collectionRef = collection(FireStore, "lostItems"); // Get a reference to the collection
+        const querySnapshot = await getDocs(collectionRef);
         if (querySnapshot.empty) {
           console.log("No matching documents.");
         } else {
@@ -128,7 +127,7 @@ const LostItemsListScreen = () => {
       }
     };
     getLostItems();
-  }, []);//can add isFocused here to reload the screen once an item is added. for now removed since its making api calls often
+  }, [isFocused]); //can add isFocused here to reload the screen once an item is added. for now removed since its making api calls often
 
   // Filter the items based on the search query
   const filteredItems = lostItems.filter(
