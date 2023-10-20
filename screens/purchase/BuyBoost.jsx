@@ -24,8 +24,8 @@ import { updateDoc, doc, collection, addDoc } from 'firebase/firestore';
 import { FireStore, auth } from '../../firebase';
 
 const BuyBoost = ({ route, navigation }) => {
-  const { itemId } = route.params;
-  //const itemId = '1';
+  //const { itemId } = route.params;
+  const itemId = '1';
   const [cardNo, setCardNo] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [cvv, setCvv] = useState('');
