@@ -1,10 +1,10 @@
-import { View, ScrollView, Text, Image, TextInput } from 'react-native';
-import React, { useState, useEffect } from 'react';
-import AddImage from '../assets/images/PostCreation/AddImage.png';
-import { Picker } from '@react-native-picker/picker';
-import data from '../assets/data/SLIITLocations/index.json';
-import MainButton from '../components/common/buttons/MainButton';
-import { FireStore, auth } from '../firebase';
+import { View, ScrollView, Text, Image, TextInput } from "react-native";
+import React, { useState, useEffect } from "react";
+import AddImage from "../assets/images/PostCreation/AddImage.png";
+import { Picker } from "@react-native-picker/picker";
+import data from "../assets/data/SLIITLocations/index.json";
+import MainButton from "../components/common/buttons/MainButton";
+import { FireStore, auth } from "../firebase";
 import {
   collection,
   addDoc,
@@ -12,28 +12,29 @@ import {
   orderBy,
   limit,
   getDocs,
-} from 'firebase/firestore';
-import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
-import TwoButtonModal from '../components/common/modals/TwoButtonModal';
-import { PostBoosting } from '../constants/RouteConstants';
-import axios from 'axios';
+  updateDoc
+} from "firebase/firestore";
+import DismissibleAlert from "../components/common/alerts/DismissibleAlert";
+import TwoButtonModal from "../components/common/modals/TwoButtonModal";
+import { PostBoosting } from "../constants/RouteConstants";
+import axios from "axios";
 
 const CreateLostItemScreen = ({ navigation }) => {
   const [selectedLocation, setSelectedLocation] = useState(data.locations[0]);
   const [createdItemId, setCreatedItemId] = useState(null);
   const [otherVisibility, setOtherVisibility] = useState(false);
-  const [itemName, setItemName] = useState('');
-  const [serialNumber, setSerialNumber] = useState('');
-  const [color, setColor] = useState('');
-  const [description, setDescription] = useState('');
-  const [other, setOther] = useState('');
+  const [itemName, setItemName] = useState("");
+  const [serialNumber, setSerialNumber] = useState("");
+  const [color, setColor] = useState("");
+  const [description, setDescription] = useState("");
+  const [other, setOther] = useState("");
   const [error, setError] = useState({
     visibility: false,
-    viewStyles: 'border border-4 border-red-600',
+    viewStyles: "border border-4 border-red-600",
     title: null,
-    titleStyles: 'text-red-600',
+    titleStyles: "text-red-600",
     message: null,
-    messageStyles: 'text-red-600 font-bold',
+    messageStyles: "text-red-600 font-bold",
   });
   const [loading, setLoading] = useState(false);
   const [leaderboardUsers, setLeaderboardUsers] = useState([]);
@@ -41,7 +42,7 @@ const CreateLostItemScreen = ({ navigation }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
-    if (selectedLocation === 'Other') {
+    if (selectedLocation === "Other") {
       setOtherVisibility(true);
     } else {
       setOtherVisibility(false);
@@ -52,13 +53,13 @@ const CreateLostItemScreen = ({ navigation }) => {
     const getLeaderboardUsers = async () => {
       try {
         const leadeboardQuery = query(
-          collection(FireStore, 'userDetails'),
-          orderBy('points', 'desc'),
+          collection(FireStore, "userDetails"),
+          orderBy("points", "desc"),
           limit(10)
         );
         const querySnapshot = await getDocs(leadeboardQuery);
         if (querySnapshot.empty) {
-          console.log('No matching documents.');
+          console.log("No matching documents.");
         } else {
           const users = querySnapshot.docs.map((doc) => doc.data().userId);
           setLeaderboardUsers(users);
@@ -78,9 +79,9 @@ const CreateLostItemScreen = ({ navigation }) => {
       {
         subIDs: leaderboardUsers,
         appId: 13599,
-        appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
-        title: 'Seeker',
-        message: 'Lost item reported near you',
+        appToken: "gTBeP5h5evCxHcHdDs0yVQ",
+        title: "Seeker",
+        message: "Lost item reported near you",
         pushData: '{ "item": "sqKcNh8KhglJahnouMvO" }',
       }
     );
@@ -88,57 +89,60 @@ const CreateLostItemScreen = ({ navigation }) => {
 
   const handleSubmit = async () => {
     handleNotification();
-    if (itemName === '' || description === '') {
+    if (itemName === "" || description === "") {
       setError((prev) => ({
         ...prev,
         visibility: true,
-        viewStyles: 'border border-4 border-red-600',
-        titleStyles: 'text-red-600',
-        messageStyles: 'text-red-600 font-bold',
-        title: 'Error !',
-        message: 'Please enter item name and description !',
+        viewStyles: "border border-4 border-red-600",
+        titleStyles: "text-red-600",
+        messageStyles: "text-red-600 font-bold",
+        title: "Error !",
+        message: "Please enter item name and description !",
       }));
     } else {
       try {
         setLoading(true);
-        const res = await addDoc(
-          collection(FireStore, 'lostItems', auth.currentUser.uid, 'drafted'),
-          {
-            userId: auth.currentUser.uid,
-            itemName: itemName,
-            serialNumber: serialNumber ?? null,
-            color: color ?? null,
-            location: selectedLocation,
-            other: other ?? null,
-            description: description,
-            timestamp: new Date(),
-          }
-        );
+        const res = await addDoc(collection(FireStore, "lostItems"), {
+          userId: auth.currentUser.uid,
+          itemName: itemName,
+          serialNumber: serialNumber ?? null,
+          color: color ?? null,
+          location: selectedLocation,
+          other: other ?? null,
+          description: description,
+          timestamp: new Date(),
+          postId: "",
+        });
+        console.log("id", res.id);
+        const postId = res.id;
+
+        // Update the document with the postId
+        await updateDoc(res, { postId: postId });
 
         setCreatedItemId(res.id);
 
         setError({
           visibility: true,
-          viewStyles: 'border border-4 border-green-600',
-          titleStyles: 'text-green-600',
-          messageStyles: 'text-green-600 font-bold',
-          title: 'Success !',
-          message: 'Post created successfully !',
+          viewStyles: "border border-4 border-green-600",
+          titleStyles: "text-green-600",
+          messageStyles: "text-green-600 font-bold",
+          title: "Success !",
+          message: "Post created successfully !",
         });
         setLoading(false);
-        setItemName('');
-        setColor('');
-        setDescription('');
-        setOther('');
-        setSerialNumber('');
+        setItemName("");
+        setColor("");
+        setDescription("");
+        setOther("");
+        setSerialNumber("");
         setIsModalVisible(true);
       } catch (error) {
         console.log(error);
         setError((prev) => ({
           ...prev,
           visibility: true,
-          title: 'Error !',
-          message: error.message + ' - ' + error.code,
+          title: "Error !",
+          message: error.message + " - " + error.code,
         }));
       }
     }
@@ -154,9 +158,9 @@ const CreateLostItemScreen = ({ navigation }) => {
       <TwoButtonModal
         isVisible={isModalVisible}
         setIsVisible={setIsModalVisible}
-        heading={'Do you want to Boost the Post?'}
+        heading={"Do you want to Boost the Post?"}
         infoMessage={
-          'Posts that you create can be boosted so that more people can see the post and more people will be motivated to find the item.'
+          "Posts that you create can be boosted so that more people can see the post and more people will be motivated to find the item."
         }
         onPressConfirm={handleBoosting}
       />
@@ -196,9 +200,9 @@ const CreateLostItemScreen = ({ navigation }) => {
           className="border border-4 px-4 py-2 border-light-blue"
           placeholder="Select Location"
           selectedValue={selectedLocation}
-          dropdownIconColor={'black'}
-          dropdownIconRippleColor={'#0284C7'}
-          selectionColor={'#0284C7'}
+          dropdownIconColor={"black"}
+          dropdownIconRippleColor={"#0284C7"}
+          selectionColor={"#0284C7"}
           onValueChange={(itemValue) => setSelectedLocation(itemValue)}
         >
           {data.locations.map((location, index) => (
@@ -236,8 +240,8 @@ const CreateLostItemScreen = ({ navigation }) => {
       )}
       <MainButton
         onPress={handleSubmit}
-        text={'Create Post'}
-        containerStyles={'mt-6 mb-12 rounded-full w-full drop-shadow-md'}
+        text={"Create Post"}
+        containerStyles={"mt-6 mb-12 rounded-full w-full drop-shadow-md"}
       />
     </ScrollView>
   );
