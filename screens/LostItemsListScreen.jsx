@@ -63,7 +63,6 @@ const LostItemsListScreen = () => {
       margin: 4,
     },
     cardContent: {
-     
       padding: 16,
       backgroundColor: "#fff",
       borderRadius: 25,
@@ -71,7 +70,7 @@ const LostItemsListScreen = () => {
     itemImage: {
       width: "100%",
       height: 100,
-      resizeMode: "cover",
+      resizeMode: 'contain',
       marginBottom: 8,
     },
     filterButton: {
@@ -159,7 +158,7 @@ const LostItemsListScreen = () => {
       case "ultra":
         return ["#8146FF", "#7928B9", "#902AE0"];
       default:
-        return ["#0369A1", "#0369A1"]; 
+        return ["#0369A1", "#0369A1"];
     }
   };
 
@@ -174,18 +173,17 @@ const LostItemsListScreen = () => {
       case "minor":
         return 4;
       default:
-        return 5; 
+        return 5;
     }
   };
 
   const sortedItems = filteredItems.sort((item1, item2) => {
     const tierValue1 = getTierValue(item1.tier);
     const tierValue2 = getTierValue(item2.tier);
-  
+
     // Compare the tier values and return the comparison result
     return tierValue1 - tierValue2;
   });
-  
 
   return (
     <View>
@@ -255,7 +253,14 @@ const LostItemsListScreen = () => {
                 colors={getBorderColor(item.tier)}
               >
                 <View style={styles.cardContent}>
-                  <Image source={tempimage} style={styles.itemImage} />
+                  {item.imageUrl ? (
+                    <Image
+                      source={{ uri: item.imageUrl }}
+                      style={styles.itemImage}
+                    />
+                  ) : (
+                    <Image source={tempimage} style={styles.itemImage} />
+                  )}
                   <Text style={styles.itemText}>{item.itemName}</Text>
                   {/* Other item details */}
                 </View>

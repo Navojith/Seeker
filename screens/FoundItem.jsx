@@ -40,9 +40,9 @@ const { item, pushDataObject } = route.params;
       borderColor: "#0369A1",
     },
     itemImage: {
-      width: "100%",
-     // height: 100,
-      resizeMode: "cover",
+      width: 200,
+      height: 200,
+      resizeMode: "contain",
       marginBottom: 8,
     },
     itemName: {
@@ -53,10 +53,11 @@ const { item, pushDataObject } = route.params;
     },
     itemDescription: {
       textAlign: "left",
+      marginBottom: 4, // Add spacing between field names and values
     },
     claimButtonContainer: {
       marginTop: 20,
-      alignItems: "center", 
+      alignItems: "center",
     },
     claimButton: {
       backgroundColor: "#0369A1",
@@ -81,17 +82,36 @@ const { item, pushDataObject } = route.params;
 
       {item && (
         <View style={styles.card}>
-          <Image source={tempimage} style={styles.itemImage} />
+          <View style={styles.cardContent}>
+            {item.imageUrl ? (
+              <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
+            ) : (
+              <Image source={tempimage} style={styles.itemImage} />
+            )}
+          </View>
           <Text style={styles.itemName}>{item.itemName}</Text>
-          <Text style={styles.itemDescription}>Color: {item.color}</Text>
-          <Text style={styles.itemDescription}>Description: {item.description}</Text>
-          <Text style={styles.itemDescription}>Location: {item.location}</Text>
-          <Text style={styles.itemDescription}>Serial No: {item.serialNumber}</Text>
-          <Text style={styles.itemDescription}>Date: {}</Text>
+          <Text style={styles.itemDescription}>
+            <Text style={{ fontWeight: "bold" }}>Color:</Text> {item.color}
+          </Text>
+          <Text style={styles.itemDescription}>
+            <Text style={{ fontWeight: "bold" }}>Description:</Text>{" "}
+            {item.description}
+          </Text>
+          <Text style={styles.itemDescription}>
+            <Text style={{ fontWeight: "bold" }}>Location:</Text>{" "}
+            {item.location}
+          </Text>
+          <Text style={styles.itemDescription}>
+            <Text style={{ fontWeight: "bold" }}>Serial No:</Text>{" "}
+            {item.serialNumber}
+          </Text>
+          <Text style={styles.itemDescription}>
+            <Text style={{ fontWeight: "bold" }}>Date:</Text>{" "}
+            {new Date(item.timestamp.toDate()).toLocaleString()}
+          </Text>
+
           <View style={styles.claimButtonContainer}>
-            <TouchableOpacity style={styles.claimButton}
-            //  onPress={handleClaim(item)}
-            >
+            <TouchableOpacity style={styles.claimButton}>
               <Text style={styles.claimButtonText}>Claim</Text>
             </TouchableOpacity>
           </View>
