@@ -2,7 +2,9 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import PostedLostItemsScreen from '../screens/PostedLostItemsScreen'
 import PostedFoundItemsScreen from '../screens/PostedFoundItemsScreen'
+import RequestScreen from '../screens/RequestScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import ImageScreen from '../screens/ImageScreen';
 
 const Stack = createStackNavigator();
 
@@ -10,7 +12,6 @@ const PostedLostItemStack = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: false,
         cardStyle: { backgroundColor: '#F0F9FF' },
         headerTitleAlign:'center',
       }}
@@ -19,6 +20,7 @@ const PostedLostItemStack = () => {
         name="profile" 
         component={ProfileScreen} 
         options={{
+          headerShown: false,
         headerStyle:{
             backgroundColor:'#0369A1',
         },
@@ -31,8 +33,23 @@ const PostedLostItemStack = () => {
         }} 
     />
     <Stack.Screen 
-        name="postedLostItems" 
+        name="Posted Lost Items" 
         component={PostedLostItemsScreen} 
+        options={{
+          headerShown: true,
+        headerStyle:{
+            backgroundColor:'#0369A1',
+        },
+        headerTintColor: '#fff', // Change this color for the text/icon color
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 28,
+          },
+        }} 
+    />
+    <Stack.Screen 
+        name="Posted Found Items" 
+        component={PostedFoundItemsScreen} 
         options={{
         headerStyle:{
             backgroundColor:'#0369A1',
@@ -45,9 +62,24 @@ const PostedLostItemStack = () => {
         }} 
     />
     <Stack.Screen 
-        name="postedFoundItems" 
-        component={PostedFoundItemsScreen} 
+        name="Requests" 
+        component={RequestScreen} 
         options={{
+        headerStyle:{
+            backgroundColor:'#0369A1',
+        },
+        headerTintColor: '#fff', // Change this color for the text/icon color
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 28,
+          },
+        }} 
+    />
+    <Stack.Screen 
+        name="Upload Image" 
+        component={ImageScreen} 
+        options={{
+          headerShown:false,
         headerStyle:{
             backgroundColor:'#0369A1',
         },

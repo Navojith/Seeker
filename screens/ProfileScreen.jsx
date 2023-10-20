@@ -1,12 +1,5 @@
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  Button,
-  Image,
-  Text,
-} from 'react-native';
 import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, TouchableOpacity, Image, Text } from 'react-native';
 import { auth } from '../firebase';
 import CustomHeader from '../components/header';
 import { useNavigation } from '@react-navigation/native';
@@ -33,18 +26,35 @@ const ProfileScreen = () => {
       fontWeight: 'bold',
       margin: 2,
     },
+    itemButtonContainer: {
+      marginTop: 20,
+      alignItems: 'center',
+    },
     itemButton: {
-      borderRadius: 25,
+      backgroundColor: '#0369a1',
+      color: '#fff',
+      borderRadius: 20,
+      padding: 10,
+      marginVertical: 10,
       width: '50%',
+    },
+    buttonText: {
+      color: 'white',
+      fontWeight: 'bold',
+      textAlign: 'center',
     },
   });
 
   const handlePostedLostItems = () => {
-    navigation.navigate('postedLostItems');
+    navigation.navigate('Posted Lost Items');
   };
 
   const handlePostedFoundItems = () => {
-    navigation.navigate('postedFoundItems');
+    navigation.navigate('Posted Found Items');
+  };
+
+  const handleUploadedImage = () => {
+    navigation.navigate('Upload Image');
   };
 
   useEffect(() => {
@@ -52,9 +62,8 @@ const ProfileScreen = () => {
 
     if (currentUser) {
       setUser(currentUser);
-      console.log(currentUser);
+      //console.log(currentUser);
     }
-    console.log(currentUser);
   }, []);
 
   const handleSignOut = () => {
@@ -62,7 +71,7 @@ const ProfileScreen = () => {
       .signOut()
       .then(() => {
         console.log('Signed out');
-        //unregister notify
+        // unregister notify
         unregisterIndieDevice(
           auth.currentUser.uid,
           13599,
@@ -74,32 +83,39 @@ const ProfileScreen = () => {
         // alert(error.message);
       });
   };
+
   return (
     <View>
       <CustomHeader title="Profile" />
       <View style={styles.container}>
         <Image source={img} style={styles.profilepic} />
-        <Text style={styles.profileDetails}>{auth.currentUser.email}</Text>
+        <Text style={styles.profileDetails}>UserName</Text>
         <Text style={styles.profileDetails}>TelNo</Text>
         <Text style={styles.profileDetails}>Points : </Text>
       </View>
-      <TouchableOpacity>
-        <Button
-          onPress={handleSignOut}
-          style={styles.itemButton}
-          title="Sign Out"
-        />
-        <Button
+      <View style={styles.itemButtonContainer}>
+        <TouchableOpacity onPress={handleSignOut} style={styles.itemButton}>
+          <Text style={styles.buttonText}>Sign Out</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
           onPress={handlePostedLostItems}
           style={styles.itemButton}
-          title="Posted Lost Items"
-        />
-        <Button
+        >
+          <Text style={styles.buttonText}>Posted Lost Items</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
           onPress={handlePostedFoundItems}
           style={styles.itemButton}
-          title="Posted Found Items"
-        />
-      </TouchableOpacity>
+        >
+          <Text style={styles.buttonText}>Posted Found Items</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={handleUploadedImage}
+          style={styles.itemButton}
+        >
+          <Text style={styles.buttonText}>Upload Image</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };

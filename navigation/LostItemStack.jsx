@@ -65,7 +65,7 @@ const LostItemStack = ({ navigation }) => {
         name={BuyBoost}
         component={BuyBoostScreen}
         options={{
-          headerShown: false,
+          headerShown: true,
           header: () => <Header title="Purchase Boost" />,
         }}
       />

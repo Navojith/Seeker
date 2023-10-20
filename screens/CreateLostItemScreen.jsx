@@ -101,19 +101,17 @@ const CreateLostItemScreen = ({ navigation }) => {
     } else {
       try {
         setLoading(true);
-        const res = await addDoc(
-          collection(FireStore, 'lostItems', auth.currentUser.uid, 'drafted'),
-          {
-            userId: auth.currentUser.uid,
-            itemName: itemName,
-            serialNumber: serialNumber ?? null,
-            color: color ?? null,
-            location: selectedLocation,
-            other: other ?? null,
-            description: description,
-            timestamp: new Date(),
-          }
-        );
+        const res = await addDoc(collection(FireStore, 'lostItems'), {
+          userId: auth.currentUser.uid,
+          itemName: itemName,
+          serialNumber: serialNumber ?? null,
+          color: color ?? null,
+          location: selectedLocation,
+          other: other ?? null,
+          description: description,
+          tier: 'free',
+          timestamp: new Date(),
+        });
 
         setCreatedItemId(res.id);
 
