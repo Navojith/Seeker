@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { auth } from '../firebase';
-import { Firestore, addDoc, collection } from "firebase/firestore";
+import { Firestore, addDoc, collection , query,where } from "firebase/firestore";
 const tempimage = require("../assets/images/PostCreation/AddImage.png");
 
 
@@ -13,9 +13,12 @@ const { item, pushDataObject } = route.params;
   //     const currentUser = auth.currentUser.uid;
   //     console.log(item , currentUser);
 
+  //     const post = query(collection(Firestore,'lostItems'), where("itemName", "==" , item.itemName), where("timestamp","==" ,item.timestamp));
+  //     console.log(post)
+
   //     const res = addDoc(collection(Firestore , 'requests'),{
   //      user : currentUser,
-  //      itemDetails : item
+  //      itemDetails : itemid,
   //     });
   //     console.log(res);
   // }
@@ -90,7 +93,7 @@ const { item, pushDataObject } = route.params;
           <Text style={styles.itemDescription}>Date: {}</Text>
           <View style={styles.claimButtonContainer}>
             <TouchableOpacity style={styles.claimButton}
-            //  onPress={handleClaim(item)}
+            //  onPress={handleClaim(item.documentId())}
             >
               <Text style={styles.claimButtonText}>Claim</Text>
             </TouchableOpacity>

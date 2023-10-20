@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, SafeAreaView, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { FireStore, auth } from '../firebase';
+import { useNavigation } from '@react-navigation/native';
 import { getDocs, collection, query, where } from 'firebase/firestore';
 const tempimage = require("../assets/images/PostCreation/AddImage.png");
 
 const PostedFoundItemsScreen = () => {
   const [foundItems, setFoundItems] = useState([]);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const getFoundItems = async () => {
@@ -26,6 +28,10 @@ const PostedFoundItemsScreen = () => {
     };
     getFoundItems();
   }, []);
+
+  const handleRequests = () =>{
+    navigation.navigate("Requests");
+  }
 
   const styles = StyleSheet.create({
     container: {
@@ -90,7 +96,7 @@ const PostedFoundItemsScreen = () => {
         <FlatList
           data={foundItems}
           renderItem={({ item }) => (
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleRequests}>
               <View key={item.id} style={styles.card}>
                 <View style={styles.itemDetails}>
                   <Image source={tempimage} style={styles.itemImage} />

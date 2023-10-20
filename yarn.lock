@@ -2524,6 +2524,16 @@
   resolved "https://registry.yarnpkg.com/@react-native-firebase/messaging/-/messaging-18.5.0.tgz#2a80b25816470e9843682e031a3a113566067ce6"
   integrity sha512-y1FApYxBMcygmbWBqUPFC+fCfvx6Yf6TdZewun7kPwx+S+tkYzoKx1IsXtxOXtqyJjCNEYirjFgNrs5SSd02zA==
 
+"@react-native-firebase/ml-vision@^7.4.13":
+  version "7.4.13"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/ml-vision/-/ml-vision-7.4.13.tgz#304de0ccb1b0e2a58c0271ef7abfe84a00fbca67"
+  integrity sha512-d2MbgXFDEMOJZGxkdICyL951le6NJirIjviYvVYAU6KqGRN46PmH2BqTA8MH9iUCDkrD/zMIRmbPJPpDVkDCeg==
+
+"@react-native-firebase/ml@^18.5.0":
+  version "18.5.0"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/ml/-/ml-18.5.0.tgz#a3cbde1308c61195fbabf20799be483b20f73469"
+  integrity sha512-3ZiuAaWdpwXnoMugx6ynM9sorC82dilrxFA7KKqXvNZN6qlLcASie8PoQF3e4FRX2M+HeMJF3M/xDr5PhjzMwg==
+
 "@react-native-masked-view/masked-view@0.2.9":
   version "0.2.9"
   resolved "https://registry.yarnpkg.com/@react-native-masked-view/masked-view/-/masked-view-0.2.9.tgz#723a7a076d56b8f5f3fda076eaa5b6b82988e854"
@@ -2687,6 +2697,11 @@
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/@tensorflow-models/coco-ssd/-/coco-ssd-2.2.3.tgz#3825286569076d6788199c9cb89fb2fa31f7d2f2"
   integrity sha512-iCLGktG/XhHbP6h2FWxqCKMp/Px0lCp6MZU1fjNhjDHeaWEC9G7S7cZrnPXsfH+NewCM53YShlrHnknxU3SQig==
+
+"@tensorflow-models/mobilenet@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@tensorflow-models/mobilenet/-/mobilenet-2.1.1.tgz#5b02c3e99a19534e3b303f57dccf31f85fec7683"
+  integrity sha512-tv4s4UFzG74PkIwl4gT64AyRnCcNUq+s8wSzge+LN/Puc1VUuInZghrobvpNlWjZtVi1x1d1NsBD//TfOr2ssA==
 
 "@tensorflow/tfjs-backend-cpu@4.12.0":
   version "4.12.0"
@@ -8524,7 +8539,7 @@ react-native-vector-icons@^10.0.0:
     prop-types "^15.7.2"
     yargs "^16.1.1"
 
-react-native-web@~0.19.6:
+react-native-web@^0.19.9:
   version "0.19.9"
   resolved "https://registry.yarnpkg.com/react-native-web/-/react-native-web-0.19.9.tgz#6ee43e6c64d886b1d739f100fed07927541ee003"
   integrity sha512-m69arZbS6FV+BNSKE6R/NQwUX+CzxCkYM7AJlSLlS8dz3BDzlaxG8Bzqtzv/r3r1YFowhnZLBXVKIwovKDw49g==

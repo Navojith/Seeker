@@ -1,10 +1,11 @@
-import { View, Text , SafeAreaView , FlatList , Image , StyleSheet , Button} from 'react-native';
-import React from 'react';
+import { View, Text , SafeAreaView ,FlatList , Image , StyleSheet , Button} from 'react-native';
+import React , {useState} from 'react';
 import { FireStore } from '../firebase';
 import { collectionGroup, getDocs } from 'firebase/firestore';
 import { TouchableOpacity } from 'react-native';
 import SecondaryButton from '../components/common/buttons/SecondaryButton';
 import MainButton from '../components/common/buttons/MainButton';
+import { CheckBox } from 'react-native-web';
 // import { auth } from 'firebase/auth';
 // const deleteIcon = '../assets/images/delete.png';
 const tempimage = require('../assets/delete.png');
@@ -43,8 +44,11 @@ const DATA = [
 ];
 
 const RequestScreen = () => {
-  // const currentUser = auth.currentUser.uid;
-  // console.log(currentUser);
+  const [isSelected, setIsSelected] = useState(false);
+
+  // const handleOwner = () =>{
+  //   setIsSelected() --- user Id
+  // }
 
   const styles = StyleSheet.create({
     container:{
@@ -101,11 +105,15 @@ const RequestScreen = () => {
         flexDirection:'row',
         justifyContent:'space-between',
       },
+      checkbox: {
+        alignSelf: 'center',
+      },
   });
 
   return (
     <View>
       <SafeAreaView>
+        <Text style={styles.itemDetails}>To select the owner , Click on the request</Text>
       <FlatList 
         data={DATA} 
         renderItem={({item})=>(
@@ -117,9 +125,9 @@ const RequestScreen = () => {
                     <Text style={styles.itemText}>Item : {item.title}</Text>
                     <Text style={styles.itemText}>Location : {item.location}</Text>
                   </View>
-              </View>    
-            </View>
-          </TouchableOpacity >
+                  </View>
+              </View>
+         </TouchableOpacity >
         )}
       />
       </SafeAreaView>
