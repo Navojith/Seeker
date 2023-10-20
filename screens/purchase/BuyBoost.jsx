@@ -6,7 +6,7 @@ import {
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import InformationIcon from '../../assets/icons/InformationIcon';
 import MainButton from '../../components/common/buttons/MainButton';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -25,8 +25,7 @@ import { FireStore, auth } from '../../firebase';
 import TwoButtonModal from '../../components/common/modals/TwoButtonModal';
 
 const BuyBoost = ({ route, navigation }) => {
-  //const { itemId } = route.params;
-  const itemId = '1';
+  const [itemId, setItemId] = useState('');
   const [cardNo, setCardNo] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [cvv, setCvv] = useState('');
@@ -86,6 +85,12 @@ const BuyBoost = ({ route, navigation }) => {
   const handleTierSelect = (item) => {
     setSelected(item);
   };
+
+  useEffect(() => {
+    if (route.params?.itemId) {
+      setItemId(route.params.itemId);
+    }
+  }, [route]);
 
   const handlePurchase = async () => {
     console.log(itemId);
@@ -169,6 +174,21 @@ const BuyBoost = ({ route, navigation }) => {
   const handleCancel = () => {
     setIsConfirmVisible(false);
     setLoading(false);
+  };
+
+  const handleClickPurchase = () => {
+    if (cardNo !== '' && expiryDate !== '' && cvv !== '' && selected !== '') {
+      setIsConfirmVisible(true);
+    } else {
+      setError((prev) => ({
+        viewStyles: 'border border-4 border-red-600',
+        titleStyles: 'text-red-600',
+        messageStyles: 'text-red-600 font-bold',
+        visibility: true,
+        title: 'Please Enter Valid Details !',
+        message: 'Please fill in all the fields',
+      }));
+    }
   };
 
   return (
@@ -294,7 +314,7 @@ const BuyBoost = ({ route, navigation }) => {
           text="Confirm Payment"
           containerStyles={'mb-20 py-4 w-full rounded rounded-full'}
           textStyles={'text-2xl'}
-          onPress={() => setIsConfirmVisible(true)}
+          onPress={handleClickPurchase}
         />
         <TwoButtonModal
           isVisible={isConfirmVisible}
