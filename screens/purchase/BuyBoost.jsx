@@ -106,6 +106,9 @@ const BuyBoost = ({ route, navigation }) => {
             timestamp: new Date(),
           });
 
+          setCardNo('');
+          setExpiryDate('');
+          setCvv('');
           setError({
             visibility: true,
             viewStyles: 'border border-4 border-green-600',
@@ -114,6 +117,7 @@ const BuyBoost = ({ route, navigation }) => {
             title: 'Success !',
             message: 'Booster Purchased successfully !',
           });
+          navigation.navigate('Lost');
         } catch (error) {
           setError((prev) => ({
             viewStyles: 'border border-4 border-red-600',
@@ -127,15 +131,26 @@ const BuyBoost = ({ route, navigation }) => {
 
         setLoading(false);
       } catch (error) {
-        console.log(error);
-        setError((prev) => ({
-          viewStyles: 'border border-4 border-red-600',
-          titleStyles: 'text-red-600',
-          messageStyles: 'text-red-600 font-bold',
-          visibility: true,
-          title: 'Error !',
-          message: error.message + ' - ' + error.code,
-        }));
+        if (error.code === 'not-found') {
+          setError((prev) => ({
+            viewStyles: 'border border-4 border-red-600',
+            titleStyles: 'text-red-600',
+            messageStyles: 'text-red-600 font-bold',
+            visibility: true,
+            title: 'Error !',
+            message:
+              "Post not found !\nThe post that you're trying to upgrade is not found.",
+          }));
+        } else {
+          setError((prev) => ({
+            viewStyles: 'border border-4 border-red-600',
+            titleStyles: 'text-red-600',
+            messageStyles: 'text-red-600 font-bold',
+            visibility: true,
+            title: 'Error !',
+            message: error.message + ' - ' + error.code,
+          }));
+        }
       }
     } else {
       setError((prev) => ({
