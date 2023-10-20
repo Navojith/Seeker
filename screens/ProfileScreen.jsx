@@ -11,15 +11,22 @@ import {
 import { auth, FireStore } from '../firebase';
 import CustomHeader from '../components/header';
 import { useNavigation } from '@react-navigation/native';
-const img = require('../assets/profilepic.png');
 import { unregisterIndieDevice } from 'native-notify';
 import { doc, getDoc } from 'firebase/firestore';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
+import UserIcon from '../assets/images/UserImg';
 
 const ProfileScreen = () => {
   const [user, setUser] = useState(null);
   const navigation = useNavigation();
-  const [error, setError] = useState(null);
+  const [error, setError] = useState({
+    visibility: false,
+    viewStyles: 'border border-4 border-red-600',
+    title: null,
+    titleStyles: 'text-red-600',
+    message: null,
+    messageStyles: 'text-red-600 font-bold',
+  });
   const [loading, setLoading] = useState(false);
 
   const styles = StyleSheet.create({
@@ -27,11 +34,6 @@ const ProfileScreen = () => {
       marginTop: 130,
       justifyContent: 'center',
       alignItems: 'center',
-    },
-    profilepic: {
-      margin: 8,
-      width: 90,
-      height: 90,
     },
     profileDetails: {
       fontSize: 20,
@@ -125,60 +127,68 @@ const ProfileScreen = () => {
       });
   };
 
-  return (
-    user && (
-      <>
-        <DismissibleAlert data={error} setData={setError} />
-        <CustomHeader title="Profile" />
-        <SafeAreaView>
-          <ScrollView>
-            <View style={styles.container}>
-              <Image source={img} style={styles.profilepic} />
-              <Text style={styles.profileDetails}>{user.displayName}</Text>
-              <Text style={styles.profileDetails}>
-                {user.phoneNo ?? user.email ?? ''}
-              </Text>
-              <Text style={styles.profileDetails}>
-                Points : {user.points ?? 0}
-              </Text>
+  return user ? (
+    <>
+      <DismissibleAlert data={error} setData={setError} />
+      <CustomHeader title="Profile" />
+      <SafeAreaView>
+        <ScrollView>
+          <View style={styles.container}>
+            <View className="mt-8 mb-4 rounded rounded-full border border-4 border-dark-blue">
+              <UserIcon />
             </View>
+            <Text style={styles.profileDetails}>{user.displayedName}</Text>
+            <Text style={styles.profileDetails}>
+              {user.phoneNo ?? user.email ?? ''}
+            </Text>
+            <Text style={styles.profileDetails}>
+              Points : {user.points ?? 0}
+            </Text>
+          </View>
 
-            <View style={styles.itemButtonContainer}>
-              <TouchableOpacity
-                onPress={handlePersonalBelongings}
-                style={styles.itemButton}
-              >
-                <Text style={styles.buttonText}>Personal Belongings</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handlePostedLostItems}
-                style={styles.itemButton}
-              >
-                <Text style={styles.buttonText}>Posted Lost Items</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handlePostedFoundItems}
-                style={styles.itemButton}
-              >
-                <Text style={styles.buttonText}>Posted Found Items</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleUploadedImage}
-                style={styles.itemButton}
-              >
-                <Text style={styles.buttonText}>Upload Image</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleSignOut}
-                style={styles.itemButton}
-              >
-                <Text style={styles.buttonText}>Sign Out</Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </SafeAreaView>
-      </>
-    )
+          <View style={styles.itemButtonContainer}>
+            <TouchableOpacity
+              onPress={handlePersonalBelongings}
+              style={styles.itemButton}
+            >
+              <Text style={styles.buttonText}>Personal Belongings</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handlePostedLostItems}
+              style={styles.itemButton}
+            >
+              <Text style={styles.buttonText}>Posted Lost Items</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handlePostedFoundItems}
+              style={styles.itemButton}
+            >
+              <Text style={styles.buttonText}>Posted Found Items</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleUploadedImage}
+              style={styles.itemButton}
+            >
+              <Text style={styles.buttonText}>Upload Image</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleSignOut} style={styles.itemButton}>
+              <Text style={styles.buttonText}>Sign Out</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </>
+  ) : (
+    <View className="flex flex-col items-center justify-center">
+      {loading && (
+        <Text className="text-lg text-light-blue font-bold">
+          Loading Profile...
+        </Text>
+      )}
+      <TouchableOpacity onPress={handleSignOut} style={styles.itemButton}>
+        <Text style={styles.buttonText}>Sign Out</Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
