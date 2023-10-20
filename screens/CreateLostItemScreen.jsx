@@ -81,7 +81,7 @@ const CreateLostItemScreen = ({ navigation }) => {
         appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
         title: 'Seeker',
         message: 'Lost item reported near you',
-        pushData: '{ "item": "sqKcNh8KhglJahnouMvO" }',
+        pushData: '{ "item": "sqKcNh8KhglJahnouMvO","type": "specialPost" }',
       }
     );
   };
