@@ -6,7 +6,7 @@ import {
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import InformationIcon from '../../assets/icons/InformationIcon';
 import MainButton from '../../components/common/buttons/MainButton';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -22,10 +22,10 @@ import { TouchableOpacity } from 'react-native';
 import DismissibleAlert from '../../components/common/alerts/DismissibleAlert';
 import { updateDoc, doc, collection, addDoc } from 'firebase/firestore';
 import { FireStore, auth } from '../../firebase';
+import TwoButtonModal from '../../components/common/modals/TwoButtonModal';
 
 const BuyBoost = ({ route, navigation }) => {
-  //const { itemId } = route.params;
-  const itemId = '1';
+  const [itemId, setItemId] = useState('');
   const [cardNo, setCardNo] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [cvv, setCvv] = useState('');
@@ -49,6 +49,7 @@ const BuyBoost = ({ route, navigation }) => {
       'py-8 px-6 border border-[6px] rounded rounded-[42px] border-dark-blue',
   });
   const [loading, setLoading] = useState(false);
+  const [isConfirmVisible, setIsConfirmVisible] = useState(false);
 
   const tiers = [
     {
@@ -84,6 +85,12 @@ const BuyBoost = ({ route, navigation }) => {
   const handleTierSelect = (item) => {
     setSelected(item);
   };
+
+  useEffect(() => {
+    if (route.params?.itemId) {
+      setItemId(route.params.itemId);
+    }
+  }, [route]);
 
   const handlePurchase = async () => {
     console.log(itemId);
@@ -163,6 +170,27 @@ const BuyBoost = ({ route, navigation }) => {
       }));
     }
   };
+
+  const handleCancel = () => {
+    setIsConfirmVisible(false);
+    setLoading(false);
+  };
+
+  const handleClickPurchase = () => {
+    if (cardNo !== '' && expiryDate !== '' && cvv !== '' && selected !== '') {
+      setIsConfirmVisible(true);
+    } else {
+      setError((prev) => ({
+        viewStyles: 'border border-4 border-red-600',
+        titleStyles: 'text-red-600',
+        messageStyles: 'text-red-600 font-bold',
+        visibility: true,
+        title: 'Please Enter Valid Details !',
+        message: 'Please fill in all the fields',
+      }));
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <DismissibleAlert data={error} setData={setError} />
@@ -286,7 +314,17 @@ const BuyBoost = ({ route, navigation }) => {
           text="Confirm Payment"
           containerStyles={'mb-20 py-4 w-full rounded rounded-full'}
           textStyles={'text-2xl'}
-          onPress={handlePurchase}
+          onPress={handleClickPurchase}
+        />
+        <TwoButtonModal
+          isVisible={isConfirmVisible}
+          setIsVisible={setIsConfirmVisible}
+          heading="Confirm Purchase"
+          onPressConfirm={handlePurchase}
+          onPressCancel={handleCancel}
+          showInfoIcon={false}
+          loading={loading}
+          loadingText={'Sending... Please wait....'}
         />
       </ScrollView>
     </SafeAreaView>
