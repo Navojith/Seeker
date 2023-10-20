@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 
-const PersonalBelongings = () => {
+const PersonalBelongings = ({ navigation }) => {
   return (
     <View>
       <Text>PersonalBelongings</Text>

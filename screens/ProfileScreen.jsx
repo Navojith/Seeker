@@ -8,26 +8,32 @@ import {
   Image,
   Text,
 } from 'react-native';
-import { auth } from '../firebase';
+import { auth, FireStore } from '../firebase';
 import CustomHeader from '../components/header';
 import { useNavigation } from '@react-navigation/native';
-const img = require('../assets/profilepic.png');
 import { unregisterIndieDevice } from 'native-notify';
+import { doc, getDoc } from 'firebase/firestore';
+import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
+import UserIcon from '../assets/images/UserImg';
 
 const ProfileScreen = () => {
   const [user, setUser] = useState(null);
   const navigation = useNavigation();
+  const [error, setError] = useState({
+    visibility: false,
+    viewStyles: 'border border-4 border-red-600',
+    title: null,
+    titleStyles: 'text-red-600',
+    message: null,
+    messageStyles: 'text-red-600 font-bold',
+  });
+  const [loading, setLoading] = useState(false);
 
   const styles = StyleSheet.create({
     container: {
       marginTop: 130,
       justifyContent: 'center',
       alignItems: 'center',
-    },
-    profilepic: {
-      margin: 8,
-      width: 90,
-      height: 90,
     },
     profileDetails: {
       fontSize: 20,
@@ -70,12 +76,37 @@ const ProfileScreen = () => {
   };
 
   useEffect(() => {
-    const currentUser = auth.currentUser;
-
-    if (currentUser) {
-      setUser(currentUser);
-      //console.log(currentUser);
-    }
+    const fetchUser = async () => {
+      try {
+        setLoading(true);
+        const uuid = auth.currentUser.uid;
+        const res = await getDoc(doc(FireStore, 'userDetails', uuid));
+        if (res.exists) {
+          setUser(res.data());
+        } else {
+          setError({
+            visibility: true,
+            title: 'Error',
+            message: 'User Information not found',
+            buttonText: 'Close',
+            titleStyles: 'text-red-500',
+            messageStyles: 'text-red-500',
+            viewStyles: 'border border-4 border-red-500',
+          });
+        }
+      } catch (error) {
+        setError({
+          visibility: true,
+          title: 'Error',
+          message: 'Data fetching failed',
+          buttonText: 'Close',
+          titleStyles: 'text-red-500',
+          messageStyles: 'text-red-500',
+          viewStyles: 'border border-4 border-red-500',
+        });
+      }
+    };
+    fetchUser();
   }, []);
 
   const handleSignOut = () => {
@@ -96,16 +127,23 @@ const ProfileScreen = () => {
       });
   };
 
-  return (
+  return user ? (
     <>
+      <DismissibleAlert data={error} setData={setError} />
       <CustomHeader title="Profile" />
       <SafeAreaView>
         <ScrollView>
           <View style={styles.container}>
-            <Image source={img} style={styles.profilepic} />
-            <Text style={styles.profileDetails}>UserName</Text>
-            <Text style={styles.profileDetails}>TelNo</Text>
-            <Text style={styles.profileDetails}>Points : </Text>
+            <View className="mt-8 mb-4 rounded rounded-full border border-4 border-dark-blue">
+              <UserIcon />
+            </View>
+            <Text style={styles.profileDetails}>{user.displayedName}</Text>
+            <Text style={styles.profileDetails}>
+              {user.phoneNo ?? user.email ?? ''}
+            </Text>
+            <Text style={styles.profileDetails}>
+              Points : {user.points ?? 0}
+            </Text>
           </View>
 
           <View style={styles.itemButtonContainer}>
@@ -140,6 +178,17 @@ const ProfileScreen = () => {
         </ScrollView>
       </SafeAreaView>
     </>
+  ) : (
+    <View className="flex flex-col items-center justify-center">
+      {loading && (
+        <Text className="text-lg text-light-blue font-bold">
+          Loading Profile...
+        </Text>
+      )}
+      <TouchableOpacity onPress={handleSignOut} style={styles.itemButton}>
+        <Text style={styles.buttonText}>Sign Out</Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
