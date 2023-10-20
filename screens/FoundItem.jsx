@@ -112,7 +112,7 @@ const { item, pushDataObject } = route.params;
 
           <View style={styles.claimButtonContainer}>
             <TouchableOpacity style={styles.claimButton}>
-              <Text style={styles.claimButtonText}>Return</Text>
+              <Text style={styles.claimButtonText}>Claim</Text>
             </TouchableOpacity>
           </View>
         </View>
