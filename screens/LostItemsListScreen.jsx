@@ -20,6 +20,7 @@ const tempimage = require("../assets/images/PostCreation/AddImage.png");
 import data from "../assets/data/SLIITLocations/index.json";
 import { Picker } from "@react-native-picker/picker";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
 
 const locationOptions = data.locations;
 
@@ -58,18 +59,14 @@ const LostItemsListScreen = () => {
       fontSize: 16,
     },
     card: {
+      width: "48%",
       margin: 4,
-      width: "48%", // Adjust as needed to fit two cards per row
+    },
+    cardContent: {
+      // Adjust as needed to fit two cards per row
       padding: 16,
       backgroundColor: "#fff",
       borderRadius: 25,
-      elevation: 3,
-      shadowColor: "#000",
-      shadowOffset: { width: 1, height: 1 },
-      shadowOpacity: 0.3,
-      shadowRadius: 2,
-      borderWidth: 3,
-      borderColor: "#0369A1",
     },
     itemImage: {
       width: "100%",
@@ -151,6 +148,21 @@ const LostItemsListScreen = () => {
     }
   };
 
+  const getBorderColor = (tier) => {
+    switch (tier) {
+      case "minor":
+        return ["#CECCCC", "#161616"];
+      case "moderate":
+        return ["#780202", "#7479F3"];
+      case "superior":
+        return ["#0066FE", "#6AA4FB"];
+      case "ultra":
+        return ["#8146FF", "#7928B9", "#902AE0"];
+      default:
+        return ["#0369A1", "#0369A1"]; // Default border for 'free'
+    }
+  };
+
   return (
     <View>
       <TextInput
@@ -214,11 +226,16 @@ const LostItemsListScreen = () => {
                 navigation.navigate("Item", { item });
               }}
             >
-              <View>
-                <Image source={tempimage} style={styles.itemImage} />
-                <Text style={styles.itemText}>{item.itemName}</Text>
-                {/* Other item details */}
-              </View>
+              <LinearGradient
+                style={{ padding: 5, borderRadius: 25 }}
+                colors={getBorderColor(item.tier)}
+              >
+                <View style={styles.cardContent}>
+                  <Image source={tempimage} style={styles.itemImage} />
+                  <Text style={styles.itemText}>{item.itemName}</Text>
+                  {/* Other item details */}
+                </View>
+              </LinearGradient>
             </TouchableOpacity>
           )}
           keyExtractor={(item, index) => item.id + index.toString()}
