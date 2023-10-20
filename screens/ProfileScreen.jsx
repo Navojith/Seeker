@@ -28,15 +28,15 @@ const ProfileScreen = () => {
     },
     itemButtonContainer: {
       marginTop: 20,
-      alignItems: "center", 
+      alignItems: "center",
     },
     itemButton: {
       backgroundColor: "#0369a1",
       color: "#fff",
       borderRadius: 20,
-      padding: 10, 
-      marginVertical: 10, 
-      width: "50%", 
+      padding: 10,
+      marginVertical: 10,
+      width: "50%",
     },
     buttonText: {
       color: "white",
@@ -53,9 +53,9 @@ const ProfileScreen = () => {
     navigation.navigate("Posted Found Items");
   };
 
-  const handleUploadedImage = () =>{
+  const handleUploadedImage = () => {
     navigation.navigate("Upload Image");
-  }
+  };
 
   useEffect(() => {
     const currentUser = auth.currentUser;
@@ -67,12 +67,16 @@ const ProfileScreen = () => {
   }, []);
 
   const handleSignOut = () => {
+    // unregister notify
+    unregisterIndieDevice(
+      auth.currentUser.uid,
+      13599,
+      "gTBeP5h5evCxHcHdDs0yVQ"
+    );
     auth
       .signOut()
       .then(() => {
         console.log("Signed out");
-        // unregister notify
-        unregisterIndieDevice(auth.currentUser.uid, 13599, "gTBeP5h5evCxHcHdDs0yVQ");
       })
       .catch((error) => {
         console.log(error.code, error.message);
@@ -93,13 +97,22 @@ const ProfileScreen = () => {
         <TouchableOpacity onPress={handleSignOut} style={styles.itemButton}>
           <Text style={styles.buttonText}>Sign Out</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handlePostedLostItems} style={styles.itemButton}>
+        <TouchableOpacity
+          onPress={handlePostedLostItems}
+          style={styles.itemButton}
+        >
           <Text style={styles.buttonText}>Posted Lost Items</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handlePostedFoundItems} style={styles.itemButton}>
+        <TouchableOpacity
+          onPress={handlePostedFoundItems}
+          style={styles.itemButton}
+        >
           <Text style={styles.buttonText}>Posted Found Items</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleUploadedImage} style={styles.itemButton}>
+        <TouchableOpacity
+          onPress={handleUploadedImage}
+          style={styles.itemButton}
+        >
           <Text style={styles.buttonText}>Upload Image</Text>
         </TouchableOpacity>
       </View>
