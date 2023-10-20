@@ -227,7 +227,7 @@ const CreateLostItemScreen = ({ navigation }) => {
         {imageUri ? (
           <Image
             source={{ uri: imageUri }}
-            style={{ width: 200, height: 200 }}
+            style={{ width: 200, height: 200, resizeMode: "contain" }}
           />
         ) : (
           <Text>Select an Image</Text>
