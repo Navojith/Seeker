@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 const tempimage = require("../assets/images/PostCreation/AddImage.png");
 const LostItem = ({ route }) => {
   const { item, pushDataObject } = route.params;
+  console.log(item);
   const styles = StyleSheet.create({
     container: {
       flex: 1,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, SafeAreaView, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { FireStore, auth } from '../firebase';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation} from '@react-navigation/native';
 import { getDocs, collection, query, where } from 'firebase/firestore';
 const tempimage = require("../assets/images/PostCreation/AddImage.png");
 
@@ -28,10 +28,6 @@ const PostedFoundItemsScreen = () => {
     };
     getFoundItems();
   }, []);
-
-  const handleRequests = () =>{
-    navigation.navigate("Requests");
-  }
 
   const styles = StyleSheet.create({
     container: {
@@ -96,12 +92,13 @@ const PostedFoundItemsScreen = () => {
         <FlatList
           data={foundItems}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={handleRequests}>
+            <TouchableOpacity onPress={()=>navigation.navigate('Requests', {item})}>
               <View key={item.id} style={styles.card}>
                 <View style={styles.itemDetails}>
                   <Image source={tempimage} style={styles.itemImage} />
                   <View style={styles.postDetails}>
                     <Text style={styles.itemText}>Item: {item.itemName}</Text>
+                    {/* <Text style={styles.itemText}>Item: {item.postId}</Text> */}
                     <Text style={styles.itemText}>Location: {item.location}</Text>
                   </View>
                 </View>
@@ -126,6 +123,7 @@ const PostedFoundItemsScreen = () => {
               </View>
             </TouchableOpacity>
           )}
+          keyExtractor={(item, index) => item.id + index.toString()}
         />
       </SafeAreaView>
     </View>
