@@ -1,12 +1,10 @@
-import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
-import CreateFoundItemScreen from '../screens/CreateFoundItemScreen';
-import FoundScreen from '../screens/FoundScreen';
+import React from "react";
+import { createStackNavigator } from "@react-navigation/stack";
+import CreateFoundItemScreen from "../screens/CreateFoundItemScreen";
+import FoundScreen from "../screens/FoundScreen";
 
-import {
-  AddLostItem,
-} from '../constants/RouteConstants';
-import FoundItem from '../screens/FoundItem';
+import { AddLostItem } from "../constants/RouteConstants";
+import FoundItem from "../screens/FoundItem";
 const Stack = createStackNavigator();
 
 const FoundItemStack = ({ navigation }) => {
@@ -14,8 +12,8 @@ const FoundItemStack = ({ navigation }) => {
     <Stack.Navigator
       screenOptions={{
         // headerShown: false,
-        cardStyle: { backgroundColor: '#F0F9FF' },
-        headerTitleAlign: 'center',
+        cardStyle: { backgroundColor: "#F0F9FF" },
+        headerTitleAlign: "center",
       }}
     >
       <Stack.Screen
@@ -23,14 +21,14 @@ const FoundItemStack = ({ navigation }) => {
         component={FoundScreen}
         options={{
           headerStyle: {
-            backgroundColor: '#0369A1',
+            backgroundColor: "#0369A1",
           },
-          headerTintColor: '#fff', // Change this color for the text/icon color
+          headerTintColor: "#fff", // Change this color for the text/icon color
           headerTitleStyle: {
-            fontWeight: 'bold',
+            fontWeight: "bold",
             fontSize: 28,
           },
-          headerTitle: 'Found Items',
+          headerTitle: "Found Items",
         }}
       />
       <Stack.Screen
@@ -38,16 +36,29 @@ const FoundItemStack = ({ navigation }) => {
         component={CreateFoundItemScreen}
         options={{
           headerStyle: {
-            backgroundColor: '#0369A1',
+            backgroundColor: "#0369A1",
           },
-          headerTintColor: '#fff', // Change this color for the text/icon color
+          headerTintColor: "#fff", // Change this color for the text/icon color
           headerTitleStyle: {
-            fontWeight: 'bold',
+            fontWeight: "bold",
             fontSize: 28,
           },
         }}
       />
-      <Stack.Screen name="FoundItem" component={FoundItem} />
+      <Stack.Screen
+        name="FoundItem"
+        component={FoundItem}
+        options={{
+          headerStyle: {
+            backgroundColor: "#0369A1",
+          },
+          headerTintColor: "#fff", // Change this color for the text/icon color
+          headerTitleStyle: {
+            fontWeight: "bold",
+            fontSize: 28,
+          },
+        }}
+      />
     </Stack.Navigator>
   );
 };
