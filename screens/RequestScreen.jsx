@@ -1,50 +1,69 @@
-import { View, Text , SafeAreaView , FlatList , Image , StyleSheet , Button} from 'react-native';
-import React from 'react';
+import { View, Text , SafeAreaView ,FlatList , Image , StyleSheet , Button} from 'react-native';
+import React , {useState , useEffect} from 'react';
 import { FireStore } from '../firebase';
-import { collectionGroup, getDocs } from 'firebase/firestore';
+import { collection, getDocs , query , where} from 'firebase/firestore';
 import { TouchableOpacity } from 'react-native';
 import SecondaryButton from '../components/common/buttons/SecondaryButton';
 import MainButton from '../components/common/buttons/MainButton';
-// import { auth } from 'firebase/auth';
-// const deleteIcon = '../assets/images/delete.png';
-const tempimage = require('../assets/delete.png');
+import { CheckBox } from 'react-native-web';
+import { auth } from '../firebase';
+import UserIcon from '../assets/icons/UserIcon';
 
-const DATA = [
-  {
-    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-    title: 'First Item',
-    location: 'qwe',
-    image : 'https://cdn-icons-png.flaticon.com/128/739/739249.png',
-  },
-  {
-    id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-    title: 'Second Item',
-    location: 'qwe',
-    image : 'https://cdn-icons-png.flaticon.com/128/739/739249.png',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96-145571e29d72',
-    title: 'Third Item',
-    location: 'qwe',
-    image : 'https://cdn-icons-png.flaticon.com/128/739/739249.png',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96-145571e29op2',
-    title: 'Fourth Item',
-    location: 'qwe',
-    image : 'https://cdn-icons-png.flaticon.com/128/739/739249.png',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96-145571e2456',
-    title: 'Fifth Item',
-    location: 'qwe',
-    image : 'https://cdn-icons-png.flaticon.com/128/739/739249.png',
-  },
-];
+const RequestScreen = ({route}) => {
+  const {item} = route.params;
+  console.log(item);
+  const [isSelected, setIsSelected] = useState(false);
+  const[requests , setRequests] = useState([]);
+  const [user , setUser] = useState(null);
+  const [userDetails , setUserDetails] = useState([]);
+  
+  // const handleOwner = () =>{
+  //   setIsSelected() --- user Id
+  // }
 
-const RequestScreen = () => {
-  // const currentUser = auth.currentUser.uid;
-  // console.log(currentUser);
+  useEffect(() => {
+    const getRequests = async()=>{
+      try{
+      console.log("get requests");
+      const requestCollectionRef = collection(FireStore, "requests");
+      const q = query(requestCollectionRef, where("itemDetails", "==", item.postId) ,);
+      const querySnapshot = await getDocs(q);
+      
+      if (querySnapshot.empty) {
+        console.log("No matching documents.");
+      } else {
+        const requestDetails = querySnapshot.docs.map((doc) => doc.data().user);
+        console.log(requestDetails);
+        setRequests(requestDetails);
+        console.log(requests);
+
+        const userDetailsPromises = requestDetails.map(async (user)=>{
+          const userCollectionRef = collection(FireStore,"userDetails");
+          const x = query(userCollectionRef,where("userId","==",user));
+          const userSnapshot = await getDocs(x);
+
+          if (userSnapshot.empty) {
+            console.log(`User details not found`);
+          } else {
+            const newUser = userSnapshot.docs.map((doc)=> doc.data());
+            console.log(newUser);
+            return newUser[0];
+            // setUserDetails([...userDetails , newUser]);
+          }
+          console.log(userDetails);
+        });
+
+        const userDetails = await Promise.all(userDetailsPromises);
+        const filteredUserDetails = userDetails.filter((user) => user !== null);
+        setUserDetails(filteredUserDetails);
+        console.log(userDetails);
+      }
+    } catch (error) {
+      console.error("Error fetching found items:", error);
+    }
+    };
+    getRequests();
+  } ,[]);
 
   const styles = StyleSheet.create({
     container:{
@@ -101,25 +120,29 @@ const RequestScreen = () => {
         flexDirection:'row',
         justifyContent:'space-between',
       },
+      checkbox: {
+        alignSelf: 'center',
+      },
   });
 
   return (
     <View>
       <SafeAreaView>
+        <Text style={styles.itemDetails}>To select the owner , Click on the request</Text>
       <FlatList 
-        data={DATA} 
+        data={userDetails} 
         renderItem={({item})=>(
           <TouchableOpacity >
             <View key={item.id} style={styles.card}>
               <View style={styles.itemDetails}>
-                <Image source={{uri:item.image}} style={styles.itemImage}/>
+                <UserIcon style={styles.itemImage}/>
                   <View style={styles.postDetails}>
-                    <Text style={styles.itemText}>Item : {item.title}</Text>
-                    <Text style={styles.itemText}>Location : {item.location}</Text>
+                    <Text style={styles.itemText}>{item.displayedName}</Text>
+                    <Text style={styles.itemText}>Location : {item.phoneNo}</Text>
                   </View>
-              </View>    
-            </View>
-          </TouchableOpacity >
+                  </View>
+              </View>
+         </TouchableOpacity >
         )}
       />
       </SafeAreaView>

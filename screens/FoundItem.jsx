@@ -1,24 +1,31 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { auth } from '../firebase';
-import { Firestore, addDoc, collection } from "firebase/firestore";
+import { getFirestore, addDoc, collection , query,where } from "firebase/firestore";
 const tempimage = require("../assets/images/PostCreation/AddImage.png");
 
 
 const FoundItem = ({ route }) => {
 const { item, pushDataObject } = route.params;
 
-  // const handleClaim = (item) =>{
-  //     console.log(item);
-  //     const currentUser = auth.currentUser.uid;
-  //     console.log(item , currentUser);
+  const handleClaim = async(post) =>{
+    try{
+      console.log(post);
+      const currentUser = auth.currentUser.uid;
+      console.log(post , currentUser);
 
-  //     const res = addDoc(collection(Firestore , 'requests'),{
-  //      user : currentUser,
-  //      itemDetails : item
-  //     });
-  //     console.log(res);
-  // }
+      const db = getFirestore();
+      console.log(db);
+
+      const res = await addDoc(collection(db , 'requests'),{
+       user : currentUser,
+       itemDetails : post,
+      });
+      console.log(res.id);
+    } catch(error){
+      console.log(error);
+    }
+  }
 
   const styles = StyleSheet.create({
     container: {
@@ -111,7 +118,9 @@ const { item, pushDataObject } = route.params;
           </Text>
 
           <View style={styles.claimButtonContainer}>
-            <TouchableOpacity style={styles.claimButton}>
+            <TouchableOpacity style={styles.claimButton}
+             onPress={()=>handleClaim(item.postId)}
+            >
               <Text style={styles.claimButtonText}>Claim</Text>
             </TouchableOpacity>
           </View>
