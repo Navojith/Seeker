@@ -110,6 +110,7 @@ const CreateLostItemScreen = ({ navigation }) => {
           location: selectedLocation,
           other: other ?? null,
           description: description,
+          tier: 'free',
           timestamp: new Date(),
           postId: "",
         });

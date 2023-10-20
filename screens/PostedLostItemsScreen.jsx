@@ -4,6 +4,8 @@ import { FireStore } from '../firebase';
 import { collectionGroup, getDocs } from 'firebase/firestore';
 import { TouchableOpacity } from 'react-native';
 import { auth } from '../firebase';
+import MainButton  from '../components/common/buttons/MainButton';
+import { useNavigation } from '@react-navigation/native';
 // const deleteIcon = '../assets/images/delete.png';
 const tempimage = require('../assets/delete.png');
 const imageIcon = require('../assets/imageIcon.png');
@@ -42,21 +44,30 @@ const imageIcon = require('../assets/imageIcon.png');
 // ];
 
 const PostedLostItemsScreen = () => {
-  const [user , setUser] = useState(null);
+  // const [user , setUser] = useState(null);
   const [posts , setPosts] = useState([]);
+  const navigation = useNavigation();
   
-  useEffect(() => {
-    const currentUser = auth.currentUser.uid;
+  // useEffect(() => {
+  //   const currentUser = auth.currentUser.uid;
 
-    if (currentUser) {
-      setUser(currentUser);
-      console.log(currentUser);
-    }
-    console.log(currentUser);
-
-  },[])
+  //   if (currentUser) {
+  //     setUser(currentUser);
+  //     console.log(currentUser);
+  //   }
+  //   console.log(currentUser);
+  //   return user;
+  // },[])
 
   useEffect(() =>{
+    const currentUser = auth.currentUser.uid;
+
+    // if (currentUser) {
+    //   setUser(currentUser);
+    //   console.log(currentUser);
+    // }
+    console.log(currentUser);
+  
     const getPostedLostItems = async () =>{
       console.log("get posted lost items");
       try{
@@ -66,7 +77,7 @@ const PostedLostItemsScreen = () => {
           console.log("No documents");
         }else{
           const posts = postedItemquery.docs
-            .filter((doc) => doc.data().userId === user)
+            .filter((doc) => doc.data().userId === currentUser)
             .map((doc) => doc.data());
           console.log(posts);
           setPosts(posts);
@@ -80,11 +91,16 @@ const PostedLostItemsScreen = () => {
     getPostedLostItems();
   },[])
 
+  // const deletePost=(item)=>{
+  //   console.log(item);
+  // }
+
   const styles = StyleSheet.create({
     container:{
         marginLeft: 20,
         marginRight: 20,
         marginTop:20,
+        backgroundColor:'#ff0000',
     },
     itemText: {
       fontSize: 20,
@@ -135,7 +151,7 @@ const PostedLostItemsScreen = () => {
       <FlatList 
         data={posts} 
         renderItem={({item})=>(
-          <TouchableOpacity >
+          // <TouchableOpacity >
           <View key={item.id} style={styles.card}>
             <Image source={imageIcon} style={styles.itemImage}/>
             <View style={styles.postDetails}>
@@ -147,12 +163,13 @@ const PostedLostItemsScreen = () => {
               {/* <Text  style={styles.itemText}>Delete</Text> */}
             {/* <View styles={{height:100, width:100 , justifyContent:'center',border:'1px solid #000' , margin: 10, padding: 10}}> */}
               <Image source={tempimage} 
+                // onPress={() => deletePost(item.id)}
                 style={styles.removeimage}
               />
             {/* </View> */}
             </TouchableOpacity>
           </View>
-          </TouchableOpacity >
+          // </TouchableOpacity >
         )}
       />
       </SafeAreaView>
