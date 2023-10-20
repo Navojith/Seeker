@@ -22,6 +22,7 @@ import { TouchableOpacity } from 'react-native';
 import DismissibleAlert from '../../components/common/alerts/DismissibleAlert';
 import { updateDoc, doc, collection, addDoc } from 'firebase/firestore';
 import { FireStore, auth } from '../../firebase';
+import TwoButtonModal from '../../components/common/modals/TwoButtonModal';
 
 const BuyBoost = ({ route, navigation }) => {
   //const { itemId } = route.params;
@@ -49,6 +50,7 @@ const BuyBoost = ({ route, navigation }) => {
       'py-8 px-6 border border-[6px] rounded rounded-[42px] border-dark-blue',
   });
   const [loading, setLoading] = useState(false);
+  const [isConfirmVisible, setIsConfirmVisible] = useState(false);
 
   const tiers = [
     {
@@ -163,6 +165,12 @@ const BuyBoost = ({ route, navigation }) => {
       }));
     }
   };
+
+  const handleCancel = () => {
+    setIsConfirmVisible(false);
+    setLoading(false);
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <DismissibleAlert data={error} setData={setError} />
@@ -286,7 +294,17 @@ const BuyBoost = ({ route, navigation }) => {
           text="Confirm Payment"
           containerStyles={'mb-20 py-4 w-full rounded rounded-full'}
           textStyles={'text-2xl'}
-          onPress={handlePurchase}
+          onPress={() => setIsConfirmVisible(true)}
+        />
+        <TwoButtonModal
+          isVisible={isConfirmVisible}
+          setIsVisible={setIsConfirmVisible}
+          heading="Confirm Purchase"
+          onPressConfirm={handlePurchase}
+          onPressCancel={handleCancel}
+          showInfoIcon={false}
+          loading={loading}
+          loadingText={'Sending... Please wait....'}
         />
       </ScrollView>
     </SafeAreaView>
