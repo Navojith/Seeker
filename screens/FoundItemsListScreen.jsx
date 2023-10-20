@@ -215,7 +215,14 @@ const FoundItemsListScreen = () => {
               }}
             >
               <View>
-                <Image source={tempimage} style={styles.itemImage} />
+                {item.imageUrl ? (
+                  <Image
+                    source={{ uri: item.imageUrl }}
+                    style={styles.itemImage}
+                  />
+                ) : (
+                  <Image source={tempimage} style={styles.itemImage} />
+                )}
                 <Text style={styles.itemText}>{item.itemName}</Text>
                 {/* Other item details */}
               </View>

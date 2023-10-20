@@ -1,15 +1,25 @@
-import { View, ScrollView, Text, Image, TextInput } from "react-native";
+import {
+  View,
+  ScrollView,
+  Text,
+  Image,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 import React, { useState, useEffect } from "react";
 import AddImage from "../assets/images/PostCreation/AddImage.png";
 import { Picker } from "@react-native-picker/picker";
 import data from "../assets/data/SLIITLocations/index.json";
 import MainButton from "../components/common/buttons/MainButton";
-import { FireStore, auth } from "../firebase";
+import { FireStore, auth, storage } from "../firebase";
 import { collection, addDoc, updateDoc } from "firebase/firestore";
 import DismissibleAlert from "../components/common/alerts/DismissibleAlert";
 import { useNavigation } from "@react-navigation/native";
 import { LostItems } from "../constants/RouteConstants";
 import axios from "axios";
+import * as ImagePicker from "expo-image-picker";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import * as ImageManipulator from "expo-image-manipulator";
 
 const CreateFoundItemScreen = () => {
   const navigation = useNavigation();
@@ -31,6 +41,7 @@ const CreateFoundItemScreen = () => {
   });
   const [loading, setLoading] = useState(false);
   //const [searchDocuments, setSearchDocuments] = useState([]);
+  const [imageUri, setImageUri] = useState(null);
 
   useEffect(() => {
     if (selectedLocation === "Other") {
@@ -39,6 +50,22 @@ const CreateFoundItemScreen = () => {
       setOtherVisibility(false);
     }
   }, [selectedLocation]);
+
+  const uploadImageToFirebaseStorage = async (imageUri) => {
+    try {
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+      const storageRef = ref(
+        storage,
+        `images/${auth.currentUser.uid}/${Date.now()}.jpg`
+      );
+      await uploadBytes(storageRef, blob);
+      return getDownloadURL(storageRef);
+    } catch (error) {
+      console.error("Error uploading image to Firebase Storage: ", error);
+      return null;
+    }
+  };
 
   const handleSubmit = async () => {
     if (itemName === "" || description === "") {
@@ -51,6 +78,10 @@ const CreateFoundItemScreen = () => {
     } else {
       try {
         setLoading(true);
+        let imageUrl = null;
+        if (imageUri) {
+          imageUrl = await uploadImageToFirebaseStorage(imageUri);
+        }
         const docRef = await addDoc(collection(FireStore, "foundItems"), {
           userId: auth.currentUser.uid,
           itemName: itemName,
@@ -61,6 +92,7 @@ const CreateFoundItemScreen = () => {
           description: description,
           timestamp: new Date(),
           postId: "",
+          imageUrl: imageUrl,
         });
 
         console.log("id", docRef.id);
@@ -94,6 +126,28 @@ const CreateFoundItemScreen = () => {
           message: error.message + " - " + error.code,
         }));
       }
+    }
+  };
+
+  const openImagePicker = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      //aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log(result);
+
+    if (!result.canceled) {
+      const resizedPhoto = await ImageManipulator.manipulateAsync(
+        result.assets[0].uri,
+        [{ resize: { width: 300 } }], // resize to width of 300 and preserve aspect ratio
+        { compress: 0.7, format: "jpeg" }
+      );
+
+      setImageUri(resizedPhoto.uri);
+      console.log(resizedPhoto.uri);
     }
   };
 
@@ -145,12 +199,25 @@ const CreateFoundItemScreen = () => {
   return (
     <ScrollView className="p-4 flex-1  ">
       <DismissibleAlert data={error} setData={setError} />
-      <Image
-        className="mx-auto mb-4"
-        source={AddImage}
-        width={100}
-        height={100}
-      />
+      <TouchableOpacity
+        onPress={openImagePicker}
+        style={{
+          borderWidth: 4,
+          borderColor: "lightblue",
+          borderRadius: 10,
+          padding: 10,
+          alignItems: "center",
+        }}
+      >
+        {imageUri ? (
+          <Image
+            source={{ uri: imageUri }}
+            style={{ width: 200, height: 200 }}
+          />
+        ) : (
+          <Text>Select an Image</Text>
+        )}
+      </TouchableOpacity>
       <Text className="text-black text-lg font-bold mb-2">Item Name</Text>
       <TextInput
         value={itemName}
