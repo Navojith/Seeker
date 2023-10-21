@@ -84,8 +84,6 @@ const PostBoostingScreen = ({ route, navigation }) => {
     }
   };
 
-  // console.log(level, needed);
-
   return (
     <View className=" w-10/12 mx-auto mt-48 bg-white">
       <DismissibleAlert
@@ -171,8 +169,9 @@ const PostBoostingScreen = ({ route, navigation }) => {
         <TwoButtonModal
           isVisible={isModalVisible}
           setIsVisible={setIsModalVisible}
-          infoMessage={"Sorry you don't have enough points. Buy boost level?"}
-          //navigate to you page
+          showInfoIcon={false}
+          heading={"Sorry you don't have enough points. Buy boost level?"}
+          //navigate to your page
           onPressConfirm={() =>
             navigation.navigate(BuyBoost, { itemId: route.params.itemId })
           }

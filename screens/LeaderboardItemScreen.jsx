@@ -77,30 +77,33 @@ const LeaderboardItemScreen = ({ route }) => {
     // console.log(currentLocation.coords);
     // console.log(item.location);
     // console.log(siteLocation.locations[item.location]);
-    console.log(
-      Math.round(
-        getDistanceFromLatLonInKm(
-          currentLocation.coords.latitude,
-          currentLocation.coords.longitude,
-          siteLocation.locations[item.location].lat,
-          siteLocation.locations[item.location].lng
-        ) *
-          1000 *
-          100
-      ) / 100
-    );
-    setDistance(
-      Math.round(
-        getDistanceFromLatLonInKm(
-          currentLocation.coords.latitude,
-          currentLocation.coords.longitude,
-          siteLocation.locations[item.location].lat,
-          siteLocation.locations[item.location].lng
-        ) *
-          1000 *
-          100
-      ) / 100
-    );
+    {
+      item &&
+        console.log(
+          Math.round(
+            getDistanceFromLatLonInKm(
+              currentLocation.coords.latitude,
+              currentLocation.coords.longitude,
+              siteLocation.locations[item.location].lat,
+              siteLocation.locations[item.location].lng
+            ) *
+              1000 *
+              100
+          ) / 100
+        );
+      setDistance(
+        Math.round(
+          getDistanceFromLatLonInKm(
+            currentLocation.coords.latitude,
+            currentLocation.coords.longitude,
+            siteLocation.locations[item?.location].lat,
+            siteLocation.locations[item?.location].lng
+          ) *
+            1000 *
+            100
+        ) / 100
+      );
+    }
   };
 
   const handleNotFound = () => {
