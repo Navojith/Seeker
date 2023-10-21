@@ -70,7 +70,14 @@ const LostItemStack = ({ navigation }) => {
         }}
       />
       <Stack.Screen name="Item" component={LostItem} />
-      <Stack.Screen name={LeaderboardPost} component={LeaderboardItemScreen} />
+      <Stack.Screen
+        name={LeaderboardPost}
+        component={LeaderboardItemScreen}
+        options={{
+          headerShown: true,
+          header: () => <Header title="Search item" />,
+        }}
+      />
     </Stack.Navigator>
   );
 };

@@ -23,9 +23,6 @@ import UserIcon from '../assets/icons/UserIcon';
 import { getPushDataObject } from 'native-notify';
 import { useNavigation } from '@react-navigation/native';
 import { Item, LeaderboardPost, LostItems } from '../constants/RouteConstants';
-import * as Location from 'expo-location';
-import { getDistanceFromLatLonInKm } from '../util/distance/getDistance';
-import siteLocation from '../assets/data/SLIITLocations/location.json';
 
 const LeaderBoard = () => {
   const [users, setUsers] = useState([]);
@@ -47,7 +44,6 @@ const LeaderBoard = () => {
       });
     }
   }, [pushDataObject]);
-  const [location, setLocation] = useState(null);
 
   const styles = StyleSheet.create({
     pageStyle: {
@@ -177,32 +173,32 @@ const LeaderBoard = () => {
     getLeaderboardUsers();
   }, []);
 
-  useEffect(() => {
-    getPermissions = async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('Permission to access location was denied');
-      }
-      let currentLocation = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Highest,
-        maximumAge: 10000,
-        timeout: 5000,
-      });
-      setLocation(currentLocation);
-      console.log(currentLocation.coords);
-      console.log(siteLocation.locations.Auditorium);
-      console.log(
-        getDistanceFromLatLonInKm(
-          currentLocation.coords.latitude,
-          currentLocation.coords.longitude,
-          siteLocation.locations.Auditorium.lat,
-          siteLocation.locations.Auditorium.lng
-        ) * 1000
-      );
-    };
+  // useEffect(() => {
+  //   getPermissions = async () => {
+  //     let { status } = await Location.requestForegroundPermissionsAsync();
+  //     if (status !== 'granted') {
+  //       console.log('Permission to access location was denied');
+  //     }
+  //     let currentLocation = await Location.getCurrentPositionAsync({
+  //       accuracy: Location.Accuracy.Highest,
+  //       maximumAge: 10000,
+  //       timeout: 5000,
+  //     });
+  //     setLocation(currentLocation);
+  //     console.log(currentLocation.coords);
+  //     console.log(siteLocation.locations.Auditorium);
+  //     console.log(
+  //       getDistanceFromLatLonInKm(
+  //         currentLocation.coords.latitude,
+  //         currentLocation.coords.longitude,
+  //         siteLocation.locations.Auditorium.lat,
+  //         siteLocation.locations.Auditorium.lng
+  //       ) * 1000
+  //     );
+  //   };
 
-    getPermissions();
-  }, []);
+  //   getPermissions();
+  // }, []);
 
   return (
     <View style={styles.pageStyle}>
