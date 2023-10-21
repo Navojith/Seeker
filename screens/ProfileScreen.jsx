@@ -38,10 +38,12 @@ const ProfileScreen = () => {
     profileDetails: {
       fontSize: 20,
       fontWeight: 'bold',
+      fontWeight: 'bold',
       margin: 2,
     },
     itemButtonContainer: {
       marginTop: 20,
+      alignItems: 'center',
       alignItems: 'center',
     },
     itemButton: {
@@ -123,7 +125,7 @@ const ProfileScreen = () => {
       })
       .catch((error) => {
         console.log(error.code, error.message);
-        alert(error.message);
+        // alert(error.message);
       });
   };
 

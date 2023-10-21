@@ -43,7 +43,10 @@ const UserStack = () => {
             fontSize: 14,
           },
           tabBarHideOnKeyboard: true,
-          headerShown: route.name !== LostItems && route.name !== FoundItems  ? true : false,
+          headerShown:
+            route.name !== LostItems && route.name !== FoundItems
+              ? true
+              : false,
         })}
         sceneContainerStyle={{ backgroundColor: '#F0F9FF' }}
       >

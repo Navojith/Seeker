@@ -22,10 +22,7 @@ import {
 import UserIcon from '../assets/icons/UserIcon';
 import { getPushDataObject } from 'native-notify';
 import { useNavigation } from '@react-navigation/native';
-import { Item } from '../constants/RouteConstants';
-import * as Location from 'expo-location';
-import { getDistanceFromLatLonInKm } from '../util/distance/getDistance';
-import siteLocation from '../assets/data/SLIITLocations/location.json';
+import { Item, LeaderboardPost, LostItems } from '../constants/RouteConstants';
 
 const LeaderBoard = () => {
   const [users, setUsers] = useState([]);
@@ -40,8 +37,13 @@ const LeaderBoard = () => {
     if (pushDataObject && pushDataObject.type === 'search') {
       navigation.navigate(Item, { pushDataObject });
     }
+    if (pushDataObject && pushDataObject.type === 'specialPost') {
+      navigation.navigate(LostItems, {
+        screen: LeaderboardPost,
+        params: { pushDataObject },
+      });
+    }
   }, [pushDataObject]);
-  const [location, setLocation] = useState(null);
 
   const styles = StyleSheet.create({
     pageStyle: {
@@ -60,6 +62,18 @@ const LeaderBoard = () => {
       paddingVertical: 5,
       borderTopLeftRadius: 15,
       borderTopRightRadius: 15,
+    },
+    footerStyle: {
+      flexDirection: 'row',
+      width: '85%',
+      borderWidth: 4,
+      backgroundColor: '#0284C7',
+      borderColor: '#0284C7',
+      marginLeft: 'auto',
+      marginRight: 'auto',
+      paddingVertical: 5,
+      borderBottomLeftRadius: 15,
+      borderBottomRightRadius: 15,
     },
     itemStyle: {
       flexDirection: 'row',
@@ -128,6 +142,10 @@ const LeaderBoard = () => {
     );
   };
 
+  const tableFooter = () => {
+    return <View style={styles.footerStyle}></View>;
+  };
+
   useEffect(() => {
     const getLeaderboardUsers = async () => {
       try {
@@ -155,32 +173,32 @@ const LeaderBoard = () => {
     getLeaderboardUsers();
   }, []);
 
-  useEffect(() => {
-    getPermissions = async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('Permission to access location was denied');
-      }
-      let currentLocation = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Highest,
-        maximumAge: 10000,
-        timeout: 5000,
-      });
-      setLocation(currentLocation);
-      console.log(currentLocation.coords.latitude);
-      console.log(siteLocation.locations.Auditorium);
-      console.log(
-        getDistanceFromLatLonInKm(
-          currentLocation.coords.latitude,
-          currentLocation.coords.longitude,
-          siteLocation.locations.Auditorium.lat,
-          siteLocation.locations.Auditorium.lng
-        ) * 1000
-      );
-    };
+  // useEffect(() => {
+  //   getPermissions = async () => {
+  //     let { status } = await Location.requestForegroundPermissionsAsync();
+  //     if (status !== 'granted') {
+  //       console.log('Permission to access location was denied');
+  //     }
+  //     let currentLocation = await Location.getCurrentPositionAsync({
+  //       accuracy: Location.Accuracy.Highest,
+  //       maximumAge: 10000,
+  //       timeout: 5000,
+  //     });
+  //     setLocation(currentLocation);
+  //     console.log(currentLocation.coords);
+  //     console.log(siteLocation.locations.Auditorium);
+  //     console.log(
+  //       getDistanceFromLatLonInKm(
+  //         currentLocation.coords.latitude,
+  //         currentLocation.coords.longitude,
+  //         siteLocation.locations.Auditorium.lat,
+  //         siteLocation.locations.Auditorium.lng
+  //       ) * 1000
+  //     );
+  //   };
 
-    getPermissions();
-  }, []);
+  //   getPermissions();
+  // }, []);
 
   return (
     <View style={styles.pageStyle}>
@@ -196,6 +214,7 @@ const LeaderBoard = () => {
           data={users}
           numColumns={1}
           ListHeaderComponent={tableHeader}
+          ListFooterComponent={tableFooter}
           renderItem={({ item }) => (
             <View style={styles.itemStyle}>
               <View>

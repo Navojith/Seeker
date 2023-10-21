@@ -20,4 +20,6 @@ export const PostBoosting = 'Post Boosting';
 
 export const Items = 'Item';
 
+export const LeaderboardPost = 'leaderboardPost';
+
 export const PersonalBelongings = 'Personal Belongings';
