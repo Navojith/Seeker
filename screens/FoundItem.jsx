@@ -1,24 +1,31 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { auth } from '../firebase';
-import { Firestore, addDoc, collection } from "firebase/firestore";
+import { getFirestore, addDoc, collection , query,where } from "firebase/firestore";
 const tempimage = require("../assets/images/PostCreation/AddImage.png");
 
 
 const FoundItem = ({ route }) => {
 const { item, pushDataObject } = route.params;
 
-  // const handleClaim = (item) =>{
-  //     console.log(item);
-  //     const currentUser = auth.currentUser.uid;
-  //     console.log(item , currentUser);
+  const handleClaim = async(post) =>{
+    try{
+      console.log(post);
+      const currentUser = auth.currentUser.uid;
+      console.log(post , currentUser);
 
-  //     const res = addDoc(collection(Firestore , 'requests'),{
-  //      user : currentUser,
-  //      itemDetails : item
-  //     });
-  //     console.log(res);
-  // }
+      const db = getFirestore();
+      console.log(db);
+
+      const res = await addDoc(collection(db , 'requests'),{
+       user : currentUser,
+       itemDetails : post,
+      });
+      console.log(res.id);
+    } catch(error){
+      console.log(error);
+    }
+  }
 
   const styles = StyleSheet.create({
     container: {
@@ -40,9 +47,9 @@ const { item, pushDataObject } = route.params;
       borderColor: "#0369A1",
     },
     itemImage: {
-      width: "100%",
-     // height: 100,
-      resizeMode: "cover",
+      width: 200,
+      height: 200,
+      resizeMode: "contain",
       marginBottom: 8,
     },
     itemName: {
@@ -53,10 +60,11 @@ const { item, pushDataObject } = route.params;
     },
     itemDescription: {
       textAlign: "left",
+      marginBottom: 4, // Add spacing between field names and values
     },
     claimButtonContainer: {
       marginTop: 20,
-      alignItems: "center", 
+      alignItems: "center",
     },
     claimButton: {
       backgroundColor: "#0369A1",
@@ -81,16 +89,37 @@ const { item, pushDataObject } = route.params;
 
       {item && (
         <View style={styles.card}>
-          <Image source={tempimage} style={styles.itemImage} />
+          <View style={styles.cardContent}>
+            {item.imageUrl ? (
+              <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
+            ) : (
+              <Image source={tempimage} style={styles.itemImage} />
+            )}
+          </View>
           <Text style={styles.itemName}>{item.itemName}</Text>
-          <Text style={styles.itemDescription}>Color: {item.color}</Text>
-          <Text style={styles.itemDescription}>Description: {item.description}</Text>
-          <Text style={styles.itemDescription}>Location: {item.location}</Text>
-          <Text style={styles.itemDescription}>Serial No: {item.serialNumber}</Text>
-          <Text style={styles.itemDescription}>Date: {}</Text>
+          <Text style={styles.itemDescription}>
+            <Text style={{ fontWeight: "bold" }}>Color:</Text> {item.color}
+          </Text>
+          <Text style={styles.itemDescription}>
+            <Text style={{ fontWeight: "bold" }}>Description:</Text>{" "}
+            {item.description}
+          </Text>
+          <Text style={styles.itemDescription}>
+            <Text style={{ fontWeight: "bold" }}>Location:</Text>{" "}
+            {item.location}
+          </Text>
+          <Text style={styles.itemDescription}>
+            <Text style={{ fontWeight: "bold" }}>Serial No:</Text>{" "}
+            {item.serialNumber}
+          </Text>
+          <Text style={styles.itemDescription}>
+            <Text style={{ fontWeight: "bold" }}>Date:</Text>{" "}
+            {new Date(item.timestamp.toDate()).toLocaleString()}
+          </Text>
+
           <View style={styles.claimButtonContainer}>
             <TouchableOpacity style={styles.claimButton}
-            //  onPress={handleClaim(item)}
+             onPress={()=>handleClaim(item.postId)}
             >
               <Text style={styles.claimButtonText}>Claim</Text>
             </TouchableOpacity>

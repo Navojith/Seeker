@@ -1,10 +1,16 @@
-import { View, ScrollView, Text, Image, TextInput } from 'react-native';
+import {
+  View,
+  ScrollView,
+  Text,
+  Image,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native';
 import React, { useState, useEffect } from 'react';
-import AddImage from '../assets/images/PostCreation/AddImage.png';
 import { Picker } from '@react-native-picker/picker';
 import data from '../assets/data/SLIITLocations/index.json';
 import MainButton from '../components/common/buttons/MainButton';
-import { FireStore, auth } from '../firebase';
+import { FireStore, auth, storage } from '../firebase';
 import {
   collection,
   addDoc,
@@ -12,11 +18,15 @@ import {
   orderBy,
   limit,
   getDocs,
+  updateDoc,
 } from 'firebase/firestore';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import TwoButtonModal from '../components/common/modals/TwoButtonModal';
 import { PostBoosting } from '../constants/RouteConstants';
 import axios from 'axios';
+import * as ImagePicker from 'expo-image-picker';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 const CreateLostItemScreen = ({ navigation }) => {
   const [selectedLocation, setSelectedLocation] = useState(data.locations[0]);
@@ -39,6 +49,7 @@ const CreateLostItemScreen = ({ navigation }) => {
   const [leaderboardUsers, setLeaderboardUsers] = useState([]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [imageUri, setImageUri] = useState(null);
 
   useEffect(() => {
     if (selectedLocation === 'Other') {
@@ -86,6 +97,22 @@ const CreateLostItemScreen = ({ navigation }) => {
     );
   };
 
+  const uploadImageToFirebaseStorage = async (imageUri) => {
+    try {
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+      const storageRef = ref(
+        storage,
+        `images/${auth.currentUser.uid}/${Date.now()}.jpg`
+      );
+      await uploadBytes(storageRef, blob);
+      return getDownloadURL(storageRef);
+    } catch (error) {
+      console.error('Error uploading image to Firebase Storage: ', error);
+      return null;
+    }
+  };
+
   const handleSubmit = async () => {
     handleNotification();
     if (itemName === '' || description === '') {
@@ -101,6 +128,10 @@ const CreateLostItemScreen = ({ navigation }) => {
     } else {
       try {
         setLoading(true);
+        let imageUrl = null;
+        if (imageUri) {
+          imageUrl = await uploadImageToFirebaseStorage(imageUri);
+        }
         const res = await addDoc(collection(FireStore, 'lostItems'), {
           userId: auth.currentUser.uid,
           itemName: itemName,
@@ -111,10 +142,12 @@ const CreateLostItemScreen = ({ navigation }) => {
           description: description,
           tier: 'free',
           timestamp: new Date(),
+          postId: '',
+          imageUrl: imageUrl,
         });
-
+        const postId = res.id;
+        await updateDoc(res, { postId: postId });
         setCreatedItemId(res.id);
-
         setError({
           visibility: true,
           viewStyles: 'border border-4 border-green-600',
@@ -147,6 +180,28 @@ const CreateLostItemScreen = ({ navigation }) => {
     navigation.navigate(PostBoosting, { itemId: createdItemId });
   };
 
+  const openImagePicker = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      //aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log(result);
+
+    if (!result.canceled) {
+      const resizedPhoto = await ImageManipulator.manipulateAsync(
+        result.assets[0].uri,
+        [{ resize: { width: 300 } }], // resize to width of 300 and preserve aspect ratio
+        { compress: 0.7, format: 'jpeg' }
+      );
+
+      setImageUri(resizedPhoto.uri);
+      console.log(resizedPhoto.uri);
+    }
+  };
+
   return (
     <ScrollView className="p-4 flex-1  ">
       <TwoButtonModal
@@ -159,12 +214,25 @@ const CreateLostItemScreen = ({ navigation }) => {
         onPressConfirm={handleBoosting}
       />
       <DismissibleAlert data={error} setData={setError} />
-      <Image
-        className="mx-auto mb-4"
-        source={AddImage}
-        width={100}
-        height={100}
-      />
+      <TouchableOpacity
+        onPress={openImagePicker}
+        style={{
+          borderWidth: 4,
+          borderColor: 'lightblue',
+          borderRadius: 10,
+          padding: 10,
+          alignItems: 'center',
+        }}
+      >
+        {imageUri ? (
+          <Image
+            source={{ uri: imageUri }}
+            style={{ width: 200, height: 200, resizeMode: 'contain' }}
+          />
+        ) : (
+          <Text>Select an Image</Text>
+        )}
+      </TouchableOpacity>
       <Text className="text-black text-lg font-bold mb-2">Item Name</Text>
       <TextInput
         value={itemName}

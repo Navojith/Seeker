@@ -6,7 +6,7 @@ import {
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import InformationIcon from '../../assets/icons/InformationIcon';
 import MainButton from '../../components/common/buttons/MainButton';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,12 +20,23 @@ import MinorIcon from '../../assets/images/Tiers/Minor.jsx';
 import MinorText from '../../assets/images/Tiers/MinorText.jsx';
 import { TouchableOpacity } from 'react-native';
 import DismissibleAlert from '../../components/common/alerts/DismissibleAlert';
+import { updateDoc, doc, collection, addDoc } from 'firebase/firestore';
+import { FireStore, auth } from '../../firebase';
+import TwoButtonModal from '../../components/common/modals/TwoButtonModal';
 
 const BuyBoost = ({ route, navigation }) => {
-  // const { itemId } = route.params;
+  const [itemId, setItemId] = useState('');
   const [cardNo, setCardNo] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [cvv, setCvv] = useState('');
+  const [error, setError] = useState({
+    visibility: false,
+    viewStyles: 'border border-4 border-red-600',
+    title: null,
+    titleStyles: 'text-red-600',
+    message: null,
+    messageStyles: 'text-red-600 font-bold',
+  });
   const [selected, setSelected] = useState('');
   const [infoButton, setInfoButton] = useState({
     visibility: false,
@@ -37,6 +48,8 @@ const BuyBoost = ({ route, navigation }) => {
     viewStyles:
       'py-8 px-6 border border-[6px] rounded rounded-[42px] border-dark-blue',
   });
+  const [loading, setLoading] = useState(false);
+  const [isConfirmVisible, setIsConfirmVisible] = useState(false);
 
   const tiers = [
     {
@@ -73,8 +86,114 @@ const BuyBoost = ({ route, navigation }) => {
     setSelected(item);
   };
 
+  useEffect(() => {
+    if (route.params?.itemId) {
+      setItemId(route.params.itemId);
+    }
+  }, [route]);
+
+  const handlePurchase = async () => {
+    console.log(itemId);
+    if (cardNo !== '' && expiryDate !== '' && cvv !== '' && selected !== '') {
+      try {
+        setLoading(true);
+        const docRef = doc(collection(FireStore, 'lostItems'), itemId);
+
+        await updateDoc(docRef, {
+          tier: selected.name.toLowerCase(),
+        });
+
+        //set Payment
+        try {
+          const res = addDoc(collection(FireStore, 'payments'), {
+            userId: auth.currentUser.uid,
+            itemId: itemId,
+            tier: selected.name.toLowerCase(),
+            total: selected.price,
+            timestamp: new Date(),
+          });
+
+          setCardNo('');
+          setExpiryDate('');
+          setCvv('');
+          setError({
+            visibility: true,
+            viewStyles: 'border border-4 border-green-600',
+            titleStyles: 'text-green-600',
+            messageStyles: 'text-green-600 font-bold',
+            title: 'Success !',
+            message: 'Booster Purchased successfully !',
+          });
+          navigation.navigate('Lost');
+        } catch (error) {
+          setError((prev) => ({
+            viewStyles: 'border border-4 border-red-600',
+            titleStyles: 'text-red-600',
+            messageStyles: 'text-red-600 font-bold',
+            visibility: true,
+            title: 'Error !',
+            message: error.message + ' - ' + error.code,
+          }));
+        }
+
+        setLoading(false);
+      } catch (error) {
+        if (error.code === 'not-found') {
+          setError((prev) => ({
+            viewStyles: 'border border-4 border-red-600',
+            titleStyles: 'text-red-600',
+            messageStyles: 'text-red-600 font-bold',
+            visibility: true,
+            title: 'Error !',
+            message:
+              "Post not found !\nThe post that you're trying to upgrade is not found.",
+          }));
+        } else {
+          setError((prev) => ({
+            viewStyles: 'border border-4 border-red-600',
+            titleStyles: 'text-red-600',
+            messageStyles: 'text-red-600 font-bold',
+            visibility: true,
+            title: 'Error !',
+            message: error.message + ' - ' + error.code,
+          }));
+        }
+      }
+    } else {
+      setError((prev) => ({
+        viewStyles: 'border border-4 border-red-600',
+        titleStyles: 'text-red-600',
+        messageStyles: 'text-red-600 font-bold',
+        visibility: true,
+        title: 'Please Enter Valid Details !',
+        message: 'Please fill in all the fields',
+      }));
+    }
+  };
+
+  const handleCancel = () => {
+    setIsConfirmVisible(false);
+    setLoading(false);
+  };
+
+  const handleClickPurchase = () => {
+    if (cardNo !== '' && expiryDate !== '' && cvv !== '' && selected !== '') {
+      setIsConfirmVisible(true);
+    } else {
+      setError((prev) => ({
+        viewStyles: 'border border-4 border-red-600',
+        titleStyles: 'text-red-600',
+        messageStyles: 'text-red-600 font-bold',
+        visibility: true,
+        title: 'Please Enter Valid Details !',
+        message: 'Please fill in all the fields',
+      }));
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      <DismissibleAlert data={error} setData={setError} />
       <ScrollView
         style={{
           paddingTop: 30,
@@ -186,10 +305,26 @@ const BuyBoost = ({ route, navigation }) => {
           Total fee:{' '}
           {selected.price ? parseFloat(selected.price).toFixed(2) : '0.00'} lkr
         </Text>
+        {loading && (
+          <Text className="text-light-blue text-lg font-bold mt-2">
+            Sending... Please wait....
+          </Text>
+        )}
         <MainButton
           text="Confirm Payment"
           containerStyles={'mb-20 py-4 w-full rounded rounded-full'}
           textStyles={'text-2xl'}
+          onPress={handleClickPurchase}
+        />
+        <TwoButtonModal
+          isVisible={isConfirmVisible}
+          setIsVisible={setIsConfirmVisible}
+          heading="Confirm Purchase"
+          onPressConfirm={handlePurchase}
+          onPressCancel={handleCancel}
+          showInfoIcon={false}
+          loading={loading}
+          loadingText={'Sending... Please wait....'}
         />
       </ScrollView>
     </SafeAreaView>

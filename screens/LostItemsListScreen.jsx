@@ -20,6 +20,7 @@ const tempimage = require("../assets/images/PostCreation/AddImage.png");
 import data from "../assets/data/SLIITLocations/index.json";
 import { Picker } from "@react-native-picker/picker";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
 
 const locationOptions = data.locations;
 
@@ -58,23 +59,18 @@ const LostItemsListScreen = () => {
       fontSize: 16,
     },
     card: {
+      width: "48%",
       margin: 4,
-      width: "48%", // Adjust as needed to fit two cards per row
+    },
+    cardContent: {
       padding: 16,
       backgroundColor: "#fff",
       borderRadius: 25,
-      elevation: 3,
-      shadowColor: "#000",
-      shadowOffset: { width: 1, height: 1 },
-      shadowOpacity: 0.3,
-      shadowRadius: 2,
-      borderWidth: 3,
-      borderColor: "#0369A1",
     },
     itemImage: {
       width: "100%",
       height: 100,
-      resizeMode: "cover",
+      resizeMode: 'contain',
       marginBottom: 8,
     },
     filterButton: {
@@ -112,9 +108,8 @@ const LostItemsListScreen = () => {
     const getLostItems = async () => {
       console.log("get lost items");
       try {
-        const querySnapshot = await getDocs(
-          collectionGroup(FireStore, "posted")
-        );
+        const collectionRef = collection(FireStore, "lostItems"); // Get a reference to the collection
+        const querySnapshot = await getDocs(collectionRef);
         if (querySnapshot.empty) {
           console.log("No matching documents.");
         } else {
@@ -128,7 +123,7 @@ const LostItemsListScreen = () => {
       }
     };
     getLostItems();
-  }, []);//can add isFocused here to reload the screen once an item is added. for now removed since its making api calls often
+  }, [isFocused]); //can add isFocused here to reload the screen once an item is added. for now removed since its making api calls often
 
   // Filter the items based on the search query
   const filteredItems = lostItems.filter(
@@ -151,6 +146,44 @@ const LostItemsListScreen = () => {
       console.error("Error saving search query:", error);
     }
   };
+
+  const getBorderColor = (tier) => {
+    switch (tier) {
+      case "minor":
+        return ["#CECCCC", "#161616"];
+      case "moderate":
+        return ["#780202", "#7479F3"];
+      case "superior":
+        return ["#0066FE", "#6AA4FB"];
+      case "ultra":
+        return ["#8146FF", "#7928B9", "#902AE0"];
+      default:
+        return ["#0369A1", "#0369A1"];
+    }
+  };
+
+  const getTierValue = (tier) => {
+    switch (tier) {
+      case "ultra":
+        return 1;
+      case "superior":
+        return 2;
+      case "moderate":
+        return 3;
+      case "minor":
+        return 4;
+      default:
+        return 5;
+    }
+  };
+
+  const sortedItems = filteredItems.sort((item1, item2) => {
+    const tierValue1 = getTierValue(item1.tier);
+    const tierValue2 = getTierValue(item2.tier);
+
+    // Compare the tier values and return the comparison result
+    return tierValue1 - tierValue2;
+  });
 
   return (
     <View>
@@ -206,7 +239,7 @@ const LostItemsListScreen = () => {
 
       <View style={styles.container}>
         <FlatList
-          data={filteredItems}
+          data={sortedItems}
           numColumns={2}
           renderItem={({ item }) => (
             <TouchableOpacity
@@ -215,11 +248,23 @@ const LostItemsListScreen = () => {
                 navigation.navigate("Item", { item });
               }}
             >
-              <View>
-                <Image source={tempimage} style={styles.itemImage} />
-                <Text style={styles.itemText}>{item.itemName}</Text>
-                {/* Other item details */}
-              </View>
+              <LinearGradient
+                style={{ padding: 5, borderRadius: 25 }}
+                colors={getBorderColor(item.tier)}
+              >
+                <View style={styles.cardContent}>
+                  {item.imageUrl ? (
+                    <Image
+                      source={{ uri: item.imageUrl }}
+                      style={styles.itemImage}
+                    />
+                  ) : (
+                    <Image source={tempimage} style={styles.itemImage} />
+                  )}
+                  <Text style={styles.itemText}>{item.itemName}</Text>
+                  {/* Other item details */}
+                </View>
+              </LinearGradient>
             </TouchableOpacity>
           )}
           keyExtractor={(item, index) => item.id + index.toString()}

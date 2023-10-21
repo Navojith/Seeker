@@ -10,8 +10,8 @@ import Svg, {
 
 const UserIcon = (props) => (
   <Svg
-    width={50}
-    height={50}
+    width={props.width || 50}
+    height={props.height || 50}
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"

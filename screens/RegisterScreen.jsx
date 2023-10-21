@@ -1,14 +1,16 @@
 import { View, Text, KeyboardAvoidingView, TextInput } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { auth } from '../firebase';
+import { auth, FireStore } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import MainButton from '../components/common/buttons/MainButton';
 import SecondaryButton from '../components/common/buttons/SecondaryButton';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import { registerIndieID } from 'native-notify';
+import { setDoc, doc } from 'firebase/firestore';
 
 const RegisterScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
+  const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [rePassword, setRePassword] = useState('');
@@ -22,7 +24,7 @@ const RegisterScreen = ({ navigation }) => {
   });
 
   const handleSignUp = () => {
-    if (!email || !password || !fullName || !rePassword) {
+    if (!email || !password || !fullName || !rePassword || !mobile) {
       setIsError((prev) => ({
         ...prev,
         visibility: true,
@@ -38,14 +40,34 @@ const RegisterScreen = ({ navigation }) => {
         message: 'Passwords do not match !',
       }));
       return;
+    } else if (mobile.length !== 10) {
+      setIsError((prev) => ({
+        ...prev,
+        visibility: true,
+        title: 'Error !',
+        message: 'Mobile should be 10 digits !',
+      }));
+      return;
     } else {
       createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
+        .then(async (userCredential) => {
           const user = userCredential.user;
           console.log('Registered user: ' + user.email);
+          try {
+            await setDoc(doc(FireStore, 'userDetails', user.uid), {
+              displayedName: fullName,
+              email: email,
+              phoneNo: mobile,
+              points: 0,
+              userId: user.uid,
+            });
+            console.log('user details added');
+          } catch (error) {
+            console.log(error);
+          }
 
-          //register notify
-        registerIndieID(user.uid, 13599, 'gTBeP5h5evCxHcHdDs0yVQ');
+          // register notify
+          registerIndieID(user.uid, 13599, 'gTBeP5h5evCxHcHdDs0yVQ');
         })
         .catch((error) => {
           console.log(error.code);
@@ -101,6 +123,13 @@ const RegisterScreen = ({ navigation }) => {
           value={email}
           onChangeText={(text) => setEmail(text)}
           type="email"
+        />
+        <TextInput
+          className="bg-white mb-2 px-4 py-2 border-[3px] border-dark-blue text-dark-blue rounded-xl"
+          placeholder="Mobile"
+          value={mobile}
+          onChangeText={(text) => setMobile(text)}
+          type="tel"
         />
         <TextInput
           className="bg-white mb-2 px-4 py-2 border-[3px] border-dark-blue text-dark-blue rounded-xl"

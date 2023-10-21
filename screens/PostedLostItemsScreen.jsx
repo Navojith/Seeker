@@ -1,7 +1,7 @@
 import { View, Text , SafeAreaView , FlatList , Image , StyleSheet} from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { FireStore } from '../firebase';
-import { collectionGroup, getDocs } from 'firebase/firestore';
+import { collectionGroup, getDocs , doc, deleteDoc } from 'firebase/firestore';
 import { TouchableOpacity } from 'react-native';
 import { auth } from '../firebase';
 import MainButton  from '../components/common/buttons/MainButton';
@@ -10,54 +10,12 @@ import { useNavigation } from '@react-navigation/native';
 const tempimage = require('../assets/delete.png');
 const imageIcon = require('../assets/imageIcon.png');
 
-// const DATA = [
-//   {
-//     id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-//     title: 'First Item',
-//     location: 'qwe',
-//     image : 'https://cdn-icons-png.flaticon.com/128/739/739249.png',
-//   },
-//   {
-//     id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-//     title: 'Second Item',
-//     location: 'qwe',
-//     image : 'https://cdn-icons-png.flaticon.com/128/739/739249.png',
-//   },
-//   {
-//     id: '58694a0f-3da1-471f-bd96-145571e29d72',
-//     title: 'Third Item',
-//     location: 'qwe',
-//     image : 'https://cdn-icons-png.flaticon.com/128/739/739249.png',
-//   },
-//   {
-//     id: '58694a0f-3da1-471f-bd96-145571e29op2',
-//     title: 'Fourth Item',
-//     location: 'qwe',
-//     image : 'https://cdn-icons-png.flaticon.com/128/739/739249.png',
-//   },
-//   {
-//     id: '58694a0f-3da1-471f-bd96-145571e2456',
-//     title: 'Fifth Item',
-//     location: 'qwe',
-//     image : 'https://cdn-icons-png.flaticon.com/128/739/739249.png',
-//   },
-// ];
-
 const PostedLostItemsScreen = () => {
   // const [user , setUser] = useState(null);
   const [posts , setPosts] = useState([]);
+  const [selectedItem , setSelectedItem] = useState(null);
   const navigation = useNavigation();
-  
-  // useEffect(() => {
-  //   const currentUser = auth.currentUser.uid;
 
-  //   if (currentUser) {
-  //     setUser(currentUser);
-  //     console.log(currentUser);
-  //   }
-  //   console.log(currentUser);
-  //   return user;
-  // },[])
 
   useEffect(() =>{
     const currentUser = auth.currentUser.uid;
@@ -91,9 +49,19 @@ const PostedLostItemsScreen = () => {
     getPostedLostItems();
   },[])
 
-  // const deletePost=(item)=>{
-  //   console.log(item);
-  // }
+  const handleDeleteItem = async()=>{
+    if(selectedItem){
+      console.log(selectedItem);
+      try{
+        const result = await deleteDoc(doc(FireStore, "lostItems", selectedItem.itemName));
+        console.log(result);
+        // setPosts(posts.filter(item => item.id !== selectedItem.id));
+        // setSelectedItem(null);
+      }catch(error){
+        console.log(error);
+      }
+    }
+  }
 
   const styles = StyleSheet.create({
     container:{
@@ -151,25 +119,24 @@ const PostedLostItemsScreen = () => {
       <FlatList 
         data={posts} 
         renderItem={({item})=>(
-          // <TouchableOpacity >
+          <TouchableOpacity onPress={() => setSelectedItem(item)}>
           <View key={item.id} style={styles.card}>
             <Image source={imageIcon} style={styles.itemImage}/>
             <View style={styles.postDetails}>
               <Text style={styles.itemText}>Item : {item.itemName}</Text>
               <Text style={styles.itemText}>Location : {item.location}</Text>
             </View>
-            <TouchableOpacity>
             {/*  onPress={() => removeGoal(itemData.item.key)} */}
               {/* <Text  style={styles.itemText}>Delete</Text> */}
             {/* <View styles={{height:100, width:100 , justifyContent:'center',border:'1px solid #000' , margin: 10, padding: 10}}> */}
+            <TouchableOpacity onPress={handleDeleteItem}> 
               <Image source={tempimage} 
-                // onPress={() => deletePost(item.id)}
                 style={styles.removeimage}
               />
             {/* </View> */}
             </TouchableOpacity>
           </View>
-          // </TouchableOpacity >
+         </TouchableOpacity >
         )}
       />
       </SafeAreaView>

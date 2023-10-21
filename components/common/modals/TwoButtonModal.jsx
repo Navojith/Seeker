@@ -24,6 +24,8 @@ const TwoButtonModal = ({
   infoButtonTextStyle,
   infoContainerStyles,
   infoMessageStyles,
+  loading,
+  loadingText,
 }) => {
   const [showInfoModal, setShowInfoModal] = useState({
     visibility: false,
@@ -79,6 +81,13 @@ const TwoButtonModal = ({
           <Text className={'text-3xl font-bold text-center my-8'}>
             {heading}
           </Text>
+          {loading && (
+            <Text
+              className={'text-lg font-bold text-center mb-8 text-light-blue'}
+            >
+              {loadingText}
+            </Text>
+          )}
           <View
             style={{
               display: 'flex',

@@ -24,7 +24,7 @@ import { useNavigation, useIsFocused } from "@react-navigation/native";
 const locationOptions = data.locations;
 
 const FoundItemsListScreen = () => {
-  const [lostItems, setLostItems] = useState([]);
+  const [foundItems, setFoundItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const userId = auth.currentUser.uid;
   const [filterModalVisible, setFilterModalVisible] = useState(false);
@@ -119,7 +119,7 @@ const FoundItemsListScreen = () => {
         } else {
           const items = querySnapshot.docs.map((doc) => doc.data());
           //console.log('Retrieved items:', items);
-          setLostItems(items);
+          setFoundItems(items);
         }
       } catch (error) {
         console.error(error);
@@ -127,10 +127,10 @@ const FoundItemsListScreen = () => {
       }
     };
     getLostItems();
-  }, []); //can add isFocused here to reload the screen once an item is added. for now removed since its making api calls often
+  }, [isFocused]); //can add isFocused here to reload the screen once an item is added. for now removed since its making api calls often
 
   // Filter the items based on the search query
-  const filteredItems = lostItems.filter(
+  const filteredItems = foundItems.filter(
     (item) =>
       item.itemName.toLowerCase().includes(searchQuery.toLowerCase()) &&
       (!selectedLocation || item.location === selectedLocation)
@@ -215,7 +215,14 @@ const FoundItemsListScreen = () => {
               }}
             >
               <View>
-                <Image source={tempimage} style={styles.itemImage} />
+                {item.imageUrl ? (
+                  <Image
+                    source={{ uri: item.imageUrl }}
+                    style={styles.itemImage}
+                  />
+                ) : (
+                  <Image source={tempimage} style={styles.itemImage} />
+                )}
                 <Text style={styles.itemText}>{item.itemName}</Text>
                 {/* Other item details */}
               </View>
