@@ -4,7 +4,7 @@ import Modal from 'react-native-modal';
 import MainButton from '../buttons/MainButton';
 
 // see LoginScreen for example usage
-const DismissibleAlert = ({ data, setData }) => {
+const DismissibleAlert = ({ data, setData, onPress }) => {
   const toggleModal = () => {
     setData((prev) => ({ ...data, visibility: false }));
   };
@@ -24,7 +24,10 @@ const DismissibleAlert = ({ data, setData }) => {
         </Text>
         <MainButton
           text={data.buttonText ?? 'Cancel'}
-          onPress={toggleModal}
+          onPress={() => {
+            toggleModal();
+            onPress && onPress();
+          }}
           containerStyles={data.buttonContainerStyles ?? 'w-full'}
           textStyles={data.buttonTextStyles ?? ''}
         />

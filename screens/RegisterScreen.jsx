@@ -66,6 +66,17 @@ const RegisterScreen = ({ navigation }) => {
             console.log(error);
           }
 
+          try {
+            await setDoc(doc(FireStore, 'notifications', user.uid), {
+              lostItemNotifications: true,
+              foundItemNotifications: true,
+              userId: user.uid,
+            });
+            console.log('deafult settings configured');
+          } catch (error) {
+            console.log(error);
+          }
+
           // register notify
           registerIndieID(user.uid, 13599, 'gTBeP5h5evCxHcHdDs0yVQ');
         })

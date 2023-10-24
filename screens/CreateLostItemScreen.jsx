@@ -19,6 +19,8 @@ import {
   limit,
   getDocs,
   updateDoc,
+  getDoc,
+  doc,
 } from "firebase/firestore";
 import DismissibleAlert from "../components/common/alerts/DismissibleAlert";
 import TwoButtonModal from "../components/common/modals/TwoButtonModal";
@@ -50,6 +52,10 @@ const CreateLostItemScreen = ({ navigation }) => {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [imageUri, setImageUri] = useState(null);
+  const [searchDocuments, setSearchDocuments] = useState([]);
+  const [postId, setPostId] = useState("");
+  const [foundItemNotifications, setFoundItemNotifications] = useState(false);
+  const [lostItemNotifications, setLostItemNotifications] = useState(false);
 
   useEffect(() => {
     if (selectedLocation === "Other") {
@@ -58,6 +64,36 @@ const CreateLostItemScreen = ({ navigation }) => {
       setOtherVisibility(false);
     }
   }, [selectedLocation]);
+
+  useEffect(() => {
+    const fetchSearch = async () => {
+      try {
+        const searchCollectionRef = collection(FireStore, "searchLostItems");
+
+        const querySnapshot = await getDocs(searchCollectionRef);
+
+        const searchDocuments = [];
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          searchDocuments.push({ id: doc.id, ...data });
+        });
+
+        setSearchDocuments(searchDocuments);
+
+        console.log("Fetched search documents:", searchDocuments);
+      } catch (error) {
+        console.error("Error fetching search documents:", error);
+        // Handle the error here
+      }
+    };
+
+    fetchSearch();
+  }, []);
+
+  useEffect(() => {
+    matchSearch();
+  }, [postId]);
 
   useEffect(() => {
     const getLeaderboardUsers = async () => {
@@ -92,7 +128,7 @@ const CreateLostItemScreen = ({ navigation }) => {
         appToken: "gTBeP5h5evCxHcHdDs0yVQ",
         title: "Seeker",
         message: "Lost item reported near you",
-        pushData: '{ "item": "sqKcNh8KhglJahnouMvO" }',
+        pushData: '{ "item": "51n8M5dAKwr5skBiBI0E","type": "specialPost" }',
       }
     );
   };
@@ -145,9 +181,17 @@ const CreateLostItemScreen = ({ navigation }) => {
           postId: "",
           imageUrl: imageUrl,
         });
-        const postId = res.id;
-        await updateDoc(res, { postId: postId });
-        setCreatedItemId(res.id);
+
+        console.log("id", res.id);
+
+        const pId = res.id;
+
+        setCreatedItemId(pId);
+        setPostId(pId);
+
+        // Update the document with the postId
+        await updateDoc(res, { postId: pId });
+
         setError({
           visibility: true,
           viewStyles: "border border-4 border-green-600",
@@ -199,6 +243,94 @@ const CreateLostItemScreen = ({ navigation }) => {
 
       setImageUri(resizedPhoto.uri);
       console.log(resizedPhoto.uri);
+    }
+  };
+
+  const matchSearch = async () => {
+    console.log("Matching search documents...");
+
+    if (!postId) {
+      console.log("postId is empty");
+      return;
+    }
+
+    console.log("postId", postId);
+
+    for (const doc of searchDocuments) {
+      const queryWords = doc.query.toLowerCase().split(" ");
+      const itemNameLower = itemName.toLowerCase();
+      const descriptionWords = description.toLowerCase().split(" ");
+
+      // Check if any word from the query is present in any of the fields
+      const isMatch = queryWords.some((word) => {
+        return (
+          itemNameLower.includes(word) ||
+          descriptionWords.some((descWord) => descWord.includes(word)) ||
+          (serialNumber && serialNumber.toLowerCase().includes(word)) ||
+          (color && color.toLowerCase().includes(word)) ||
+          (selectedLocation && selectedLocation.toLowerCase().includes(word))
+        );
+      });
+
+      if (isMatch) {
+        console.log("Match found");
+        const res = await getNotificationSettings(doc.userId);
+        console.log("lost", lostItemNotifications);
+        console.log("res", res);
+        if (lostItemNotifications) {
+          const pushData = {
+            type: "searchFoundItem",
+            postId,
+          };
+
+          // Add a 10-second delay because firestore is slow
+          setTimeout(() => {
+            axios.post(`https://app.nativenotify.com/api/indie/notification`, {
+              subID: doc.userId,
+              appId: 13599,
+              appToken: "gTBeP5h5evCxHcHdDs0yVQ",
+              title: "Lost item matched your search",
+              message:
+                'Your search "' +
+                doc.query +
+                '" matched with "' +
+                itemName +
+                '"',
+              pushData: JSON.stringify(pushData),
+            });
+          }, 10000);
+        } else {
+          console.log("User has disabled lost item notifications");
+        }
+      }
+    }
+  };
+
+  const getNotificationSettings = async (uId) => {
+    console.log("Retrieving notification settings...");
+    console.log("uId", uId);
+    try {
+      const docRef = doc(FireStore, "notifications", uId);
+
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        console.log("Notification settings:", data);
+        if (data) {
+          console.log(data);
+          setFoundItemNotifications(data.foundItemNotifications);
+          setLostItemNotifications(data.lostItemNotifications);
+        }
+      } else {
+        console.log("No notification settings found");
+      }
+
+      console.log("Notification settings retrieved");
+
+      return true;
+    } catch (error) {
+      console.log(error);
     }
   };
 

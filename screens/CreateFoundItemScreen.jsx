@@ -12,7 +12,14 @@ import { Picker } from "@react-native-picker/picker";
 import data from "../assets/data/SLIITLocations/index.json";
 import MainButton from "../components/common/buttons/MainButton";
 import { FireStore, auth, storage } from "../firebase";
-import { collection, addDoc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  getDocs,
+  getDoc,
+  doc,
+} from "firebase/firestore";
 import DismissibleAlert from "../components/common/alerts/DismissibleAlert";
 import { useNavigation } from "@react-navigation/native";
 import { LostItems } from "../constants/RouteConstants";
@@ -40,8 +47,11 @@ const CreateFoundItemScreen = () => {
     messageStyles: "text-red-600 font-bold",
   });
   const [loading, setLoading] = useState(false);
-  //const [searchDocuments, setSearchDocuments] = useState([]);
+  const [searchDocuments, setSearchDocuments] = useState([]);
   const [imageUri, setImageUri] = useState(null);
+  const [postId, setPostId] = useState("");
+  const [foundItemNotifications, setFoundItemNotifications] = useState(false);
+  const [lostItemNotifications, setLostItemNotifications] = useState(false);
 
   useEffect(() => {
     if (selectedLocation === "Other") {
@@ -50,6 +60,36 @@ const CreateFoundItemScreen = () => {
       setOtherVisibility(false);
     }
   }, [selectedLocation]);
+
+  useEffect(() => {
+    const fetchSearch = async () => {
+      try {
+        const searchCollectionRef = collection(FireStore, "searchFoundItems");
+
+        const querySnapshot = await getDocs(searchCollectionRef);
+
+        const searchDocuments = [];
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          searchDocuments.push({ id: doc.id, ...data });
+        });
+
+        setSearchDocuments(searchDocuments);
+
+        console.log("Fetched search documents:", searchDocuments);
+      } catch (error) {
+        console.error("Error fetching search documents:", error);
+        // Handle the error here
+      }
+    };
+
+    fetchSearch();
+  }, []);
+
+  useEffect(() => {
+    matchSearch();
+  }, [postId]);
 
   const uploadImageToFirebaseStorage = async (imageUri) => {
     try {
@@ -96,12 +136,12 @@ const CreateFoundItemScreen = () => {
         });
 
         console.log("id", docRef.id);
-        const postId = docRef.id;
+
+        const pId = docRef.id; // Set postId after the document is added
+        setPostId(pId);
 
         // Update the document with the postId
-        await updateDoc(docRef, { postId: postId });
-
-        //fetchSearch();
+        await updateDoc(docRef, { postId: pId });
 
         setError({
           visibility: true,
@@ -151,50 +191,85 @@ const CreateFoundItemScreen = () => {
     }
   };
 
-  //   const fetchSearch = async () => {
-  //     try {
-  //       // Get a reference to the /search collection
-  //       const searchCollectionRef = collection(FireStore, "search"); // Replace 'FireStore' with your Firestore instance
+  const matchSearch = async () => {
+    console.log("Matching search documents...");
 
-  //       // Use the getDocs function to fetch all documents
-  //       const querySnapshot = await getDocs(searchCollectionRef);
+    if (!postId) {
+      console.log("postId is empty");
+      return;
+    }
 
-  //       const searchDocuments = [];
+    console.log("postId", postId);
 
-  //       querySnapshot.forEach((doc) => {
-  //         const data = doc.data();
-  //         searchDocuments.push({ id: doc.id, ...data });
-  //       });
+    for (const doc of searchDocuments) {
+      const queryWords = doc.query.toLowerCase().split(" ");
+      const itemNameLower = itemName.toLowerCase();
+      const descriptionWords = description.toLowerCase().split(" ");
 
-  //       setSearchDocuments(searchDocuments);
+      // Check if any word from the query is present in any of the fields
+      const isMatch = queryWords.some((word) => {
+        return (
+          itemNameLower.includes(word) ||
+          descriptionWords.some((descWord) => descWord.includes(word)) ||
+          (serialNumber && serialNumber.toLowerCase().includes(word)) ||
+          (color && color.toLowerCase().includes(word)) ||
+          (selectedLocation && selectedLocation.toLowerCase().includes(word))
+        );
+      });
 
-  //       matchSearch();
+      if (isMatch) {
+        console.log("Match found");
+        const res = await getNotificationSettings(doc.userId);
+        console.log("found", foundItemNotifications);
+        if (foundItemNotifications) {
+          const pushData = {
+            type: "searchFoundItem",
+            postId,
+          };
 
-  //       // Now, the searchDocuments array contains all the documents in the /search collection
-  //       console.log("Fetched search documents:", searchDocuments);
-  //     } catch (error) {
-  //       console.error("Error fetching search documents:", error);
-  //       // Handle the error here
-  //     }
-  //   };
+          // Add a 10-second delay because firestore is slow
+          setTimeout(() => {
+            axios.post(`https://app.nativenotify.com/api/indie/notification`, {
+              subID: doc.userId,
+              appId: 13599,
+              appToken: "gTBeP5h5evCxHcHdDs0yVQ",
+              title: "Found item matched your search",
+              message:
+                'Your search "' +
+                doc.query +
+                '" matched with "' +
+                itemName +
+                '"',
+              pushData: JSON.stringify(pushData),
+            });
+          }, 10000);
+        } else {
+          console.log("User has disabled found item notifications");
+        }
+      }
+    }
+  };
 
-  //   const matchSearch = () => {
-  //     // Loop through the searchDocuments array and check for matches
-  //     searchDocuments.forEach((doc) => {
-  //       if (doc.query.toLowerCase().includes(itemName.toLowerCase())) {
-  //         // Fire your function here when there's a match
-  //         console.log("Match found:", doc); // Replace with your desired action
+  const getNotificationSettings = async (userId) => {
+    try {
+      const docRef = doc(FireStore, "notifications", userId);
 
-  //         axios.post(`https://app.nativenotify.com/api/indie/notification`, {
-  //           subID: doc.userId,
-  //           appId: 13582,
-  //           appToken: "4bB2Wq6pPQwKoSbjJdg1Ef",
-  //           title: "put your push notification title here as a string",
-  //           message: "put your push notification message here as a string",
-  //         });
-  //       }
-  //     });
-  //   };
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        console.log("Notification settings:", data);
+        if (data) {
+          setFoundItemNotifications(data.foundItemNotifications);
+          setLostItemNotifications(data.lostItemNotifications);
+        }
+      }
+
+      console.log("Notification settings retrieved");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <ScrollView className="p-4 flex-1  ">
