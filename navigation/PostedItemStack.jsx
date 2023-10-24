@@ -6,7 +6,8 @@ import RequestScreen from '../screens/RequestScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ImageScreen from '../screens/ImageScreen';
 import PersonalBelongingsScreen from '../screens/PersonalBelongings';
-import { PersonalBelongings } from '../constants/RouteConstants';
+import { PersonalBelongings, Settings } from '../constants/RouteConstants';
+import SettingsScreen from '../screens/SettingsScreen';
 
 const Stack = createStackNavigator();
 
@@ -94,6 +95,21 @@ const PostedLostItemStack = () => {
       <Stack.Screen
         name={PersonalBelongings}
         component={PersonalBelongingsScreen}
+        options={{
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: '#0369A1',
+          },
+          headerTintColor: '#fff', // Change this color for the text/icon color
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 28,
+          },
+        }}
+      />
+      <Stack.Screen
+        name={Settings}
+        component={SettingsScreen}
         options={{
           headerShown: true,
           headerStyle: {

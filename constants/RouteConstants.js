@@ -25,3 +25,5 @@ export const LeaderboardPost = 'leaderboardPost';
 export const PersonalBelongings = 'Personal Belongings';
 
 export const FoundItem = 'Found Item';
+
+export const Settings = 'Settings';
