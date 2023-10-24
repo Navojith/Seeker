@@ -127,25 +127,31 @@ const RequestScreen = ({route}) => {
 
   return (
     <View>
-      <SafeAreaView>
+      {/* <SafeAreaView> */}
         <Text style={styles.itemDetails}>To select the owner , Click on the request</Text>
-      <FlatList 
-        data={userDetails} 
-        renderItem={({item})=>(
-          <TouchableOpacity >
-            <View key={item.id} style={styles.card}>
+      {/* <FlatList 
+        // data={userDetails} 
+        // renderItem={({item})=>(
+          <TouchableOpacity > */}
+            <View 
+            // key={item.id} 
+            style={styles.card}>
               <View style={styles.itemDetails}>
                 <UserIcon style={styles.itemImage}/>
                   <View style={styles.postDetails}>
-                    <Text style={styles.itemText}>{item.displayedName}</Text>
-                    <Text style={styles.itemText}>Location : {item.phoneNo}</Text>
+                    <Text style={styles.itemText}>Name
+                      {/* {item.displayedName} */}
+                      </Text>
+                    <Text style={styles.itemText}>Telno
+                      {/* Location : {item.phoneNo} */}
+                      </Text>
                   </View>
                   </View>
               </View>
-         </TouchableOpacity >
-        )}
-      />
-      </SafeAreaView>
+         {/* </TouchableOpacity > */}
+        {/* )} */}
+      {/* /> */}
+      {/* </SafeAreaView> */}
     </View>
   );
 };

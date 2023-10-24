@@ -20,6 +20,7 @@ const PostedFoundItemsScreen = () => {
           console.log("No matching documents.");
         } else {
           const items = querySnapshot.docs.map((doc) => doc.data());
+          console.log(items);
           setFoundItems(items);
         }
       } catch (error) {
@@ -95,7 +96,7 @@ const PostedFoundItemsScreen = () => {
             <TouchableOpacity onPress={()=>navigation.navigate('Requests', {item})}>
               <View key={item.id} style={styles.card}>
                 <View style={styles.itemDetails}>
-                  <Image source={tempimage} style={styles.itemImage} />
+                  <Image source={{uri:item.imageUrl}} style={styles.itemImage} />
                   <View style={styles.postDetails}>
                     <Text style={styles.itemText}>Item: {item.itemName}</Text>
                     {/* <Text style={styles.itemText}>Item: {item.postId}</Text> */}
