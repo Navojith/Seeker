@@ -19,6 +19,8 @@ import {
   limit,
   getDocs,
   updateDoc,
+  getDoc,
+  doc,
 } from "firebase/firestore";
 import DismissibleAlert from "../components/common/alerts/DismissibleAlert";
 import TwoButtonModal from "../components/common/modals/TwoButtonModal";
@@ -52,6 +54,8 @@ const CreateLostItemScreen = ({ navigation }) => {
   const [imageUri, setImageUri] = useState(null);
   const [searchDocuments, setSearchDocuments] = useState([]);
   const [postId, setPostId] = useState("");
+  const [foundItemNotifications, setFoundItemNotifications] = useState(false);
+  const [lostItemNotifications, setLostItemNotifications] = useState(false);
 
   useEffect(() => {
     if (selectedLocation === "Other") {
@@ -116,17 +120,17 @@ const CreateLostItemScreen = ({ navigation }) => {
   }, []);
 
   const handleNotification = async () => {
-    const res = await axios.post(
-      `https://app.nativenotify.com/api/indie/group/notification`,
-      {
-        subIDs: leaderboardUsers,
-        appId: 13599,
-        appToken: "gTBeP5h5evCxHcHdDs0yVQ",
-        title: "Seeker",
-        message: "Lost item reported near you",
-        pushData: '{ "item": "51n8M5dAKwr5skBiBI0E","type": "specialPost" }',
-      }
-    );
+    // const res = await axios.post(
+    //   `https://app.nativenotify.com/api/indie/group/notification`,
+    //   {
+    //     subIDs: leaderboardUsers,
+    //     appId: 13599,
+    //     appToken: "gTBeP5h5evCxHcHdDs0yVQ",
+    //     title: "Seeker",
+    //     message: "Lost item reported near you",
+    //     pushData: '{ "item": "51n8M5dAKwr5skBiBI0E","type": "specialPost" }',
+    //   }
+    // );
   };
 
   const uploadImageToFirebaseStorage = async (imageUri) => {
@@ -252,7 +256,7 @@ const CreateLostItemScreen = ({ navigation }) => {
 
     console.log("postId", postId);
 
-    searchDocuments.forEach((doc) => {
+    for (const doc of searchDocuments) {
       const queryWords = doc.query.toLowerCase().split(" ");
       const itemNameLower = itemName.toLowerCase();
       const descriptionWords = description.toLowerCase().split(" ");
@@ -270,26 +274,64 @@ const CreateLostItemScreen = ({ navigation }) => {
 
       if (isMatch) {
         console.log("Match found");
+        const res = await getNotificationSettings(doc.userId);
+        console.log("lost", lostItemNotifications);
+        console.log("res", res);
+        if (lostItemNotifications) {
+          const pushData = {
+            type: "searchFoundItem",
+            postId,
+          };
 
-        const pushData = {
-          type: "searchLostItem",
-          postId,
-        };
-
-        // Add a 5-second delay bcz firestore is slow
-        setTimeout(() => {
-          axios.post(`https://app.nativenotify.com/api/indie/notification`, {
-            subID: doc.userId,
-            appId: 13599,
-            appToken: "gTBeP5h5evCxHcHdDs0yVQ",
-            title: "Lost item matched your search",
-            message:
-              'Your search "' + doc.query + '" matched with "' + itemName + '"',
-            pushData: JSON.stringify(pushData),
-          });
-        }, 5000);
+          // Add a 10-second delay because firestore is slow
+          setTimeout(() => {
+            axios.post(`https://app.nativenotify.com/api/indie/notification`, {
+              subID: doc.userId,
+              appId: 13599,
+              appToken: "gTBeP5h5evCxHcHdDs0yVQ",
+              title: "Lost item matched your search",
+              message:
+                'Your search "' +
+                doc.query +
+                '" matched with "' +
+                itemName +
+                '"',
+              pushData: JSON.stringify(pushData),
+            });
+          }, 10000);
+        } else {
+          console.log("User has disabled lost item notifications");
+        }
       }
-    });
+    }
+  };
+
+  const getNotificationSettings = async (uId) => {
+    console.log("Retrieving notification settings...");
+    console.log("uId", uId);
+    try {
+      const docRef = doc(FireStore, "notifications", uId);
+
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        console.log("Notification settings:", data);
+        if (data) {
+          console.log(data);
+          setFoundItemNotifications(data.foundItemNotifications);
+          setLostItemNotifications(data.lostItemNotifications);
+        }
+      } else {
+        console.log("No notification settings found");
+      }
+
+      console.log("Notification settings retrieved");
+
+      return true;
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (

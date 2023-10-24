@@ -12,7 +12,14 @@ import { Picker } from "@react-native-picker/picker";
 import data from "../assets/data/SLIITLocations/index.json";
 import MainButton from "../components/common/buttons/MainButton";
 import { FireStore, auth, storage } from "../firebase";
-import { collection, addDoc, updateDoc, getDocs } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  getDocs,
+  getDoc,
+  doc,
+} from "firebase/firestore";
 import DismissibleAlert from "../components/common/alerts/DismissibleAlert";
 import { useNavigation } from "@react-navigation/native";
 import { LostItems } from "../constants/RouteConstants";
@@ -43,6 +50,8 @@ const CreateFoundItemScreen = () => {
   const [searchDocuments, setSearchDocuments] = useState([]);
   const [imageUri, setImageUri] = useState(null);
   const [postId, setPostId] = useState("");
+  const [foundItemNotifications, setFoundItemNotifications] = useState(false);
+  const [lostItemNotifications, setLostItemNotifications] = useState(false);
 
   useEffect(() => {
     if (selectedLocation === "Other") {
@@ -184,19 +193,19 @@ const CreateFoundItemScreen = () => {
 
   const matchSearch = async () => {
     console.log("Matching search documents...");
-  
+
     if (!postId) {
       console.log("postId is empty");
       return;
     }
-  
+
     console.log("postId", postId);
-  
-    searchDocuments.forEach((doc) => {
+
+    for (const doc of searchDocuments) {
       const queryWords = doc.query.toLowerCase().split(" ");
       const itemNameLower = itemName.toLowerCase();
       const descriptionWords = description.toLowerCase().split(" ");
-  
+
       // Check if any word from the query is present in any of the fields
       const isMatch = queryWords.some((word) => {
         return (
@@ -207,30 +216,60 @@ const CreateFoundItemScreen = () => {
           (selectedLocation && selectedLocation.toLowerCase().includes(word))
         );
       });
-  
+
       if (isMatch) {
         console.log("Match found");
-  
-        const pushData = {
-          type: "searchFoundItem",
-          postId,
-        };
-  
-        // Add a 5-second delay bcz firestore is slow
-        setTimeout(() => {
-          axios.post(`https://app.nativenotify.com/api/indie/notification`, {
-            subID: doc.userId,
-            appId: 13599,
-            appToken: "gTBeP5h5evCxHcHdDs0yVQ",
-            title: "Found item matched your search",
-            message: 'Your search "' + doc.query + '" matched with "' + itemName + '"',
-            pushData: JSON.stringify(pushData),
-          });
-        }, 5000); 
+        const res = await getNotificationSettings(doc.userId);
+        console.log("found", foundItemNotifications);
+        if (foundItemNotifications) {
+          const pushData = {
+            type: "searchFoundItem",
+            postId,
+          };
+
+          // Add a 10-second delay because firestore is slow
+          setTimeout(() => {
+            axios.post(`https://app.nativenotify.com/api/indie/notification`, {
+              subID: doc.userId,
+              appId: 13599,
+              appToken: "gTBeP5h5evCxHcHdDs0yVQ",
+              title: "Found item matched your search",
+              message:
+                'Your search "' +
+                doc.query +
+                '" matched with "' +
+                itemName +
+                '"',
+              pushData: JSON.stringify(pushData),
+            });
+          }, 10000);
+        } else {
+          console.log("User has disabled found item notifications");
+        }
       }
-    });
+    }
   };
-  
+
+  const getNotificationSettings = async (userId) => {
+    try {
+      const docRef = doc(FireStore, "notifications", userId);
+
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        console.log("Notification settings:", data);
+        if (data) {
+          setFoundItemNotifications(data.foundItemNotifications);
+          setLostItemNotifications(data.lostItemNotifications);
+        }
+      }
+
+      console.log("Notification settings retrieved");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <ScrollView className="p-4 flex-1  ">
