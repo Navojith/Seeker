@@ -120,17 +120,17 @@ const CreateLostItemScreen = ({ navigation }) => {
   }, []);
 
   const handleNotification = async () => {
-    // const res = await axios.post(
-    //   `https://app.nativenotify.com/api/indie/group/notification`,
-    //   {
-    //     subIDs: leaderboardUsers,
-    //     appId: 13599,
-    //     appToken: "gTBeP5h5evCxHcHdDs0yVQ",
-    //     title: "Seeker",
-    //     message: "Lost item reported near you",
-    //     pushData: '{ "item": "51n8M5dAKwr5skBiBI0E","type": "specialPost" }',
-    //   }
-    // );
+    const res = await axios.post(
+      `https://app.nativenotify.com/api/indie/group/notification`,
+      {
+        subIDs: leaderboardUsers,
+        appId: 13599,
+        appToken: "gTBeP5h5evCxHcHdDs0yVQ",
+        title: "Seeker",
+        message: "Lost item reported near you",
+        pushData: '{ "item": "51n8M5dAKwr5skBiBI0E","type": "specialPost" }',
+      }
+    );
   };
 
   const uploadImageToFirebaseStorage = async (imageUri) => {
