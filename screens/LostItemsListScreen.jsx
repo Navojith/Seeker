@@ -21,6 +21,7 @@ import data from "../assets/data/SLIITLocations/index.json";
 import { Picker } from "@react-native-picker/picker";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
+import { LostItem } from "../constants/RouteConstants";
 
 const locationOptions = data.locations;
 
@@ -70,7 +71,7 @@ const LostItemsListScreen = () => {
     itemImage: {
       width: "100%",
       height: 100,
-      resizeMode: 'contain',
+      resizeMode: "contain",
       marginBottom: 8,
     },
     filterButton: {
@@ -126,24 +127,35 @@ const LostItemsListScreen = () => {
   }, [isFocused]); //can add isFocused here to reload the screen once an item is added. for now removed since its making api calls often
 
   // Filter the items based on the search query
-  const filteredItems = lostItems.filter(
-    (item) =>
-      item.itemName.toLowerCase().includes(searchQuery.toLowerCase()) &&
+  const filteredItems = lostItems.filter((item) => {
+    const searchWords = searchQuery.toLowerCase().split(" ");
+    return (
+      searchWords.some(
+        (word) =>
+          item.itemName.toLowerCase().includes(word) ||
+          (item.serialNumber &&
+            item.serialNumber.toLowerCase().includes(word)) ||
+          item.description.toLowerCase().includes(word) ||
+          (item.color && item.color.toLowerCase().includes(word))
+      ) &&
       (!selectedLocation || item.location === selectedLocation)
-  );
+    );
+  });
 
   // Function to save the search query to Firestore
   const saveSearchQueryToFirestore = async () => {
-    try {
-      const searchCollectionRef = collection(FireStore, "search");
-      await addDoc(searchCollectionRef, {
-        userId: userId,
-        query: searchQuery,
-        timestamp: new Date(),
-      });
-      console.log("Search query saved to Firestore.");
-    } catch (error) {
-      console.error("Error saving search query:", error);
+    if (searchQuery && searchQuery.trim() !== "") {
+      try {
+        const searchCollectionRef = collection(FireStore, "searchLostItems");
+        await addDoc(searchCollectionRef, {
+          userId: userId,
+          query: searchQuery,
+          timestamp: new Date(),
+        });
+        console.log("Search query saved to Firestore.");
+      } catch (error) {
+        console.error("Error saving search query:", error);
+      }
     }
   };
 
@@ -245,7 +257,7 @@ const LostItemsListScreen = () => {
             <TouchableOpacity
               style={styles.card}
               onPress={() => {
-                navigation.navigate("Item", { item });
+                navigation.navigate(LostItem, { item });
               }}
             >
               <LinearGradient

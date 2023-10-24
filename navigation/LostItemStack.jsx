@@ -8,11 +8,13 @@ import {
   BuyBoost,
   LeaderboardPost,
   PostBoosting,
+  LostItem
 } from '../constants/RouteConstants';
 import Header from '../components/header';
 import BuyBoostScreen from '../screens/purchase/BuyBoost';
-import LostItem from '../screens/LostItem';
+import LostItemScreen from '../screens/LostItem';
 import LeaderboardItemScreen from '../screens/LeaderboardItemScreen';
+
 const Stack = createStackNavigator();
 
 const LostItemStack = ({ navigation }) => {
@@ -70,8 +72,8 @@ const LostItemStack = ({ navigation }) => {
         }}
       />
       <Stack.Screen
-        name="Item"
-        component={LostItem}
+        name={LostItem}
+        component={LostItemScreen}
         options={{
           headerStyle: {
             backgroundColor: '#0369A1',
