@@ -1,12 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
-import { auth } from '../firebase';
-import { getFirestore, addDoc, collection , query,where } from "firebase/firestore";
+import { getFirestore, addDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { FireStore, auth } from "../firebase";
 const tempimage = require("../assets/images/PostCreation/AddImage.png");
 
 
 const FoundItem = ({ route }) => {
 const { item, pushDataObject } = route.params;
+const [fetchedItem, setFetchedItem] = useState(null);
+
+useEffect(() => {
+  console.log("fetching item details");
+  console.log(pushDataObject);
+  if (pushDataObject && pushDataObject.postId) {
+    const fetchItemDetails = async () => {
+      try {
+        // Construct a query to find a document where 'postId' matches 'pushDataObject.postId'
+        const q = query(collection(FireStore, 'foundItems'), where('postId', '==', pushDataObject.postId));
+        
+        // Retrieve the documents that match the query
+        const querySnapshot = await getDocs(q);
+
+        // Check if any documents were found
+        if (!querySnapshot.empty) {
+          // Assuming there's only one matching document, retrieve its data
+          const itemData = querySnapshot.docs[0].data();
+          setFetchedItem(itemData);
+          console.log(itemData);
+        } else {
+          console.log('Item not found');
+        }
+      } catch (error) {
+        console.error('Error fetching item details:', error);
+        // Handle the error here
+      }
+    };
+    fetchItemDetails();
+    
+  }
+  
+}, [pushDataObject]);
 
   const handleClaim = async(post) =>{
     try{
@@ -83,8 +116,44 @@ const { item, pushDataObject } = route.params;
 
   return (
     <View style={styles.container}>
-      {pushDataObject && (
-        <Text>Push Data: {JSON.stringify(pushDataObject)}</Text>
+      {fetchedItem && (
+        <View style={styles.card}>
+          <View style={styles.cardContent}>
+            {fetchedItem.imageUrl ? (
+              <Image source={{ uri: fetchedItem.imageUrl }} style={styles.itemImage} />
+            ) : (
+              <Image source={tempimage} style={styles.itemImage} />
+            )}
+          </View>
+          <Text style={styles.itemName}>{fetchedItem.itemName}</Text>
+          <Text style={styles.itemDescription}>
+            <Text style={{ fontWeight: "bold" }}>Color:</Text> {fetchedItem.color}
+          </Text>
+          <Text style={styles.itemDescription}>
+            <Text style={{ fontWeight: "bold" }}>Description:</Text>{" "}
+            {fetchedItem.description}
+          </Text>
+          <Text style={styles.itemDescription}>
+            <Text style={{ fontWeight: "bold" }}>Location:</Text>{" "}
+            {fetchedItem.location}
+          </Text>
+          <Text style={styles.itemDescription}>
+            <Text style={{ fontWeight: "bold" }}>Serial No:</Text>{" "}
+            {fetchedItem.serialNumber}
+          </Text>
+          <Text style={styles.itemDescription}>
+            <Text style={{ fontWeight: "bold" }}>Date:</Text>{" "}
+            {new Date(fetchedItem.timestamp.toDate()).toLocaleString()}
+          </Text>
+
+          <View style={styles.claimButtonContainer}>
+            <TouchableOpacity style={styles.claimButton}
+             onPress={()=>handleClaim(item.postId)}
+            >
+              <Text style={styles.claimButtonText}>Claim</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       )}
 
       {item && (

@@ -18,8 +18,10 @@ export const BuyBoost = 'purchase-boost';
 
 export const PostBoosting = 'Post Boosting';
 
-export const Items = 'Item';
+export const LostItem = 'Lost Item';
 
 export const LeaderboardPost = 'leaderboardPost';
 
 export const PersonalBelongings = 'Personal Belongings';
+
+export const FoundItem = 'Found Item';

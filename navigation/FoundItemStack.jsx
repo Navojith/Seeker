@@ -3,8 +3,8 @@ import { createStackNavigator } from "@react-navigation/stack";
 import CreateFoundItemScreen from "../screens/CreateFoundItemScreen";
 import FoundScreen from "../screens/FoundScreen";
 
-import { AddLostItem } from "../constants/RouteConstants";
-import FoundItem from "../screens/FoundItem";
+import { FoundItem } from "../constants/RouteConstants";
+import FoundItemScreen from "../screens/FoundItem";
 const Stack = createStackNavigator();
 
 const FoundItemStack = ({ navigation }) => {
@@ -46,8 +46,8 @@ const FoundItemStack = ({ navigation }) => {
         }}
       />
       <Stack.Screen
-        name="FoundItem"
-        component={FoundItem}
+        name={FoundItem}
+        component={FoundItemScreen}
         options={{
           headerStyle: {
             backgroundColor: "#0369A1",
