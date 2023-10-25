@@ -6,7 +6,6 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
-  Modal,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { FireStore, auth } from "../firebase";
@@ -29,7 +28,7 @@ const LostItemsListScreen = () => {
   const [lostItems, setLostItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const userId = auth.currentUser.uid;
-  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const navigation = useNavigation();
   const isFocused = useIsFocused();
@@ -39,7 +38,7 @@ const LostItemsListScreen = () => {
       marginLeft: 20,
       marginRight: 20,
       marginTop: 20,
-      marginBottom: 260,
+      flex: 1,
     },
     searchBar: {
       height: 50,
@@ -91,15 +90,10 @@ const LostItemsListScreen = () => {
     filterModal: {
       backgroundColor: "white",
       padding: 20,
-      marginTop: 200,
+      marginTop: 0,
       marginHorizontal: 20,
       backgroundColor: "#fff",
       borderRadius: 25,
-      elevation: 3,
-      shadowColor: "#000",
-      shadowOffset: { width: 1, height: 1 },
-      shadowOpacity: 0.3,
-      shadowRadius: 2,
       borderWidth: 3,
       borderColor: "#0369A1",
     },
@@ -197,8 +191,12 @@ const LostItemsListScreen = () => {
     return tierValue1 - tierValue2;
   });
 
+  const toggleFilter = () => {
+    setShowFilter(!showFilter);
+  };
+
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <TextInput
         style={styles.searchBar}
         placeholder="Search..."
@@ -208,16 +206,11 @@ const LostItemsListScreen = () => {
       />
       <TouchableOpacity
         style={styles.filterButton}
-        onPress={() => setFilterModalVisible(true)}
+        onPress={toggleFilter}
       >
         <Text style={styles.filterButtonText}>Filter</Text>
       </TouchableOpacity>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={filterModalVisible}
-        onRequestClose={() => setFilterModalVisible(false)}
-      >
+      {showFilter && ( 
         <View style={styles.filterModal}>
           <Text>Filter by Location:</Text>
 
@@ -230,7 +223,6 @@ const LostItemsListScreen = () => {
             selectionColor={"#0284C7"}
             onValueChange={(itemValue) => {
               setSelectedLocation(itemValue);
-              setFilterModalVisible(false);
             }}
           >
             {locationOptions.map((location, index) => (
@@ -241,13 +233,13 @@ const LostItemsListScreen = () => {
             style={styles.filterButton}
             onPress={() => {
               setSelectedLocation(null);
-              setFilterModalVisible(false);
+              toggleFilter(); // Hide the filter card
             }}
           >
             <Text style={styles.filterButtonText}>Clear Filter</Text>
           </TouchableOpacity>
         </View>
-      </Modal>
+      )}
 
       <View style={styles.container}>
         <FlatList
