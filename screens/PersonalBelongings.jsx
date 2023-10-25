@@ -1,11 +1,11 @@
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, FlatList, Image } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { PersonalBelongingsTypes } from '../constants/PersonalBelongingsTypes';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import MainButton from '../components/common/buttons/MainButton';
+import AddPBModal from './AddPersonalBelongings';
 
 const PersonalBelongings = ({ navigation }) => {
-  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [error, setError] = useState({
@@ -16,6 +16,7 @@ const PersonalBelongings = ({ navigation }) => {
     message: null,
     messageStyles: 'text-red-600 font-bold',
   });
+  const [modalIsVisible, setModalIsVisible] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -24,7 +25,6 @@ const PersonalBelongings = ({ navigation }) => {
         const uuid = auth.currentUser.uid;
         const res = await getDoc(doc(FireStore, 'userDetails', uuid));
         if (res.exists) {
-          setUser(res.data());
           setData(res.data().devices);
         } else {
           setError({
@@ -55,52 +55,54 @@ const PersonalBelongings = ({ navigation }) => {
   }, []);
 
   return (
-    <>
-      <View style={styles.mainContainer}>
-        {data.length ? (
-          <>
-            <Text className="font-bold">Personal Belongings</Text>
-            <FlatList
-              data={data}
-              numColumns={1}
-              renderItem={({ item }) => (
-                <View style={styles.item}>
-                  <View style={styles.mainStack}>
-                    <Image
-                      source={
-                        item.type === PersonalBelongingsTypes.Laptop
-                          ? require('../assets/images/PersonalBelongingsTypes/Laptop.png')
-                          : item.type === PersonalBelongingsTypes.Phone
-                          ? require('../assets/images/PersonalBelongingsTypes/Phone.png')
-                          : item.type === PersonalBelongingsTypes.Charger
-                          ? require('../assets/images/PersonalBelongingsTypes/Charger.png')
-                          : require('../assets/images/PersonalBelongingsTypes/Other.png')
-                      }
-                    />
-                    <View>
-                      <Text>Name : {item.name}</Text>
-                      <Text>Serial Number : {item.serialNo}</Text>
-                    </View>
-                    <TouchableOpacity>
-                      <Text>Delete</Text>
-                    </TouchableOpacity>
+    <View style={styles.mainContainer}>
+      <AddPBModal isVisible={modalIsVisible} setIsVisible={setModalIsVisible} />
+      {data.length ? (
+        <View>
+          <Text style={styles.fontBold}>Personal Belongings</Text>
+          <FlatList
+            data={data}
+            numColumns={1}
+            renderItem={({ item }) => (
+              <View style={styles.item}>
+                <View style={styles.mainStack}>
+                  <Image
+                    source={
+                      item.type === PersonalBelongingsTypes.Laptop
+                        ? require('../assets/images/PersonalBelongingsTypes/Laptop.png')
+                        : item.type === PersonalBelongingsTypes.Phone
+                        ? require('../assets/images/PersonalBelongingsTypes/Phone.png')
+                        : item.type === PersonalBelongingsTypes.Charger
+                        ? require('../assets/images/PersonalBelongingsTypes/Charger.png')
+                        : require('../assets/images/PersonalBelongingsTypes/Other.png')
+                    }
+                  />
+                  <View>
+                    <Text>Name : {item.name}</Text>
+                    <Text>Serial Number : {item.serialNo}</Text>
                   </View>
-                  <MainButton text={'Add New Device'} />
+                  <TouchableOpacity>
+                    <Text>Delete</Text>
+                  </TouchableOpacity>
                 </View>
-              )}
-              keyExtractor={({ index }) => index.toString()}
-            />
-          </>
-        ) : (
-          <View style={styles.flexCenteredContainer}>
-            <Text className="text-lg font-bold">No Personal Belongings</Text>
-          </View>
-        )}
-      </View>
-      <TouchableOpacity style={styles.Temp}>
+                <MainButton text={'Add New Device'} />
+              </View>
+            )}
+            keyExtractor={({ index }) => index.toString()}
+          />
+        </View>
+      ) : (
+        <View style={styles.flexCenteredContainer}>
+          <Text className="text-lg font-bold">No Personal Belongings</Text>
+        </View>
+      )}
+      <TouchableOpacity
+        style={styles.Temp}
+        onPress={() => setModalIsVisible(true)}
+      >
         <Text style={styles.buttonTextTemp}>Temp</Text>
       </TouchableOpacity>
-    </>
+    </View>
   );
 };
 
@@ -113,8 +115,8 @@ const styles = StyleSheet.create({
   },
 
   Temp: {
-    position: 'absolute',
-    top: 505,
+    //position: 'absolute',
+    bottom: 25,
     left: 25,
     backgroundColor: '#0369A1',
     borderRadius: 50,
@@ -158,5 +160,8 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     padding: 20,
+  },
+  fontBold: {
+    fontWeight: 'bold',
   },
 });
