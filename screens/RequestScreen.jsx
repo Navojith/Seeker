@@ -2,11 +2,11 @@ import { View, Text , SafeAreaView ,FlatList , Image , StyleSheet , Button} from
 import React , {useState , useEffect} from 'react';
 import { FireStore } from '../firebase';
 import { collection, getDocs , query , where} from 'firebase/firestore';
-import { TouchableOpacity } from 'react-native';
-import SecondaryButton from '../components/common/buttons/SecondaryButton';
-import MainButton from '../components/common/buttons/MainButton';
-import { CheckBox } from 'react-native-web';
-import { auth } from '../firebase';
+// import { TouchableOpacity } from 'react-native';
+// import SecondaryButton from '../components/common/buttons/SecondaryButton';
+// import MainButton from '../components/common/buttons/MainButton';
+// import { CheckBox } from 'react-native-web';
+// import { auth } from '../firebase';
 import UserIcon from '../assets/icons/UserIcon';
 
 const RequestScreen = ({route}) => {
