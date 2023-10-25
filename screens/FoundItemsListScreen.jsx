@@ -6,7 +6,6 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
-  Modal,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { FireStore, auth } from "../firebase";
@@ -28,7 +27,7 @@ const FoundItemsListScreen = () => {
   const [foundItems, setFoundItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const userId = auth.currentUser.uid;
-  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const navigation = useNavigation();
   const isFocused = useIsFocused();
@@ -38,7 +37,7 @@ const FoundItemsListScreen = () => {
       marginLeft: 20,
       marginRight: 20,
       marginTop: 20,
-      marginBottom: 260,
+      flex: 1,
     },
     searchBar: {
       height: 50,
@@ -75,7 +74,7 @@ const FoundItemsListScreen = () => {
     itemImage: {
       width: "100%",
       height: 100,
-      resizeMode: "cover",
+      resizeMode: "contain",
       marginBottom: 8,
     },
     filterButton: {
@@ -95,15 +94,10 @@ const FoundItemsListScreen = () => {
     filterModal: {
       backgroundColor: "white",
       padding: 20,
-      marginTop: 200,
+      marginTop: 0,
       marginHorizontal: 20,
       backgroundColor: "#fff",
       borderRadius: 25,
-      elevation: 3,
-      shadowColor: "#000",
-      shadowOffset: { width: 1, height: 1 },
-      shadowOpacity: 0.3,
-      shadowRadius: 2,
       borderWidth: 3,
       borderColor: "#0369A1",
     },
@@ -132,19 +126,19 @@ const FoundItemsListScreen = () => {
 
   // Filter the items based on the search query
   const filteredItems = foundItems.filter((item) => {
-    const searchWords = searchQuery.toLowerCase().split(' ');
+    const searchWords = searchQuery.toLowerCase().split(" ");
     return (
-      searchWords.some((word) =>
-        item.itemName.toLowerCase().includes(word) ||
-        (item.serialNumber &&
-          item.serialNumber.toLowerCase().includes(word)) ||
-        item.description.toLowerCase().includes(word) ||
-        (item.color && item.color.toLowerCase().includes(word))
+      searchWords.some(
+        (word) =>
+          item.itemName.toLowerCase().includes(word) ||
+          (item.serialNumber &&
+            item.serialNumber.toLowerCase().includes(word)) ||
+          item.description.toLowerCase().includes(word) ||
+          (item.color && item.color.toLowerCase().includes(word))
       ) &&
       (!selectedLocation || item.location === selectedLocation)
     );
   });
-  
 
   // Function to save the search query to Firestore
   const saveSearchQueryToFirestore = async () => {
@@ -163,8 +157,12 @@ const FoundItemsListScreen = () => {
     }
   };
 
+  const toggleFilter = () => {
+    setShowFilter(!showFilter);
+  };
+
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <TextInput
         style={styles.searchBar}
         placeholder="Search..."
@@ -172,18 +170,10 @@ const FoundItemsListScreen = () => {
         value={searchQuery}
         onEndEditing={saveSearchQueryToFirestore}
       />
-      <TouchableOpacity
-        style={styles.filterButton}
-        onPress={() => setFilterModalVisible(true)}
-      >
+      <TouchableOpacity style={styles.filterButton} onPress={toggleFilter}>
         <Text style={styles.filterButtonText}>Filter</Text>
       </TouchableOpacity>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={filterModalVisible}
-        onRequestClose={() => setFilterModalVisible(false)}
-      >
+      {showFilter && ( 
         <View style={styles.filterModal}>
           <Text>Filter by Location:</Text>
 
@@ -196,7 +186,6 @@ const FoundItemsListScreen = () => {
             selectionColor={"#0284C7"}
             onValueChange={(itemValue) => {
               setSelectedLocation(itemValue);
-              setFilterModalVisible(false);
             }}
           >
             {locationOptions.map((location, index) => (
@@ -207,13 +196,13 @@ const FoundItemsListScreen = () => {
             style={styles.filterButton}
             onPress={() => {
               setSelectedLocation(null);
-              setFilterModalVisible(false);
+              toggleFilter(); // Hide the filter card
             }}
           >
             <Text style={styles.filterButtonText}>Clear Filter</Text>
           </TouchableOpacity>
         </View>
-      </Modal>
+      )}
 
       <View style={styles.container}>
         <FlatList

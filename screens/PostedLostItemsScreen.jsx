@@ -8,7 +8,7 @@ import MainButton  from '../components/common/buttons/MainButton';
 import { useNavigation } from '@react-navigation/native';
 // const deleteIcon = '../assets/images/delete.png';
 const tempimage = require('../assets/delete.png');
-const imageIcon = require('../assets/imageIcon.png');
+// const imageIcon = require('../assets/imageIcon.png');
 
 const PostedLostItemsScreen = () => {
   // const [user , setUser] = useState(null);
@@ -121,7 +121,7 @@ const PostedLostItemsScreen = () => {
         renderItem={({item})=>(
           <TouchableOpacity onPress={() => setSelectedItem(item)}>
           <View key={item.id} style={styles.card}>
-            <Image source={imageIcon} style={styles.itemImage}/>
+            <Image source={{uri:item.imageUri}} style={styles.itemImage}/>
             <View style={styles.postDetails}>
               <Text style={styles.itemText}>Item : {item.itemName}</Text>
               <Text style={styles.itemText}>Location : {item.location}</Text>

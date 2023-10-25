@@ -17,6 +17,8 @@ import {
 import { ScreenContainer } from 'react-native-screens';
 import PostedItemStack from './PostedItemStack';
 import FoundItemStack from './FoundItemStack';
+import FoundIcon from '../assets/icons/FoundIcon';
+import LostIcon from '../assets/icons/LostIcon';
 
 const Tab = createBottomTabNavigator();
 
@@ -62,7 +64,7 @@ const UserStack = () => {
           name={FoundItems}
           component={FoundItemStack}
           options={{
-            tabBarIcon: () => <ProfileIcon name="user" size={48} />,
+            tabBarIcon: () => <FoundIcon name="found" size={48} />,
             // headerStyle: {
             //   backgroundColor: '#0369A1',
             // },
@@ -78,7 +80,7 @@ const UserStack = () => {
           name={LostItems}
           component={LostItemStack}
           options={{
-            tabBarIcon: () => <ProfileIcon name="user" size={48} />,
+            tabBarIcon: () => <LostIcon name="found" size={48} />,
             // headerStyle: {
             //   backgroundColor: '#0369A1',
             // },

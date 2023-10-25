@@ -14,12 +14,19 @@ const PostedFoundItemsScreen = () => {
       try {
         const collectionRef = collection(FireStore, "foundItems");
         const q = query(collectionRef, where("userId", "==", auth.currentUser.uid));
+        const returnCollectionRef = collection(FireStore, "lostItems");
+        const returnQuery = query(returnCollectionRef, where("foundUserId", "==" ,auth.currentUser.uid ));
         const querySnapshot = await getDocs(q);
+        const returnQuerySnapshot = await getDocs(returnQuery);
+        console.log('query',returnQuerySnapshot);
 
-        if (querySnapshot.empty) {
+        if (querySnapshot.empty && returnQuerySnapshot.empty) {
           console.log("No matching documents.");
         } else {
-          const items = querySnapshot.docs.map((doc) => doc.data());
+          const lostItems = querySnapshot.docs.map((doc) => doc.data());
+          const foundItems = returnQuerySnapshot.docs.map((doc)=>doc.data());
+          const items = lostItems.concat(foundItems);
+          console.log(items);
           setFoundItems(items);
         }
       } catch (error) {
@@ -95,7 +102,7 @@ const PostedFoundItemsScreen = () => {
             <TouchableOpacity onPress={()=>navigation.navigate('Requests', {item})}>
               <View key={item.id} style={styles.card}>
                 <View style={styles.itemDetails}>
-                  <Image source={tempimage} style={styles.itemImage} />
+                  <Image source={{uri:item.imageUrl}} style={styles.itemImage} />
                   <View style={styles.postDetails}>
                     <Text style={styles.itemText}>Item: {item.itemName}</Text>
                     {/* <Text style={styles.itemText}>Item: {item.postId}</Text> */}
