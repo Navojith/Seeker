@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -7,75 +7,75 @@ import {
   TouchableOpacity,
   Image,
   Text,
-} from "react-native";
-import { auth, FireStore } from "../firebase";
-import CustomHeader from "../components/header";
-import { useNavigation } from "@react-navigation/native";
-import { unregisterIndieDevice } from "native-notify";
-import { doc, getDoc } from "firebase/firestore";
-import DismissibleAlert from "../components/common/alerts/DismissibleAlert";
-import UserIcon from "../assets/images/UserImg";
-import { Settings } from "../constants/RouteConstants";
+} from 'react-native';
+import { auth, FireStore } from '../firebase';
+import CustomHeader from '../components/header';
+import { useNavigation } from '@react-navigation/native';
+import { unregisterIndieDevice } from 'native-notify';
+import { doc, getDoc } from 'firebase/firestore';
+import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
+import UserIcon from '../assets/images/UserImg';
+import { Settings } from '../constants/RouteConstants';
 
 const ProfileScreen = () => {
   const [user, setUser] = useState(null);
   const navigation = useNavigation();
   const [error, setError] = useState({
     visibility: false,
-    viewStyles: "border border-4 border-red-600",
+    viewStyles: 'border border-4 border-red-600',
     title: null,
-    titleStyles: "text-red-600",
+    titleStyles: 'text-red-600',
     message: null,
-    messageStyles: "text-red-600 font-bold",
+    messageStyles: 'text-red-600 font-bold',
   });
   const [loading, setLoading] = useState(false);
 
   const styles = StyleSheet.create({
     container: {
       marginTop: 130,
-      justifyContent: "center",
-      alignItems: "center",
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     profileDetails: {
       fontSize: 20,
-      fontWeight: "bold",
-      fontWeight: "bold",
+      fontWeight: 'bold',
+      fontWeight: 'bold',
       margin: 2,
     },
     itemButtonContainer: {
       marginTop: 20,
-      alignItems: "center",
-      alignItems: "center",
+      alignItems: 'center',
+      alignItems: 'center',
     },
     itemButton: {
-      backgroundColor: "#0369a1",
-      color: "#fff",
+      backgroundColor: '#0369a1',
+      color: '#fff',
       borderRadius: 20,
       padding: 10,
       marginVertical: 10,
-      width: "50%",
+      width: '50%',
     },
     buttonText: {
-      color: "white",
-      fontWeight: "bold",
-      textAlign: "center",
+      color: 'white',
+      fontWeight: 'bold',
+      textAlign: 'center',
     },
   });
 
   const handlePostedLostItems = () => {
-    navigation.navigate("Posted Lost Items");
+    navigation.navigate('Posted Lost Items');
   };
 
   const handlePostedFoundItems = () => {
-    navigation.navigate("Posted Found Items");
+    navigation.navigate('Posted Found Items');
   };
 
   const handleUploadedImage = () => {
-    navigation.navigate("Upload Image");
+    navigation.navigate('Upload Image');
   };
 
   const handlePersonalBelongings = () => {
-    navigation.navigate("Personal Belongings");
+    navigation.navigate('Personal Belongings');
   };
 
   const handleSettings = () => {
@@ -87,30 +87,32 @@ const ProfileScreen = () => {
       try {
         setLoading(true);
         const uuid = auth.currentUser.uid;
-        const res = await getDoc(doc(FireStore, "userDetails", uuid));
+        const res = await getDoc(doc(FireStore, 'userDetails', uuid));
         if (res.exists) {
           setUser(res.data());
         } else {
           setError({
             visibility: true,
-            title: "Error",
-            message: "User Information not found",
-            buttonText: "Close",
-            titleStyles: "text-red-500",
-            messageStyles: "text-red-500",
-            viewStyles: "border border-4 border-red-500",
+            title: 'Error',
+            message: 'User Information not found',
+            buttonText: 'Close',
+            titleStyles: 'text-red-500',
+            messageStyles: 'text-red-500',
+            viewStyles: 'border border-4 border-red-500',
           });
         }
       } catch (error) {
         setError({
           visibility: true,
-          title: "Error",
-          message: "Data fetching failed",
-          buttonText: "Close",
-          titleStyles: "text-red-500",
-          messageStyles: "text-red-500",
-          viewStyles: "border border-4 border-red-500",
+          title: 'Error',
+          message: 'Data fetching failed',
+          buttonText: 'Close',
+          titleStyles: 'text-red-500',
+          messageStyles: 'text-red-500',
+          viewStyles: 'border border-4 border-red-500',
         });
+      } finally {
+        setLoading(false);
       }
     };
     fetchUser();
@@ -121,12 +123,12 @@ const ProfileScreen = () => {
     unregisterIndieDevice(
       auth.currentUser.uid,
       13599,
-      "gTBeP5h5evCxHcHdDs0yVQ"
+      'gTBeP5h5evCxHcHdDs0yVQ'
     );
     auth
       .signOut()
       .then(() => {
-        console.log("Signed out");
+        console.log('Signed out');
       })
       .catch((error) => {
         console.log(error.code, error.message);
@@ -146,7 +148,7 @@ const ProfileScreen = () => {
             </View>
             <Text style={styles.profileDetails}>{user.displayedName}</Text>
             <Text style={styles.profileDetails}>
-              {user.phoneNo ?? user.email ?? ""}
+              {user.phoneNo ?? user.email ?? ''}
             </Text>
             <Text style={styles.profileDetails}>
               Points : {user.points ?? 0}
@@ -178,7 +180,10 @@ const ProfileScreen = () => {
             >
               <Text style={styles.buttonText}>Upload Image</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleSettings}  style={styles.itemButton}>
+            <TouchableOpacity
+              onPress={handleSettings}
+              style={styles.itemButton}
+            >
               <Text style={styles.buttonText}>Settings</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={handleSignOut} style={styles.itemButton}>
