@@ -1,57 +1,81 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet ,Image , View , Text , Button} from "react-native";
+import { FireStore, auth, storage } from "../firebase";
 import Header from '../components/header';
 import * as ImagePicker from 'expo-image-picker';
-// import * as tf from '@tensorflow/tfjs';
-// import { decodeJpeg } from '@tensorflow/tfjs-react-native';
-// import * as FileSystem from 'expo-file-system';
-// import * as jpeg from 'jpeg-js'
-// import * as mobilenet from '@tensorflow-models/mobilenet';
+import MainButton from "../components/common/buttons/MainButton";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+const URL = "https://seekervision.cognitiveservices.azure.com/vision/v3.1/analyze?visualFeatures=Description";
 
 const ImageScreen =() =>{
-    const [image , setImage] = useState('');
-    // const [isTfReady, setIsTfReady] = useState(false);
-    // const [result, setResult] = useState('');
-
+    const [imageUri , setImageUri] = useState('');
+    const [imageUrl , setImageUrl] = useState('');
+  
     const pickImage = async () =>{
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes : ImagePicker.MediaTypeOptions.Images,
             allowsEditing:true,
-            aspect:[4,3],
+            // aspect:[4,3],
             quality:1,
         });
         console.log(result);
 
-        if(!result.cancelled){
-            setImage(result.uri);
-            console.log(image);
+        if(!result.canceled){
+            setImageUri(result.assets[0].uri);
+            console.log(imageUri);
         }
     }
 
-    // const classifyUsingMobilenet = async() =>{
-    //     try{
-    //         // load mobilenet
-    //         await tf.ready();
-    //         const model = await mobilenet.load();
-    //         setIsTfReady(true);
-    //         console.log("starting inference with picked image");
+    const uploadImageToFirebaseStorage = async (imageUri) => {
+      console.log('uri',imageUri);
+      try {
+        const response = await fetch(imageUri);
+        const blob = await response.blob();
+        console.log(blob);
+        const storageRef = ref(
+          storage,
+          `images/${auth.currentUser.uid}/${Date.now()}.jpg`
+        );
+        console.log('storageref', storageRef);
+        await uploadBytes(storageRef, blob);
+        const image = await getDownloadURL(storageRef);
+        console.log('imageurl',image);
+        setImageUrl(image);
+        generateTags(imageUrl);
+      } catch (error) {
+        console.error("Error uploading image to Firebase Storage: ", error);
+        return null;
+      }
+    };
 
-    //         const img = await FileSystem.readAsStringAsync(image,{
-    //             encoding:FileSystem.EncodingType.Base64,
-    //         });
-    //         const imgBuffer = tf.util.encodeString(img , 'base64').buffer;
-    //         const raw = new Uint8Array(imgBuffer);
-    //         const imageTensor = decodeJpeg(raw);
+    // useEffect(() => {
+    //   console.log(imageUrl);
 
-    //         const prediction = await model.classify(imageTensor);
-    //         if (prediction && prediction.length > 0) {
-    //         setResult(
-    //             `${prediction[0].className} (${prediction[0].probability.toFixed(3)})`
-    //         );
-    //   }}catch (error){
-    //     console.log(error);
-    //   }
-    // }
+      const generateTags = async(imageUrl)=>{
+        console.log(imageUrl);
+        const url = {
+          "url" : imageUrl,
+        };
+
+      //   console.log(url);
+
+        const response = await fetch(URL , {
+          method : 'POST',
+          headers : {
+            'Ocp-Apim-Subscription-Key':'feffc98877e84bf59420e96d05adeb0d',
+            'Content-Type': 'application/json',
+          },
+          body : JSON.stringify(url),  
+        })
+
+        // console.log(response);
+        // if(response.ok){
+          const result = await response.text();
+          console.log('result',result);
+        // }
+      }
+      // generateTags();
+      // }, [imageUrl]);
 
     const styles = StyleSheet.create({
         container: {
@@ -81,12 +105,6 @@ const ImageScreen =() =>{
           },
     })
 
-    // useEffect(() => {
-    //     if (image) {
-    //         classifyUsingMobilenet();
-    //     }
-    //   }, [image]);
-
     return(
         <View>
            <Header title="Scan Item" />
@@ -95,12 +113,15 @@ const ImageScreen =() =>{
               { /* {isTfReady && */}
                 <Button title="Pick an image" onPress={pickImage}/>
                 {/* } */}
-             {image && (
+             {imageUri && (
                 <View>
-                    <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />
-                    <Text>Image URI: {image}</Text>
+                    <Image source={{ uri: imageUri }} style={{ width: 250, height: 250 }} />
                 </View>
               )}
+              <MainButton 
+                onPress={() => {uploadImageToFirebaseStorage(imageUri)}} 
+                text="Scan" 
+                containerStyles={"mt-6 mb-12 rounded-full w-50% drop-shadow-md"}/>
               {/* {!isTfReady && <Text>Loading TFJS model...</Text>}
               {isTfReady && result === '' && <Text>Pick an image to classify!</Text>}
               {result !== '' && <Text>{result}</Text>} */}

@@ -2,11 +2,11 @@ import { View, Text , SafeAreaView ,FlatList , Image , StyleSheet , Button} from
 import React , {useState , useEffect} from 'react';
 import { FireStore } from '../firebase';
 import { collection, getDocs , query , where} from 'firebase/firestore';
-import { TouchableOpacity } from 'react-native';
-import SecondaryButton from '../components/common/buttons/SecondaryButton';
-import MainButton from '../components/common/buttons/MainButton';
-import { CheckBox } from 'react-native-web';
-import { auth } from '../firebase';
+// import { TouchableOpacity } from 'react-native';
+// import SecondaryButton from '../components/common/buttons/SecondaryButton';
+// import MainButton from '../components/common/buttons/MainButton';
+// import { CheckBox } from 'react-native-web';
+// import { auth } from '../firebase';
 import UserIcon from '../assets/icons/UserIcon';
 
 const RequestScreen = ({route}) => {
@@ -127,25 +127,31 @@ const RequestScreen = ({route}) => {
 
   return (
     <View>
-      <SafeAreaView>
+      {/* <SafeAreaView> */}
         <Text style={styles.itemDetails}>To select the owner , Click on the request</Text>
-      <FlatList 
-        data={userDetails} 
-        renderItem={({item})=>(
-          <TouchableOpacity >
-            <View key={item.id} style={styles.card}>
+      {/* <FlatList 
+        // data={userDetails} 
+        // renderItem={({item})=>(
+          <TouchableOpacity > */}
+            <View 
+            // key={item.id} 
+            style={styles.card}>
               <View style={styles.itemDetails}>
                 <UserIcon style={styles.itemImage}/>
                   <View style={styles.postDetails}>
-                    <Text style={styles.itemText}>{item.displayedName}</Text>
-                    <Text style={styles.itemText}>Location : {item.phoneNo}</Text>
+                    <Text style={styles.itemText}>Name
+                      {/* {item.displayedName} */}
+                      </Text>
+                    <Text style={styles.itemText}>Telno
+                      {/* Location : {item.phoneNo} */}
+                      </Text>
                   </View>
                   </View>
               </View>
-         </TouchableOpacity >
-        )}
-      />
-      </SafeAreaView>
+         {/* </TouchableOpacity > */}
+        {/* )} */}
+      {/* /> */}
+      {/* </SafeAreaView> */}
     </View>
   );
 };
