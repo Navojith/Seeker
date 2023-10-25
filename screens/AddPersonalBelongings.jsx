@@ -9,8 +9,9 @@ import { FireStore } from '../firebase';
 import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
 import { Alert } from 'react-native';
 import { auth } from '../firebase';
+import { Profile } from '../constants/RouteConstants';
 
-const AddPBModal = ({ isVisible, setIsVisible }) => {
+const AddPBModal = ({ isVisible, setIsVisible, navigation }) => {
   const [type, setType] = useState(PersonalBelongingsTypes.Laptop);
   const [name, setName] = useState('');
   const [serialNo, setSerialNo] = useState('');
@@ -23,13 +24,15 @@ const AddPBModal = ({ isVisible, setIsVisible }) => {
         type,
         serialNo,
       };
-      setLoading(true);
       try {
+        setLoading(true);
         await updateDoc(doc(FireStore, 'userDetails', auth.currentUser.uid), {
           devices: arrayUnion(data),
         });
+        setLoading(false);
         Alert.alert('Success', 'Device Added Successfully');
         setIsVisible(false);
+        navigation.navigate(Profile);
       } catch (error) {
         Alert.alert('Error', error.message);
       }
@@ -134,6 +137,7 @@ const AddPBModal = ({ isVisible, setIsVisible }) => {
             onChangeText={(val) => setSerialNo(val)}
           />
         </View>
+        {loading && <Text style={{ color: '#0369A1' }}>Sending Data...</Text>}
         <MainButton
           text="Add New Device"
           containerStyles={'mt-8 rounded-full w-[150px] '}
