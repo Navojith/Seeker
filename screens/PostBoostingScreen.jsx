@@ -25,7 +25,7 @@ const PostBoostingScreen = ({ route, navigation }) => {
     viewStyles: ` pt-8 flex justify-center border rounded-[42px] border-[6px] border-dark-blue`,
     message:
       'There are 4 levels of boosting available within the app. You can choose one depending on your budget and urgency to find the item.',
-    buttonText: 'Close',
+    buttonText: 'Okay',
     buttonContainerStyles: ` w-[100px] mx-auto rounded-full bg-dark-blue`,
     buttonTextStyles: ` font-bold`,
     messageStyles: ` text-2xl font-bold`,
@@ -35,10 +35,19 @@ const PostBoostingScreen = ({ route, navigation }) => {
     viewStyles: ` pt-8 flex justify-center border rounded-[42px] border-[6px] border-dark-blue`,
     message:
       'Posts can be boosted using in app points. If you have the points needed, you can boost the post absolutely free.',
-    buttonText: 'Close',
+    buttonText: 'Okay',
     buttonContainerStyles: ` w-[100px] mx-auto rounded-full bg-dark-blue`,
     buttonTextStyles: ` font-bold`,
     messageStyles: ` text-2xl font-bold`,
+  });
+  const [status, setStatus] = useState({
+    visibility: false,
+    viewStyles: 'border border-4 border-red-600',
+    title: null,
+    titleStyles: 'text-red-600',
+    message: null,
+    messageStyles: 'text-red-600 font-bold',
+    buttonText: 'Okay',
   });
 
   useEffect(() => {
@@ -96,9 +105,17 @@ const PostBoostingScreen = ({ route, navigation }) => {
       if (docSnap.exists()) {
         const doc = docSnap.data();
         const newPoints = doc.points - needed;
-        await docRef.ref.update({ points: newPoints });
+        await updateDoc(docRef, { points: newPoints });
         console.log('Document successfully updated!');
-        // navigation.goBack();
+        setStatus({
+          visibility: true,
+          viewStyles: 'border border-4 border-green-600',
+          titleStyles: 'text-green-600',
+          messageStyles: 'text-green-600 font-bold',
+          title: 'Success !',
+          message: 'Post boosted successfully !',
+          buttonText: 'Okay',
+        });
       } else {
         console.log('No such document!');
       }
@@ -107,8 +124,12 @@ const PostBoostingScreen = ({ route, navigation }) => {
     }
   };
 
+  const handleNavigation = () => {
+    navigation.navigate('Lost');
+  };
+
   return (
-    <View className=" w-10/12 mx-auto mt-48 bg-white">
+    <View className=" w-10/12 mx-auto mt-[28vh] bg-white">
       <DismissibleAlert
         data={showInfoLevelModal}
         setData={setShowInfoLevelModal}
@@ -200,6 +221,12 @@ const PostBoostingScreen = ({ route, navigation }) => {
           }
         />
       </View>
+
+      <DismissibleAlert
+        data={status}
+        setData={setStatus}
+        onPress={handleNavigation}
+      />
     </View>
   );
 };

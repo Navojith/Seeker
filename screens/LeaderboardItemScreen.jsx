@@ -76,9 +76,8 @@ const LeaderboardItemScreen = ({ route }) => {
     });
     // console.log(currentLocation.coords);
     // console.log(item.location);
-    // console.log(siteLocation.locations[item.location]);
-    {
-      item &&
+    item
+      ? (console.log(siteLocation.locations[item.location]),
         console.log(
           Math.round(
             getDistanceFromLatLonInKm(
@@ -90,20 +89,20 @@ const LeaderboardItemScreen = ({ route }) => {
               1000 *
               100
           ) / 100
-        );
-      setDistance(
-        Math.round(
-          getDistanceFromLatLonInKm(
-            currentLocation.coords.latitude,
-            currentLocation.coords.longitude,
-            siteLocation.locations[item?.location].lat,
-            siteLocation.locations[item?.location].lng
-          ) *
-            1000 *
-            100
-        ) / 100
-      );
-    }
+        ),
+        setDistance(
+          Math.round(
+            getDistanceFromLatLonInKm(
+              currentLocation.coords.latitude,
+              currentLocation.coords.longitude,
+              siteLocation.locations[item?.location].lat,
+              siteLocation.locations[item?.location].lng
+            ) *
+              1000 *
+              100
+          ) / 100
+        ))
+      : console.log('No item');
   };
 
   const handleNotFound = () => {
