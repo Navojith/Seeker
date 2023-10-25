@@ -75,7 +75,7 @@ const FoundItemsListScreen = () => {
     itemImage: {
       width: "100%",
       height: 100,
-      resizeMode: "cover",
+      resizeMode: "contain",
       marginBottom: 8,
     },
     filterButton: {
