@@ -4,6 +4,8 @@ const tempimage = require("../assets/images/PostCreation/AddImage.png");
 import {
   getFirestore,
   addDoc,
+  doc,
+  updateDoc,
   collection,
   query,
   where,
@@ -43,6 +45,29 @@ const LostItem = ({ route }) => {
       fetchItemDetails();
     }
   }, [pushDataObject]);
+
+  const addFoundUser = async(postId)=>{
+    const user = auth.currentUser.uid;
+    console.log('user',user);
+    console.log('post',postId);
+
+    const postDocRef = doc(FireStore,"lostItems",postId);
+    
+    try{
+      await updateDoc(postDocRef , {foundUserId : user});
+
+      const db = getFirestore();
+      console.log(db);
+      const res = await addDoc(collection(db , 'requests'),{
+       user : user,
+       itemDetails : postId,
+      });
+      console.log('requestId',res.id);
+      console.log("document updated successfully")
+    }catch(error){
+      console.error(error);
+    }
+  }
 
   const styles = StyleSheet.create({
     container: {
@@ -176,7 +201,7 @@ const LostItem = ({ route }) => {
           </Text>
 
           <View style={styles.claimButtonContainer}>
-            <TouchableOpacity style={styles.claimButton}>
+            <TouchableOpacity style={styles.claimButton} onPress={()=>{addFoundUser(item.postId)}}>
               <Text style={styles.claimButtonText}>Return</Text>
             </TouchableOpacity>
           </View>
