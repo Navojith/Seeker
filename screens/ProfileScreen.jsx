@@ -8,14 +8,18 @@ import {
   Image,
   Text,
 } from "react-native";
-import { auth, FireStore } from "../firebase";
+import { auth, FireStore, storage } from "../firebase";
 import CustomHeader from "../components/header";
 import { useNavigation } from "@react-navigation/native";
 import { unregisterIndieDevice } from "native-notify";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, collection } from "firebase/firestore";
 import DismissibleAlert from "../components/common/alerts/DismissibleAlert";
 import UserIcon from "../assets/images/UserImg";
 import { Settings } from "../constants/RouteConstants";
+import * as ImagePicker from "expo-image-picker";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import * as ImageManipulator from "expo-image-manipulator";
+import EvilIcons from "react-native-vector-icons/EvilIcons";
 
 const ProfileScreen = () => {
   const [user, setUser] = useState(null);
@@ -29,6 +33,7 @@ const ProfileScreen = () => {
     messageStyles: "text-red-600 font-bold",
   });
   const [loading, setLoading] = useState(false);
+  const [imageUri, setImageUri] = useState(null);
 
   const styles = StyleSheet.create({
     container: {
@@ -39,26 +44,35 @@ const ProfileScreen = () => {
     profileDetails: {
       fontSize: 20,
       fontWeight: "bold",
-      fontWeight: "bold",
       margin: 2,
+      color: "#333", // Adjust the color as needed
     },
-    itemButtonContainer: {
-      marginTop: 20,
-      alignItems: "center",
-      alignItems: "center",
+    phoneDetails: {
+      fontSize: 16, // You can adjust the font size
+      color: "#666", // Adjust the color
     },
-    itemButton: {
-      backgroundColor: "#0369a1",
-      color: "#fff",
-      borderRadius: 20,
-      padding: 10,
-      marginVertical: 10,
-      width: "50%",
+    pointsDetails: {
+      fontSize: 18, // You can adjust the font size
+      fontWeight: "bold",
+      color: "#FF5733", // Adjust the color
+    },
+    card: {
+      backgroundColor: "#F0F9FF",
+      borderRadius: 10,
+      padding: 20,
+      margin: 20,
+      borderColor: "#0284C7",
+      borderWidth: 3,
+    },
+    row: {
+      flexDirection: "row",
+      padding: 15,
+      borderBottomWidth: 1,
+      borderBottomColor: "#ccc",
     },
     buttonText: {
-      color: "white",
+      color: "#000",
       fontWeight: "bold",
-      textAlign: "center",
     },
   });
 
@@ -114,7 +128,7 @@ const ProfileScreen = () => {
       }
     };
     fetchUser();
-  }, []);
+  }, [imageUri]);
 
   const handleSignOut = () => {
     // unregister notify
@@ -134,6 +148,52 @@ const ProfileScreen = () => {
       });
   };
 
+  const handleChangeAvatar = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const resizedPhoto = await ImageManipulator.manipulateAsync(
+        result.assets[0].uri,
+        [{ resize: { width: 300 } }],
+        { compress: 0.7, format: "jpeg" }
+      );
+
+      try {
+        const downUrl = await uploadImageToFirebaseStorage(resizedPhoto.uri);
+        const userRef = doc(FireStore, "userDetails", auth.currentUser.uid);
+
+        await updateDoc(userRef, {
+          avatarUrl: downUrl,
+        });
+
+        setImageUri(downUrl);
+      } catch (error) {
+        console.error("Error updating profile picture:", error);
+      }
+    }
+  };
+
+  const uploadImageToFirebaseStorage = async (imageUri) => {
+    try {
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+      const storageRef = ref(
+        storage,
+        `images/${auth.currentUser.uid}/${Date.now()}.jpg`
+      );
+      await uploadBytes(storageRef, blob);
+      console.log("uploaded to firebase");
+      return getDownloadURL(storageRef);
+    } catch (error) {
+      console.error("Error uploading image to Firebase Storage: ", error);
+      return null;
+    }
+  };
+
   return user ? (
     <>
       <DismissibleAlert data={error} setData={setError} />
@@ -141,48 +201,56 @@ const ProfileScreen = () => {
       <SafeAreaView>
         <ScrollView>
           <View style={styles.container}>
-            <View className="mt-8 mb-4 rounded rounded-full border border-4 border-dark-blue">
-              <UserIcon />
-            </View>
+            <TouchableOpacity onPress={handleChangeAvatar}>
+              {user.avatarUrl ? (
+                <View className="mt-8 mb-4 rounded rounded-full border border-4 border-dark-blue">
+                  <Image
+                    source={{ uri: user.avatarUrl }}
+                    style={{ width: 80, height: 80, borderRadius: 100 }}
+                  />
+                </View>
+              ) : (
+                <View className="mt-8 mb-4 rounded rounded-full border border-4 border-dark-blue">
+                  <UserIcon />
+                </View>
+              )}
+            </TouchableOpacity>
             <Text style={styles.profileDetails}>{user.displayedName}</Text>
-            <Text style={styles.profileDetails}>
+            <Text style={styles.phoneDetails}>
               {user.phoneNo ?? user.email ?? ""}
             </Text>
-            <Text style={styles.profileDetails}>
-              Points : {user.points ?? 0}
-            </Text>
+            <Text style={styles.pointsDetails}>Points: {user.points ?? 0}</Text>
           </View>
 
-          <View style={styles.itemButtonContainer}>
+          <View style={styles.card}>
             <TouchableOpacity
+              style={styles.row}
               onPress={handlePersonalBelongings}
-              style={styles.itemButton}
             >
+              <EvilIcons name="check" size={20} color="black" />
               <Text style={styles.buttonText}>Personal Belongings</Text>
             </TouchableOpacity>
             <TouchableOpacity
+              style={styles.row}
               onPress={handlePostedLostItems}
-              style={styles.itemButton}
             >
+              <EvilIcons name="search" size={20} color="black" />
               <Text style={styles.buttonText}>Posted Lost Items</Text>
             </TouchableOpacity>
             <TouchableOpacity
+              style={styles.row}
               onPress={handlePostedFoundItems}
-              style={styles.itemButton}
             >
+              <EvilIcons name="location" size={20} color="black" />
               <Text style={styles.buttonText}>Posted Found Items</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleUploadedImage}
-              style={styles.itemButton}
-            >
+            <TouchableOpacity style={styles.row} onPress={handleUploadedImage}>
+              <EvilIcons name="image" size={20} color="black" />
               <Text style={styles.buttonText}>Upload Image</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleSettings}  style={styles.itemButton}>
+            <TouchableOpacity style={styles.row} onPress={handleSettings}>
+              <EvilIcons name="gear" size={20} color="black" />
               <Text style={styles.buttonText}>Settings</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleSignOut} style={styles.itemButton}>
-              <Text style={styles.buttonText}>Sign Out</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
