@@ -5,7 +5,13 @@ import InformationIcon from '../assets/icons/InformationIcon';
 import MainButton from '../components/common/buttons/MainButton';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import { FireStore, auth } from '../firebase';
-import { getDocs, collectionGroup, getDoc } from 'firebase/firestore';
+import {
+  getDocs,
+  collectionGroup,
+  getDoc,
+  doc,
+  updateDoc,
+} from 'firebase/firestore';
 import TwoButtonModal from '../components/common/modals/TwoButtonModal';
 import { BuyBoost } from '../constants/RouteConstants';
 
@@ -77,10 +83,27 @@ const PostBoostingScreen = ({ route, navigation }) => {
 
   const handleConfirm = () => {
     if (available >= needed) {
-      // Do something here
-      console.log('boosting');
+      updatePoints();
     } else {
       setIsModalVisible(true);
+    }
+  };
+
+  const updatePoints = async () => {
+    try {
+      const docRef = doc(FireStore, 'userDetails', auth.currentUser.uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const doc = docSnap.data();
+        const newPoints = doc.points - needed;
+        await docRef.ref.update({ points: newPoints });
+        console.log('Document successfully updated!');
+        // navigation.goBack();
+      } else {
+        console.log('No such document!');
+      }
+    } catch (error) {
+      console.error('Error updating document: ', error);
     }
   };
 
