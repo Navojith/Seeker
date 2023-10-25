@@ -135,7 +135,7 @@ const SettingsScreen = () => {
         <Text>Found Item Notifications</Text>
         <Switch
           trackColor={{ false: "#767577", true: "#81b0ff" }}
-          thumbColor={foundItemNotifications ? "#f5dd4b" : "#f4f3f4"}
+          thumbColor={foundItemNotifications ? "#0369a1" : "#f4f3f4"}
           onValueChange={toggleFoundItemNotifications}
           value={foundItemNotifications}
         />
@@ -144,7 +144,7 @@ const SettingsScreen = () => {
         <Text>Lost Item Notifications</Text>
         <Switch
           trackColor={{ false: "#767577", true: "#81b0ff" }}
-          thumbColor={lostItemNotifications ? "#f5dd4b" : "#f4f3f4"}
+          thumbColor={lostItemNotifications ? "#0369a1" : "#f4f3f4"}
           onValueChange={toggleLostItemNotifications}
           value={lostItemNotifications}
         />
