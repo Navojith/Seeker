@@ -5,13 +5,13 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
-} from "react-native";
-import React, { useState, useEffect } from "react";
-import AddImage from "../assets/images/PostCreation/AddImage.png";
-import { Picker } from "@react-native-picker/picker";
-import data from "../assets/data/SLIITLocations/index.json";
-import MainButton from "../components/common/buttons/MainButton";
-import { FireStore, auth, storage } from "../firebase";
+} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import AddImage from '../assets/images/PostCreation/AddImage.png';
+import { Picker } from '@react-native-picker/picker';
+import data from '../assets/data/SLIITLocations/index.json';
+import MainButton from '../components/common/buttons/MainButton';
+import { FireStore, auth, storage } from '../firebase';
 import {
   collection,
   addDoc,
@@ -19,42 +19,42 @@ import {
   getDocs,
   getDoc,
   doc,
-} from "firebase/firestore";
-import DismissibleAlert from "../components/common/alerts/DismissibleAlert";
-import { useNavigation } from "@react-navigation/native";
-import { LostItems } from "../constants/RouteConstants";
-import axios from "axios";
-import * as ImagePicker from "expo-image-picker";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import * as ImageManipulator from "expo-image-manipulator";
+} from 'firebase/firestore';
+import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
+import { useNavigation } from '@react-navigation/native';
+import { LostItems } from '../constants/RouteConstants';
+import axios from 'axios';
+import * as ImagePicker from 'expo-image-picker';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 const CreateFoundItemScreen = () => {
   const navigation = useNavigation();
 
   const [selectedLocation, setSelectedLocation] = useState(data.locations[0]);
   const [otherVisibility, setOtherVisibility] = useState(false);
-  const [itemName, setItemName] = useState("");
-  const [serialNumber, setSerialNumber] = useState("");
-  const [color, setColor] = useState("");
-  const [description, setDescription] = useState("");
-  const [other, setOther] = useState("");
+  const [itemName, setItemName] = useState('');
+  const [serialNumber, setSerialNumber] = useState('');
+  const [color, setColor] = useState('');
+  const [description, setDescription] = useState('');
+  const [other, setOther] = useState('');
   const [error, setError] = useState({
     visibility: false,
-    viewStyles: "border border-4 border-red-600",
+    viewStyles: 'border border-4 border-red-600',
     title: null,
-    titleStyles: "text-red-600",
+    titleStyles: 'text-red-600',
     message: null,
-    messageStyles: "text-red-600 font-bold",
+    messageStyles: 'text-red-600 font-bold',
   });
   const [loading, setLoading] = useState(false);
   const [searchDocuments, setSearchDocuments] = useState([]);
   const [imageUri, setImageUri] = useState(null);
-  const [postId, setPostId] = useState("");
+  const [postId, setPostId] = useState('');
   const [foundItemNotifications, setFoundItemNotifications] = useState(false);
   const [lostItemNotifications, setLostItemNotifications] = useState(false);
 
   useEffect(() => {
-    if (selectedLocation === "Other") {
+    if (selectedLocation === 'Other') {
       setOtherVisibility(true);
     } else {
       setOtherVisibility(false);
@@ -64,7 +64,7 @@ const CreateFoundItemScreen = () => {
   useEffect(() => {
     const fetchSearch = async () => {
       try {
-        const searchCollectionRef = collection(FireStore, "searchFoundItems");
+        const searchCollectionRef = collection(FireStore, 'searchFoundItems');
 
         const querySnapshot = await getDocs(searchCollectionRef);
 
@@ -77,9 +77,9 @@ const CreateFoundItemScreen = () => {
 
         setSearchDocuments(searchDocuments);
 
-        console.log("Fetched search documents:", searchDocuments);
+        console.log('Fetched search documents:', searchDocuments);
       } catch (error) {
-        console.error("Error fetching search documents:", error);
+        console.error('Error fetching search documents:', error);
         // Handle the error here
       }
     };
@@ -102,18 +102,18 @@ const CreateFoundItemScreen = () => {
       await uploadBytes(storageRef, blob);
       return getDownloadURL(storageRef);
     } catch (error) {
-      console.error("Error uploading image to Firebase Storage: ", error);
+      console.error('Error uploading image to Firebase Storage: ', error);
       return null;
     }
   };
 
   const handleSubmit = async () => {
-    if (itemName === "" || description === "") {
+    if (itemName === '' || description === '') {
       setError((prev) => ({
         ...prev,
         visibility: true,
-        title: "Error !",
-        message: "Please enter item name and description !",
+        title: 'Error !',
+        message: 'Please enter item name and description !',
       }));
     } else {
       try {
@@ -122,7 +122,7 @@ const CreateFoundItemScreen = () => {
         if (imageUri) {
           imageUrl = await uploadImageToFirebaseStorage(imageUri);
         }
-        const docRef = await addDoc(collection(FireStore, "foundItems"), {
+        const docRef = await addDoc(collection(FireStore, 'foundItems'), {
           userId: auth.currentUser.uid,
           itemName: itemName,
           serialNumber: serialNumber ?? null,
@@ -131,11 +131,11 @@ const CreateFoundItemScreen = () => {
           other: other ?? null,
           description: description,
           timestamp: new Date(),
-          postId: "",
+          postId: '',
           imageUrl: imageUrl,
         });
 
-        console.log("id", docRef.id);
+        console.log('id', docRef.id);
 
         const pId = docRef.id; // Set postId after the document is added
         setPostId(pId);
@@ -145,25 +145,25 @@ const CreateFoundItemScreen = () => {
 
         setError({
           visibility: true,
-          viewStyles: "border border-4 border-green-600",
-          titleStyles: "text-green-600",
-          messageStyles: "text-green-600 font-bold",
-          title: "Success !",
-          message: "Your post has been created successfully !",
+          viewStyles: 'border border-4 border-green-600',
+          titleStyles: 'text-green-600',
+          messageStyles: 'text-green-600 font-bold',
+          title: 'Success !',
+          message: 'Your post has been created successfully !',
         });
         setLoading(false);
-        setItemName("");
-        setColor("");
-        setDescription("");
-        setOther("");
-        setSerialNumber("");
+        setItemName('');
+        setColor('');
+        setDescription('');
+        setOther('');
+        setSerialNumber('');
       } catch (error) {
         console.log(error);
         setError((prev) => ({
           ...prev,
           visibility: true,
-          title: "Error !",
-          message: error.message + " - " + error.code,
+          title: 'Error !',
+          message: error.message + ' - ' + error.code,
         }));
       }
     }
@@ -183,7 +183,7 @@ const CreateFoundItemScreen = () => {
       const resizedPhoto = await ImageManipulator.manipulateAsync(
         result.assets[0].uri,
         [{ resize: { width: 300 } }], // resize to width of 300 and preserve aspect ratio
-        { compress: 0.7, format: "jpeg" }
+        { compress: 0.7, format: 'jpeg' }
       );
 
       setImageUri(resizedPhoto.uri);
@@ -192,19 +192,19 @@ const CreateFoundItemScreen = () => {
   };
 
   const matchSearch = async () => {
-    console.log("Matching search documents...");
+    console.log('Matching search documents...');
 
     if (!postId) {
-      console.log("postId is empty");
+      console.log('postId is empty');
       return;
     }
 
-    console.log("postId", postId);
+    console.log('postId', postId);
 
     for (const doc of searchDocuments) {
-      const queryWords = doc.query.toLowerCase().split(" ");
+      const queryWords = doc.query.toLowerCase().split(' ');
       const itemNameLower = itemName.toLowerCase();
-      const descriptionWords = description.toLowerCase().split(" ");
+      const descriptionWords = description.toLowerCase().split(' ');
 
       // Check if any word from the query is present in any of the fields
       const isMatch = queryWords.some((word) => {
@@ -218,12 +218,12 @@ const CreateFoundItemScreen = () => {
       });
 
       if (isMatch) {
-        console.log("Match found");
+        console.log('Match found');
         const res = await getNotificationSettings(doc.userId);
-        console.log("found", foundItemNotifications);
+        console.log('found', foundItemNotifications);
         if (foundItemNotifications) {
           const pushData = {
-            type: "searchFoundItem",
+            type: 'searchFoundItem',
             postId,
           };
 
@@ -232,8 +232,8 @@ const CreateFoundItemScreen = () => {
             axios.post(`https://app.nativenotify.com/api/indie/notification`, {
               subID: doc.userId,
               appId: 13599,
-              appToken: "gTBeP5h5evCxHcHdDs0yVQ",
-              title: "Found item matched your search",
+              appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
+              title: 'Found item matched your search',
               message:
                 'Your search "' +
                 doc.query +
@@ -243,8 +243,43 @@ const CreateFoundItemScreen = () => {
               pushData: JSON.stringify(pushData),
             });
           }, 10000);
+
+          //search serial no
+          if (serialNumber) {
+            const q = query(
+              collection(FireStore, 'userDetails'),
+              where('devices.serialNo', '==', serialNumber)
+            );
+            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach((doc) => {
+              const notificationPermissions = getNotificationSettings(
+                doc.userId
+              );
+              if (notificationPermissions.lostItemNotifications) {
+                const pushData = {
+                  type: 'searchFoundItem',
+                  postId,
+                };
+
+                // Add a 10-second delay because firestore is slow
+                setTimeout(() => {
+                  axios.post(
+                    `https://app.nativenotify.com/api/indie/notification`,
+                    {
+                      subID: doc.userId,
+                      appId: 13599,
+                      appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
+                      title: 'Found item',
+                      message: 'Found item with serial number ' + serialNumber,
+                      pushData: JSON.stringify(pushData),
+                    }
+                  );
+                }, 10000);
+              }
+            });
+          }
         } else {
-          console.log("User has disabled found item notifications");
+          console.log('User has disabled found item notifications');
         }
       }
     }
@@ -252,20 +287,20 @@ const CreateFoundItemScreen = () => {
 
   const getNotificationSettings = async (userId) => {
     try {
-      const docRef = doc(FireStore, "notifications", userId);
+      const docRef = doc(FireStore, 'notifications', userId);
 
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
         const data = docSnap.data();
-        console.log("Notification settings:", data);
+        console.log('Notification settings:', data);
         if (data) {
           setFoundItemNotifications(data.foundItemNotifications);
           setLostItemNotifications(data.lostItemNotifications);
         }
       }
 
-      console.log("Notification settings retrieved");
+      console.log('Notification settings retrieved');
     } catch (error) {
       console.log(error);
     }
@@ -278,10 +313,10 @@ const CreateFoundItemScreen = () => {
         onPress={openImagePicker}
         style={{
           borderWidth: 4,
-          borderColor: "lightblue",
+          borderColor: 'lightblue',
           borderRadius: 10,
           padding: 10,
-          alignItems: "center",
+          alignItems: 'center',
         }}
       >
         {imageUri ? (
@@ -322,9 +357,9 @@ const CreateFoundItemScreen = () => {
           className="border border-4 px-4 py-2 border-light-blue"
           placeholder="Select Location"
           selectedValue={selectedLocation}
-          dropdownIconColor={"black"}
-          dropdownIconRippleColor={"#0284C7"}
-          selectionColor={"#0284C7"}
+          dropdownIconColor={'black'}
+          dropdownIconRippleColor={'#0284C7'}
+          selectionColor={'#0284C7'}
           onValueChange={(itemValue) => setSelectedLocation(itemValue)}
         >
           {data.locations.map((location, index) => (
@@ -362,8 +397,8 @@ const CreateFoundItemScreen = () => {
       )}
       <MainButton
         onPress={handleSubmit}
-        text={"Create Post"}
-        containerStyles={"mt-6 mb-12 rounded-full w-full drop-shadow-md"}
+        text={'Create Post'}
+        containerStyles={'mt-6 mb-12 rounded-full w-full drop-shadow-md'}
       />
     </ScrollView>
   );
