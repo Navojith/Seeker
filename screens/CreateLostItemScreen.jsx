@@ -174,6 +174,7 @@ const CreateLostItemScreen = ({ navigation }) => {
         }
         const res = await addDoc(collection(FireStore, 'lostItems'), {
           userId: auth.currentUser.uid,
+          foundUserId: '',
           itemName: itemName,
           serialNumber: serialNumber ?? null,
           color: color ?? null,
