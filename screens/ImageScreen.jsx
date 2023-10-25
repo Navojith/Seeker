@@ -69,6 +69,7 @@ const ImageScreen =() =>{
         })
 
         // console.log(response);
+
         // if(response.ok){
           const result = await response.text();
           console.log('result',result);
@@ -127,6 +128,7 @@ const ImageScreen =() =>{
               {result !== '' && <Text>{result}</Text>} */}
            </View>
        </View>
+       
     )
 
  }
