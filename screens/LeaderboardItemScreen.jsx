@@ -20,6 +20,7 @@ import getPoints from '../util/pointCalculation/getPoints';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import { useNavigation } from '@react-navigation/native';
 import { LeaderBoard } from '../constants/RouteConstants';
+import { LostItem } from '../constants/RouteConstants';
 
 const LeaderboardItemScreen = ({ route }) => {
   const nav = useNavigation();
@@ -41,6 +42,7 @@ const LeaderboardItemScreen = ({ route }) => {
 
   useEffect(() => {
     async function getItem() {
+      console.log('Special Item Post', pushDataObject?.item);
       const docRef = doc(getFirestore(), 'lostItems', pushDataObject?.item);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
@@ -51,14 +53,12 @@ const LeaderboardItemScreen = ({ route }) => {
         console.log('No such document!');
       }
     }
-    let count = 0;
     getPermissions = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         console.log('Permission to access location was denied');
       } else {
-        count = count + 1;
-        console.log('Permission to access location was granted', count);
+        console.log('Permission to access location was granted');
         setLocationInterval(setInterval(trackLocation, 1000));
       }
     };
@@ -117,7 +117,7 @@ const LeaderboardItemScreen = ({ route }) => {
   };
 
   const handleViewPost = () => {
-    nav.navigate('Item', { item });
+    nav.navigate(LostItem, { item });
   };
 
   return (
