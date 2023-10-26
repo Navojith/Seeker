@@ -4,16 +4,26 @@ import { FireStore, auth, storage } from "../firebase";
 import Header from '../components/header';
 import * as ImagePicker from 'expo-image-picker';
 import MainButton from "../components/common/buttons/MainButton";
+import { useNavigation } from "@react-navigation/core";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Modal  from "react-native-modal";
+import { AddLostItem } from "../constants/RouteConstants";
+import * as ImageManipulator from 'expo-image-manipulator';
 const URL = "https://seekervision.cognitiveservices.azure.com/vision/v3.1/analyze?visualFeatures=Description";
 
-const ImageScreen =() =>{
+const ImageScreen =({route}) =>{
+    const { screen } = route.params;
+    const navigation = useNavigation();
+
+    console.log(screen);
+
     const [imageUri , setImageUri] = useState('');
     const [imageUrl , setImageUrl] = useState('');
     const [tags , setTags] = useState([]);
     const [description , setDescription] = useState('');
     const [isModalVisible, setModalVisible] = useState(false);
+    const [selectedTags , setSelectedTags] = useState([]);
+    const [selectedDescription , setSelectedDescription] = useState('');
   
     const pickImage = async () =>{
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -24,10 +34,21 @@ const ImageScreen =() =>{
         });
         console.log(result);
 
-        if(!result.canceled){
-            setImageUri(result.assets[0].uri);
+        if (!result.canceled) {
+            const resizedPhoto = await ImageManipulator.manipulateAsync(
+              result.assets[0].uri,
+              [{ resize: { width: 300 } }], // resize to width of 300 and preserve aspect ratio
+              { compress: 0.7, format: 'jpeg' }
+            );
+      
+            setImageUri(resizedPhoto.uri);
+            console.log(resizedPhoto.uri);
             console.log(imageUri);
-        }
+            }      
+        // if(!result.canceled){
+        //     setImageUri(result.assets[0].uri);
+        //     console.log(imageUri);
+        // }
     }
 
     const uploadImageToFirebaseStorage = async (imageUri) => {
@@ -96,8 +117,37 @@ const ImageScreen =() =>{
 
     const handleTags = () =>{
       setModalVisible(false);
+      
+      if(screen == "found"){
+        console.log('ST:',selectedTags);
+        console.log('desc',selectedDescription);
+        navigation.navigate("Add Found Item",{tags : selectedTags, desc : selectedDescription , img : imageUrl});
+      }else{
+        console.log('ST:',selectedTags);
+        console.log('desc',selectedDescription);
+        navigation.navigate(AddLostItem , {tags : selectedTags,desc : selectedDescription , img : imageUrl});
+      }
+
       setTags([]);
       setDescription('');
+    }
+
+    const handleDescription = () => {
+      setSelectedDescription(description);
+      console.log(selectedDescription);
+      return selectedDescription;
+    }
+
+    const handleTagSelection = (tag) => {
+      setSelectedTags((previousTags) =>{
+      if (selectedTags.includes(tag)) {
+          return previousTags.filter(selectedTag => selectedTag !== tag);
+      } else {
+          return [...previousTags, tag];
+      }
+      });
+      console.log(selectedTags);
+      return selectedTags;
     }
 
     const styles = StyleSheet.create({
@@ -138,6 +188,17 @@ const ImageScreen =() =>{
             borderWidth: 6,
             borderColor: '#0369A1',
           },
+          tagText: {
+            padding: 5,
+            margin: 5,
+            borderColor: 'gray',
+            borderWidth: 1,
+            borderRadius: 5,
+          },
+          selectedTag: {
+            backgroundColor: 'blue', 
+            color: 'white',
+        },
       })
 
     return(
@@ -150,7 +211,7 @@ const ImageScreen =() =>{
                 {/* } */}
              {imageUri && (
                 <View>
-                    <Image source={{ uri: imageUri }} style={{ width: 250, height: 250 }} />
+                    <Image source={{ uri: imageUri }} style={{ width: 200, height: 200,  resizeMode: 'contain' }} />
                 </View>
               )}
               <MainButton 
@@ -176,12 +237,18 @@ const ImageScreen =() =>{
                 <Text style={styles.subtitle}>Click the text to select tags.</Text>
                 {tags.map((tag, index) => (
                       <View key={index}>
-                        <TouchableOpacity>
-                        <Text style={styles.tagText}>{tag}</Text>
+                        <TouchableOpacity
+                          onPress={() => handleTagSelection(tag)}
+                          style = {[
+                            styles.tagText,
+                            selectedTags.includes(tag) ? styles.selectedTag : null
+                        ]}
+                        >
+                        <Text>{tag}</Text>
                         </TouchableOpacity>
                       </View>
                   ))}
-                <TouchableOpacity>
+                <TouchableOpacity onPress={handleDescription}>
                 <Text style={styles.modalText}>Description: {description}</Text>
                 </TouchableOpacity>
                 <Button title="Confirm" onPress={handleTags} />

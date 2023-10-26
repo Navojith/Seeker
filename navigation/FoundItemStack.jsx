@@ -2,7 +2,7 @@ import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import CreateFoundItemScreen from "../screens/CreateFoundItemScreen";
 import FoundScreen from "../screens/FoundScreen";
-
+import ImageScreen from "../screens/ImageScreen";
 import { FoundItem } from "../constants/RouteConstants";
 import FoundItemScreen from "../screens/FoundItem";
 const Stack = createStackNavigator();
@@ -55,6 +55,21 @@ const FoundItemStack = ({ navigation }) => {
           headerTintColor: "#fff", // Change this color for the text/icon color
           headerTitleStyle: {
             fontWeight: "bold",
+            fontSize: 28,
+          },
+        }}
+      />
+     <Stack.Screen
+        name="Upload Image"
+        component={ImageScreen}
+        options={{
+          headerShown: false,
+          headerStyle: {
+            backgroundColor: '#0369A1',
+          },
+          headerTintColor: '#fff', // Change this color for the text/icon color
+          headerTitleStyle: {
+            fontWeight: 'bold',
             fontSize: 28,
           },
         }}

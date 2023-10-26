@@ -85,7 +85,8 @@ const PostedFoundItemsScreen = () => {
       marginLeft: 8,
       marginRight: 16,
       marginBottom: 8,
-      borderRadius: 8, // Add border radius to the image
+      borderRadius: 8,
+      resizeMode: 'contain',
     },
     buttonContainer: {
       flexDirection: 'row',
@@ -110,7 +111,15 @@ const PostedFoundItemsScreen = () => {
             <TouchableOpacity onPress={()=>navigation.navigate('Requests', {item})}>
               <View key={item.id} style={styles.card}>
                 <View style={styles.itemDetails}>
-                  <Image source={{uri:item.imageUrl}} style={styles.itemImage} />
+                {item.imageUrl ? (
+                  <Image
+                    source={{ uri: item.imageUrl }}
+                    style={styles.itemImage}
+                  />
+                ) : (
+                  <Image source={tempimage} style={styles.itemImage} />
+                )}
+                  {/* <Image source={{uri:item.imageUrl}} style={styles.itemImage} /> */}
                   <View style={styles.postDetails}>
                     <Text style={styles.itemText}>Item: {item.itemName}</Text>
                     {/* <Text style={styles.itemText}>Item: {item.postId}</Text> */}
