@@ -6,6 +6,7 @@ import {
   addDoc,
   doc,
   updateDoc,
+  collectionGroup,
   collection,
   query,
   where,
@@ -16,6 +17,7 @@ import { FireStore, auth } from "../firebase";
 const LostItem = ({ route }) => {
   const { item, pushDataObject } = route.params;
   const [fetchedItem, setFetchedItem] = useState(null);
+  const [postedUserId, setPostedUserId] = useState(null);
 
   useEffect(() => {
     console.log("fetching item details");
@@ -33,7 +35,6 @@ const LostItem = ({ route }) => {
           if (!querySnapshot.empty) {
             const itemData = querySnapshot.docs[0].data();
             setFetchedItem(itemData);
-            console.log(itemData);
           } else {
             console.log("Item not found");
           }
@@ -58,6 +59,7 @@ const LostItem = ({ route }) => {
 
       const db = getFirestore();
       console.log(db);
+    
       const res = await addDoc(collection(db , 'requests'),{
        user : user,
        itemDetails : postId,

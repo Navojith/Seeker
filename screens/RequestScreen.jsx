@@ -1,4 +1,4 @@
-import { View, Text , SafeAreaView ,FlatList , Image , StyleSheet , Button} from 'react-native';
+import { View, Text , SafeAreaView ,FlatList , Image , StyleSheet , Button, TouchableOpacity} from 'react-native';
 import React , {useState , useEffect} from 'react';
 import { FireStore } from '../firebase';
 import { collection, getDocs , query , where} from 'firebase/firestore';
@@ -6,64 +6,117 @@ import { collection, getDocs , query , where} from 'firebase/firestore';
 // import SecondaryButton from '../components/common/buttons/SecondaryButton';
 // import MainButton from '../components/common/buttons/MainButton';
 // import { CheckBox } from 'react-native-web';
-// import { auth } from '../firebase';
+import { auth } from '../firebase';
+import { useNavigation } from '@react-navigation/core';
 import UserIcon from '../assets/icons/UserIcon';
 
 const RequestScreen = ({route}) => {
   const {item} = route.params;
   console.log(item);
   const [isSelected, setIsSelected] = useState(false);
+  const navigation = useNavigation();
   const[requests , setRequests] = useState([]);
   const [user , setUser] = useState(null);
   const [userDetails , setUserDetails] = useState([]);
+  const [loading , setLoading] = useState(false);
   
   // const handleOwner = () =>{
   //   setIsSelected() --- user Id
   // }
 
   useEffect(() => {
+    setLoading(true);
     const getRequests = async()=>{
-      try{
-      console.log("get requests");
-      const requestCollectionRef = collection(FireStore, "requests");
-      const q = query(requestCollectionRef, where("itemDetails", "==", item.postId) ,);
-      const querySnapshot = await getDocs(q);
-      
-      if (querySnapshot.empty) {
-        console.log("No matching documents.");
-      } else {
-        const requestDetails = querySnapshot.docs.map((doc) => doc.data().user);
-        console.log(requestDetails);
+      try
+      {
+        console.log("get requests");
+        const requestCollectionRef = collection(FireStore, "requests");
+        const q = query(requestCollectionRef, where("itemDetails", "==", item.postId));
+        const querySnapshot = await getDocs(q);
+        console.log('querySnapshot',querySnapshot);
+
+        const requestDetails = querySnapshot.docs.map((doc) => doc.data());
+        console.log('user',requestDetails);
         setRequests(requestDetails);
-        console.log(requests);
+        console.log('request',requestDetails.length);
 
-        const userDetailsPromises = requestDetails.map(async (user)=>{
-          const userCollectionRef = collection(FireStore,"userDetails");
-          const x = query(userCollectionRef,where("userId","==",user));
-          const userSnapshot = await getDocs(x);
+        if(requestDetails.length === 1)
+        {
+          console.log('user return the item');
 
-          if (userSnapshot.empty) {
-            console.log(`User details not found`);
-          } else {
-            const newUser = userSnapshot.docs.map((doc)=> doc.data());
-            console.log(newUser);
-            return newUser[0];
-            // setUserDetails([...userDetails , newUser]);
-          }
-          console.log(userDetails);
-        });
+          const itemDetailsPromises = requestDetails.map(async(request)=>{
+            const itemCollectionRef = collection(FireStore , "lostItems");
+            const l = query(itemCollectionRef, where("foundUserId" , "==" , request.user), where("postId" , "==" , item.postId ));
+            const foundUserSnapshot = await getDocs(l);
+            console.log(foundUserSnapshot);
 
-        const userDetails = await Promise.all(userDetailsPromises);
-        const filteredUserDetails = userDetails.filter((user) => user !== null);
-        setUserDetails(filteredUserDetails);
-        console.log(userDetails);
+            if(foundUserSnapshot.empty)
+            {
+              console.log('not a returned item');
+            }else
+            {
+              const postDetails = foundUserSnapshot.docs.map((doc)=> doc.data().userId);
+              console.log(postDetails);
+              console.log('returned');    
+              
+              const userDetailsPromises = postDetails.map(async (userId) => {
+                const userCollectionRef = collection(FireStore, "userDetails");
+                const userQuery = query(userCollectionRef, where("userId", "==", userId));
+                const userSnapshot = await getDocs(userQuery);
+              
+                if (!userSnapshot.empty)
+                {
+                  const userData = userSnapshot.docs[0].data();
+                  return userData;
+                }
+              })
+              const userDetails = await Promise.all(userDetailsPromises);
+              setUserDetails(userDetails);
+              console.log(userDetails);
+              setLoading(false);
+            }
+
+            const foundUserDetails =  await Promise.all(itemDetailsPromises);
+            console.log('userDetails',foundUserDetails);
+          })
+        } else
+        {
+          const userDetailsPromises = requests.map(async (request)=>{
+            const userCollectionRef = collection(FireStore,"userDetails");
+            const x = query(userCollectionRef,where("userId","==",request.user));
+            const userSnapshot = await getDocs(x);
+
+            if (userSnapshot.empty) {
+              console.log('User details not found');
+            } else {
+              console.log('user found')
+              const newUser = userSnapshot.docs.map((doc)=> doc.data());
+              console.log(newUser);
+              // return newUser[0];
+              setUserDetails([...userDetails , newUser]);
+              // console.log(userDetails);
+            }
+            console.log('userDetails',userDetails);  
+          });
+
+          const userDetails = await Promise.all(userDetailsPromises);
+          const filteredUserDetails = userDetails.filter((user) => user !== null);
+          setUserDetails(filteredUserDetails);
+          // console.log('filtered user',userDetails);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error fetching found items:", error);
       }
-    } catch (error) {
-      console.error("Error fetching found items:", error);
-    }
     };
     getRequests();
   } ,[]);
+
+  const selectUser = async(item) =>{
+    // setUser(item);
+    console.log('selectedUser',item);
+    navigation.navigate("Posted Found Items",{ selectedUser: item });
+  }
 
   const styles = StyleSheet.create({
     container:{
@@ -127,31 +180,31 @@ const RequestScreen = ({route}) => {
 
   return (
     <View>
-      {/* <SafeAreaView> */}
+      {loading &&(
+      <Text>loading..</Text>)}
+      <SafeAreaView>
         <Text style={styles.itemDetails}>To select the owner , Click on the request</Text>
-      {/* <FlatList 
-        // data={userDetails} 
-        // renderItem={({item})=>(
-          <TouchableOpacity > */}
+    <FlatList 
+        data={userDetails} 
+        renderItem={({item})=>(
+          <TouchableOpacity onPress={()=>{selectUser(item)}}> 
             <View 
-            // key={item.id} 
+            key={item.id} 
             style={styles.card}>
               <View style={styles.itemDetails}>
                 <UserIcon style={styles.itemImage}/>
                   <View style={styles.postDetails}>
-                    <Text style={styles.itemText}>Name
-                      {/* {item.displayedName} */}
+                    <Text style={styles.itemText}>Name : {item.displayedName}
                       </Text>
-                    <Text style={styles.itemText}>Telno
-                      {/* Location : {item.phoneNo} */}
+                    <Text style={styles.itemText}>Telno : {item.phoneNo}
                       </Text>
                   </View>
                   </View>
               </View>
-         {/* </TouchableOpacity > */}
-        {/* )} */}
-      {/* /> */}
-      {/* </SafeAreaView> */}
+         </TouchableOpacity >
+        )}
+      />
+      </SafeAreaView>
     </View>
   );
 };
