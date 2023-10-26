@@ -50,14 +50,20 @@ const PostedLostItemsScreen = () => {
     getPostedLostItems();
   },[])
 
-  const handleDeleteItem = async()=>{
+
+  const handleDeleteItem = async(item)=>{
+    console.log('delete item');
+    console.log(item);
+    setSelectedItem(item);
     if(selectedItem){
-      console.log(selectedItem);
+      console.log('selectedItem',selectedItem);
       try{
-        const result = await deleteDoc(doc(FireStore, "lostItems", selectedItem.itemName));
-        console.log(result);
-        // setPosts(posts.filter(item => item.id !== selectedItem.id));
-        // setSelectedItem(null);
+        console.log(selectedItem.postId);
+        const result = await deleteDoc(doc(FireStore, "lostItems", selectedItem.postId));
+        console.log('deleted', result);
+        setPosts(posts.filter(post => post.postid !== selectedItem.postId));
+        setSelectedItem(null);  
+        navigation.navigate("Posted Found Items" , {screen: 'Profile'});
       }catch(error){
         console.log(error);
       }
@@ -120,7 +126,7 @@ const PostedLostItemsScreen = () => {
       <FlatList 
         data={posts} 
         renderItem={({item})=>(
-          <TouchableOpacity onPress={() => setSelectedItem(item)}>
+          <TouchableOpacity>
           <View key={item.id} style={styles.card}>
           {item.imageUrl ? (
                   <Image
@@ -138,14 +144,14 @@ const PostedLostItemsScreen = () => {
             {/*  onPress={() => removeGoal(itemData.item.key)} */}
               {/* <Text  style={styles.itemText}>Delete</Text> */}
             {/* <View styles={{height:100, width:100 , justifyContent:'center',border:'1px solid #000' , margin: 10, padding: 10}}> */}
-            <TouchableOpacity onPress={handleDeleteItem}> 
+            <TouchableOpacity onPress={()=>{handleDeleteItem(item)}}> 
               <Image source={tempimage} 
                 style={styles.removeimage}
               />
             {/* </View> */}
             </TouchableOpacity>
           </View>
-         </TouchableOpacity >
+         </TouchableOpacity>
         )}
       />
       </SafeAreaView>
