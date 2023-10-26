@@ -110,7 +110,15 @@ const PostedFoundItemsScreen = () => {
             <TouchableOpacity onPress={()=>navigation.navigate('Requests', {item})}>
               <View key={item.id} style={styles.card}>
                 <View style={styles.itemDetails}>
-                  <Image source={{uri:item.imageUrl}} style={styles.itemImage} />
+                {item.imageUrl ? (
+                  <Image
+                    source={{ uri: item.imageUrl }}
+                    style={styles.itemImage}
+                  />
+                ) : (
+                  <Image source={tempimage} style={styles.itemImage} />
+                )}
+                  {/* <Image source={{uri:item.imageUrl}} style={styles.itemImage} /> */}
                   <View style={styles.postDetails}>
                     <Text style={styles.itemText}>Item: {item.itemName}</Text>
                     {/* <Text style={styles.itemText}>Item: {item.postId}</Text> */}

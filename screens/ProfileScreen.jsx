@@ -84,10 +84,6 @@ const ProfileScreen = () => {
     navigation.navigate('Posted Found Items');
   };
 
-  const handleUploadedImage = () => {
-    navigation.navigate('Upload Image');
-  };
-
   const handlePersonalBelongings = () => {
     navigation.navigate('Personal Belongings');
   };
@@ -246,10 +242,10 @@ const ProfileScreen = () => {
               <EvilIcons name="location" size={20} color="black" />
               <Text style={styles.buttonText}>Posted Found Items</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.row} onPress={handleUploadedImage}>
+            {/* <TouchableOpacity style={styles.row} onPress={handleUploadedImage}>
               <EvilIcons name="image" size={20} color="black" />
               <Text style={styles.buttonText}>Upload Image</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <TouchableOpacity style={styles.row} onPress={handleSettings}>
               <EvilIcons name="gear" size={20} color="black" />
               <Text style={styles.buttonText}>Settings</Text>
