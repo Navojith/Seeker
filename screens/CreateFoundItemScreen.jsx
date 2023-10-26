@@ -19,6 +19,8 @@ import {
   getDocs,
   getDoc,
   doc,
+  query,
+  where,
 } from 'firebase/firestore';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import { useNavigation } from '@react-navigation/native';
@@ -27,6 +29,7 @@ import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import * as ImageManipulator from 'expo-image-manipulator';
+import { Alert } from 'react-native';
 
 const CreateFoundItemScreen = () => {
   const navigation = useNavigation();
@@ -117,31 +120,87 @@ const CreateFoundItemScreen = () => {
       }));
     } else {
       try {
-        setLoading(true);
-        let imageUrl = null;
-        if (imageUri) {
-          imageUrl = await uploadImageToFirebaseStorage(imageUri);
+        // setLoading(true);
+        // let imageUrl = null;
+        // if (imageUri) {
+        //   imageUrl = await uploadImageToFirebaseStorage(imageUri);
+        // }
+        // const docRef = await addDoc(collection(FireStore, 'foundItems'), {
+        //   userId: auth.currentUser.uid,
+        //   itemName: itemName,
+        //   serialNumber: serialNumber ?? null,
+        //   color: color ?? null,
+        //   location: selectedLocation,
+        //   other: other ?? null,
+        //   description: description,
+        //   timestamp: new Date(),
+        //   postId: '',
+        //   imageUrl: imageUrl,
+        // });
+
+        // console.log('id', docRef.id);
+
+        // const pId = docRef.id; // Set postId after the document is added
+        // setPostId(pId);
+
+        // // Update the document with the postId
+        // await updateDoc(docRef, { postId: pId });
+
+        // //search serial no
+
+        if (serialNumber) {
+          const q = query(collection(FireStore, 'userDetails'));
+          const querySnapshot = await getDocs(q);
+          for (const document of querySnapshot.docs) {
+            const data = document.data();
+
+            if (
+              data.devices &&
+              data.devices.some((device) => device.serialNo === serialNumber)
+            ) {
+              let permissions = {};
+              try {
+                const userId = data.userId;
+                const notificationsDocRef = doc(
+                  FireStore,
+                  'notifications',
+                  userId
+                );
+                const docSnap = await getDoc(notificationsDocRef);
+                if (docSnap.exists()) {
+                  const notificationData = docSnap.data();
+                  console.log('Notification settings:', notificationData);
+                  if (notificationData) {
+                    permissions = notificationData;
+                  }
+                }
+              } catch (error) {
+                console.log(error);
+              }
+
+              if (permissions.lostItemNotifications) {
+                const pushData = {
+                  type: 'searchFoundItem',
+                  postId: 'OK4IDtq35rKsVyl8Zonl',
+                };
+
+                console.log('sdddddddddddd\n', JSON.stringify(pushData));
+
+                axios.post(
+                  `https://app.nativenotify.com/api/indie/notification`,
+                  {
+                    subID: data.userId,
+                    appId: 13599,
+                    appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
+                    title: 'Found item',
+                    message: 'Found item with serial number ' + serialNumber,
+                    pushData: JSON.stringify(pushData),
+                  }
+                );
+              }
+            }
+          }
         }
-        const docRef = await addDoc(collection(FireStore, 'foundItems'), {
-          userId: auth.currentUser.uid,
-          itemName: itemName,
-          serialNumber: serialNumber ?? null,
-          color: color ?? null,
-          location: selectedLocation,
-          other: other ?? null,
-          description: description,
-          timestamp: new Date(),
-          postId: '',
-          imageUrl: imageUrl,
-        });
-
-        console.log('id', docRef.id);
-
-        const pId = docRef.id; // Set postId after the document is added
-        setPostId(pId);
-
-        // Update the document with the postId
-        await updateDoc(docRef, { postId: pId });
 
         setError({
           visibility: true,
@@ -152,11 +211,11 @@ const CreateFoundItemScreen = () => {
           message: 'Your post has been created successfully !',
         });
         setLoading(false);
-        setItemName('');
-        setColor('');
-        setDescription('');
-        setOther('');
-        setSerialNumber('');
+        // setItemName('');
+        // setColor('');
+        // setDescription('');
+        // setOther('');
+        // setSerialNumber('');
       } catch (error) {
         console.log(error);
         setError((prev) => ({
@@ -243,41 +302,6 @@ const CreateFoundItemScreen = () => {
               pushData: JSON.stringify(pushData),
             });
           }, 10000);
-
-          //search serial no
-          if (serialNumber) {
-            const q = query(
-              collection(FireStore, 'userDetails'),
-              where('devices.serialNo', '==', serialNumber)
-            );
-            const querySnapshot = await getDocs(q);
-            querySnapshot.forEach((doc) => {
-              const notificationPermissions = getNotificationSettings(
-                doc.userId
-              );
-              if (notificationPermissions.lostItemNotifications) {
-                const pushData = {
-                  type: 'searchFoundItem',
-                  postId,
-                };
-
-                // Add a 10-second delay because firestore is slow
-                setTimeout(() => {
-                  axios.post(
-                    `https://app.nativenotify.com/api/indie/notification`,
-                    {
-                      subID: doc.userId,
-                      appId: 13599,
-                      appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
-                      title: 'Found item',
-                      message: 'Found item with serial number ' + serialNumber,
-                      pushData: JSON.stringify(pushData),
-                    }
-                  );
-                }, 10000);
-              }
-            });
-          }
         } else {
           console.log('User has disabled found item notifications');
         }

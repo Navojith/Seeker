@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   Text,
+  ActivityIndicator,
 } from 'react-native';
 import { auth, FireStore, storage } from '../firebase';
 import CustomHeader from '../components/header';
@@ -259,12 +260,8 @@ const ProfileScreen = () => {
       </SafeAreaView>
     </>
   ) : (
-    <View className="flex flex-col items-center justify-center">
-      {loading && (
-        <Text className="text-lg text-light-blue font-bold">
-          Loading Profile...
-        </Text>
-      )}
+    <View className="flex flex-col flex-1 items-center justify-center">
+      {loading && <ActivityIndicator size="large" color="#0369A1" />}
       <TouchableOpacity onPress={handleSignOut} style={styles.itemButton}>
         <Text style={styles.buttonText}>Sign Out</Text>
       </TouchableOpacity>

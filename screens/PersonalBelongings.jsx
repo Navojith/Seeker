@@ -1,4 +1,12 @@
-import { StyleSheet, Text, View, FlatList, Image, Alert } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  Image,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { PersonalBelongingsTypes } from '../constants/PersonalBelongingsTypes';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -113,7 +121,7 @@ const PersonalBelongings = ({ navigation }) => {
     setToBeDeleted(item);
   };
 
-  return (
+  return !loading ? (
     <View style={styles.mainContainer}>
       <AddPBModal
         isVisible={modalIsVisible}
@@ -178,6 +186,10 @@ const PersonalBelongings = ({ navigation }) => {
           <Text className="text-lg font-bold">No Personal Belongings</Text>
         </View>
       )}
+    </View>
+  ) : (
+    <View style={styles.flexCenteredContainer}>
+      <ActivityIndicator size="large" color="#0369A1" />
     </View>
   );
 };
