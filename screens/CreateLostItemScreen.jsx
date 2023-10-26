@@ -35,6 +35,7 @@ const CreateLostItemScreen = ({ navigation }) => {
   const [createdItemId, setCreatedItemId] = useState(null);
   const [otherVisibility, setOtherVisibility] = useState(false);
   const [itemName, setItemName] = useState('');
+  const [persistedItemName, setPersistedItemName] = useState('');
   const [serialNumber, setSerialNumber] = useState('');
   const [color, setColor] = useState('');
   const [description, setDescription] = useState('');
@@ -124,15 +125,20 @@ const CreateLostItemScreen = ({ navigation }) => {
       type: 'specialPost',
       item: postId,
     };
-
-    const res = await axios.post(
+    console.log(itemName);
+    await axios.post(
       `https://app.nativenotify.com/api/indie/group/notification`,
       {
         subIDs: leaderboardUsers,
         appId: 13599,
         appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
         title: 'Seeker',
-        message: 'Lost item reported near you',
+        message:
+          'Lost item reported near you\n\nItem: ' +
+          persistedItemName +
+          '\nLocation: ' +
+          selectedLocation +
+          '\nPoints: 10',
         pushData: JSON.stringify(pushData),
       }
     );
@@ -193,12 +199,13 @@ const CreateLostItemScreen = ({ navigation }) => {
 
         setCreatedItemId(pId);
         setPostId(pId);
-        handleNotification(pId);
+        // handleNotification(pId);
 
         // Update the document with the postId
         await updateDoc(res, { postId: pId });
 
         setLoading(false);
+        setPersistedItemName(itemName);
         setItemName('');
         setColor('');
         setDescription('');
@@ -219,7 +226,11 @@ const CreateLostItemScreen = ({ navigation }) => {
 
   const handleBoosting = () => {
     setIsModalVisible(false);
-    navigation.navigate(PostBoosting, { itemId: createdItemId });
+    navigation.navigate(PostBoosting, {
+      itemId: createdItemId,
+      itemName: persistedItemName,
+      location: selectedLocation,
+    });
   };
 
   const openImagePicker = async () => {
@@ -343,6 +354,7 @@ const CreateLostItemScreen = ({ navigation }) => {
         }
         onPressConfirm={handleBoosting}
         onPressCancel={() => {
+          handleNotification(createdItemId);
           setError({
             visibility: true,
             viewStyles: 'border border-4 border-green-600',

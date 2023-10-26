@@ -11,14 +11,21 @@ import {
   getDoc,
   doc,
   updateDoc,
+  query,
+  limit,
+  orderBy,
+  collection,
 } from 'firebase/firestore';
 import TwoButtonModal from '../components/common/modals/TwoButtonModal';
 import { BuyBoost } from '../constants/RouteConstants';
+import axios from 'axios';
+import getTier from '../util/pointCalculation/getTier';
 
 const PostBoostingScreen = ({ route, navigation }) => {
   const [level, setLevel] = useState(1);
   const [needed, setNeeded] = useState(10);
   const [available, setAvailable] = useState('');
+  const [leaderboardUsers, setLeaderboardUsers] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [showInfoLevelModal, setShowInfoLevelModal] = useState({
     visibility: false,
@@ -90,12 +97,70 @@ const PostBoostingScreen = ({ route, navigation }) => {
     getPoints();
   }, []);
 
+  useEffect(() => {
+    const getLeaderboardUsers = async () => {
+      try {
+        const leadeboardQuery = query(
+          collection(FireStore, 'userDetails'),
+          orderBy('points', 'desc'),
+          limit(10)
+        );
+        const querySnapshot = await getDocs(leadeboardQuery);
+        if (querySnapshot.empty) {
+          console.log('No matching documents.');
+        } else {
+          const users = querySnapshot.docs.map((doc) => doc.data().userId);
+          setLeaderboardUsers(users);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getLeaderboardUsers();
+  }, []);
+
   const handleConfirm = () => {
     if (available >= needed) {
       updatePoints();
+      updatePost();
+      handleNotification(
+        route.params.itemId,
+        route.params.itemName,
+        route.params.location,
+        needed + 10
+      );
     } else {
       setIsModalVisible(true);
     }
+  };
+
+  const handleNotification = async (
+    postId,
+    itemName,
+    selectedLocation,
+    points
+  ) => {
+    const pushData = {
+      type: 'specialPost',
+      item: postId,
+    };
+    await axios.post(
+      `https://app.nativenotify.com/api/indie/group/notification`,
+      {
+        subIDs: leaderboardUsers,
+        appId: 13599,
+        appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
+        title: 'Seeker',
+        message:
+          'Lost item reported near you\n\nItem: ' +
+          itemName +
+          '\nLocation: ' +
+          selectedLocation +
+          '\nPoints: ' +
+          points,
+        pushData: JSON.stringify(pushData),
+      }
+    );
   };
 
   const updatePoints = async () => {
@@ -116,6 +181,22 @@ const PostBoostingScreen = ({ route, navigation }) => {
           message: 'Post boosted successfully !',
           buttonText: 'Okay',
         });
+      } else {
+        console.log('No such document!');
+      }
+    } catch (error) {
+      console.error('Error updating document: ', error);
+    }
+  };
+
+  const updatePost = async () => {
+    try {
+      const docRef = doc(FireStore, 'lostItems', route.params.itemId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const tier = getTier(level);
+        await updateDoc(docRef, { tier: tier });
+        console.log('Document successfully updated!');
       } else {
         console.log('No such document!');
       }
