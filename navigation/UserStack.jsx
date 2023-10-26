@@ -64,7 +64,9 @@ const UserStack = () => {
           name={FoundItems}
           component={FoundItemStack}
           options={{
-            tabBarIcon: () => <FoundIcon name="found" size={48} />,
+            tabBarIcon: () => (
+              <FoundIcon name="found" size={48} style={{ marginTop: 5 }} />
+            ),
             // headerStyle: {
             //   backgroundColor: '#0369A1',
             // },
@@ -80,7 +82,9 @@ const UserStack = () => {
           name={LostItems}
           component={LostItemStack}
           options={{
-            tabBarIcon: () => <LostIcon name="found" size={48} />,
+            tabBarIcon: () => (
+              <LostIcon name="found" size={48} style={{ marginTop: 5 }} />
+            ),
             // headerStyle: {
             //   backgroundColor: '#0369A1',
             // },
@@ -97,7 +101,9 @@ const UserStack = () => {
           component={PostedItemStack}
           options={{
             // header: () => <Header title="Profile" />,
-            tabBarIcon: () => <ProfileIcon name="user" size={48} />,
+            tabBarIcon: () => (
+              <ProfileIcon name="user" size={48} style={{ marginTop: -10 }} />
+            ),
             headerShown: false,
           }}
         />

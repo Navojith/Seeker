@@ -350,7 +350,7 @@ const CreateFoundItemScreen = () => {
         className="border border-4 px-4 py-2 border-light-blue rounded-xl text-black  mb-4"
       />
       <Text className="text-black text-lg font-bold mb-2">
-        Where did you lose it?
+        Where did you find it?
       </Text>
       <View className="border border-4 border-light-blue rounded-xl text-black mb-4">
         <Picker
