@@ -2,6 +2,7 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import CreateLostItemScreen from '../screens/CreateLostItemScreen';
 import LostScreen from '../screens/LostScreen';
+import ImageScreen from '../screens/ImageScreen';
 import PostBoostingScreen from '../screens/PostBoostingScreen';
 import {
   AddLostItem,
@@ -91,6 +92,21 @@ const LostItemStack = ({ navigation }) => {
         options={{
           headerShown: true,
           header: () => <Header title="Search item" />,
+        }}
+      />
+      <Stack.Screen
+        name="Upload Image"
+        component={ImageScreen}
+        options={{
+          headerShown: false,
+          headerStyle: {
+            backgroundColor: '#0369A1',
+          },
+          headerTintColor: '#fff', // Change this color for the text/icon color
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 28,
+          },
         }}
       />
     </Stack.Navigator>

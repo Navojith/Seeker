@@ -5,6 +5,7 @@ import { collectionGroup, getDocs , doc, deleteDoc } from 'firebase/firestore';
 import { TouchableOpacity } from 'react-native';
 import { auth } from '../firebase';
 import MainButton  from '../components/common/buttons/MainButton';
+const addimage = require("../assets/images/PostCreation/AddImage.png");
 import { useNavigation } from '@react-navigation/native';
 // const deleteIcon = '../assets/images/delete.png';
 const tempimage = require('../assets/delete.png');
@@ -71,7 +72,7 @@ const PostedLostItemsScreen = () => {
         backgroundColor:'#ff0000',
     },
     itemText: {
-      fontSize: 20,
+      fontSize: 16,
       margin: 4,
       fontWeight: 'bold',
     },
@@ -121,7 +122,15 @@ const PostedLostItemsScreen = () => {
         renderItem={({item})=>(
           <TouchableOpacity onPress={() => setSelectedItem(item)}>
           <View key={item.id} style={styles.card}>
-            <Image source={{uri:item.imageUri}} style={styles.itemImage}/>
+          {item.imageUrl ? (
+                  <Image
+                    source={{ uri: item.imageUrl }}
+                    style={styles.itemImage}
+                  />
+                ) : (
+                  <Image source={addimage} style={styles.itemImage} />
+                )}
+            {/* <Image source={{uri:item.imageUri}} style={styles.itemImage}/> */}
             <View style={styles.postDetails}>
               <Text style={styles.itemText}>Item : {item.itemName}</Text>
               <Text style={styles.itemText}>Location : {item.location}</Text>
