@@ -8,6 +8,7 @@ import { useNavigation } from "@react-navigation/core";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Modal  from "react-native-modal";
 import { AddLostItem } from "../constants/RouteConstants";
+import * as ImageManipulator from 'expo-image-manipulator';
 const URL = "https://seekervision.cognitiveservices.azure.com/vision/v3.1/analyze?visualFeatures=Description";
 
 const ImageScreen =({route}) =>{
@@ -33,10 +34,21 @@ const ImageScreen =({route}) =>{
         });
         console.log(result);
 
-        if(!result.canceled){
-            setImageUri(result.assets[0].uri);
+        if (!result.canceled) {
+            const resizedPhoto = await ImageManipulator.manipulateAsync(
+              result.assets[0].uri,
+              [{ resize: { width: 300 } }], // resize to width of 300 and preserve aspect ratio
+              { compress: 0.7, format: 'jpeg' }
+            );
+      
+            setImageUri(resizedPhoto.uri);
+            console.log(resizedPhoto.uri);
             console.log(imageUri);
-        }
+            }      
+        // if(!result.canceled){
+        //     setImageUri(result.assets[0].uri);
+        //     console.log(imageUri);
+        // }
     }
 
     const uploadImageToFirebaseStorage = async (imageUri) => {
@@ -199,7 +211,7 @@ const ImageScreen =({route}) =>{
                 {/* } */}
              {imageUri && (
                 <View>
-                    <Image source={{ uri: imageUri }} style={{ width: 250, height: 250 }} />
+                    <Image source={{ uri: imageUri }} style={{ width: 200, height: 200,  resizeMode: 'contain' }} />
                 </View>
               )}
               <MainButton 

@@ -161,6 +161,7 @@ const RequestScreen = ({route}) => {
         marginLeft:40,
         marginRight:16,
         marginBottom:8,
+        resizeMode: 'contain'
       },
       removeimage:{
         width:30,
