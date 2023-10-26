@@ -36,6 +36,14 @@ const PostedFoundItemsScreen = () => {
     getFoundItems();
   }, []);
 
+  const handleReturnItem = (user) =>{
+    console.log(user);
+  }
+
+  const handleSecurity = () =>{
+    console.log("handover to security");
+  }
+
   const styles = StyleSheet.create({
     container: {
       marginLeft: 20,
@@ -111,17 +119,13 @@ const PostedFoundItemsScreen = () => {
                 </View>
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
-                    onPress={() => {
-                      console.log("Return to owner");
-                    }}
+                    onPress={handleReturnItem}
                     style={styles.button}
                   >
                     <Text style={{ color: 'white', fontWeight: 'bold' }}>Return to Owner</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    onPress={() => {
-                      console.log("Handover to Security");
-                    }}
+                    onPress={handleSecurity}
                     style={styles.button}
                   >
                     <Text style={{ color: 'white', fontWeight: 'bold' }}>Handover to Security</Text>
