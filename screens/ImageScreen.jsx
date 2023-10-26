@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet ,Image , View , Text , Button} from "react-native";
+import { StyleSheet ,Image , View , Text , Button, TouchableOpacity} from "react-native";
 import { FireStore, auth, storage } from "../firebase";
 import Header from '../components/header';
 import * as ImagePicker from 'expo-image-picker';
 import MainButton from "../components/common/buttons/MainButton";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import Modal  from "react-native-modal";
 const URL = "https://seekervision.cognitiveservices.azure.com/vision/v3.1/analyze?visualFeatures=Description";
 
 const ImageScreen =() =>{
     const [imageUri , setImageUri] = useState('');
     const [imageUrl , setImageUrl] = useState('');
+    const [tags , setTags] = useState([]);
+    const [description , setDescription] = useState('');
+    const [isModalVisible, setModalVisible] = useState(false);
   
     const pickImage = async () =>{
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -41,7 +45,8 @@ const ImageScreen =() =>{
         const image = await getDownloadURL(storageRef);
         console.log('imageurl',image);
         setImageUrl(image);
-        generateTags(imageUrl);
+        generateTags(image);
+
       } catch (error) {
         console.error("Error uploading image to Firebase Storage: ", error);
         return null;
@@ -69,14 +74,31 @@ const ImageScreen =() =>{
         })
 
         // console.log(response);
-
-        // if(response.ok){
+        if(response.ok){
           const result = await response.text();
+          const responseJson = JSON.parse(result);
+          // console.log(result.description);
+          // console.log(result.captions
+          setModalVisible(true)
           console.log('result',result);
-        // }
+          console.log('response',responseJson);
+          const tags = responseJson.description.tags;
+          const captions = responseJson.description.captions;
+          const text = captions.length > 0 ? captions[0].text : "";
+          setTags(tags);
+          setDescription(text);
+          console.log("Tags:", tags);
+          console.log("Description:", description);
+        }
       }
       // generateTags();
       // }, [imageUrl]);
+
+    const handleTags = () =>{
+      setModalVisible(false);
+      setTags([]);
+      setDescription('');
+    }
 
     const styles = StyleSheet.create({
         container: {
@@ -104,7 +126,19 @@ const ImageScreen =() =>{
             textAlign: "center",
             fontSize:30,
           },
-    })
+          modalStyle:{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+          },
+          modalContainer:{
+            backgroundColor: '#fff',
+            padding: 30,
+            borderRadius: 42,
+            borderWidth: 6,
+            borderColor: '#0369A1',
+          },
+      })
 
     return(
         <View>
@@ -127,7 +161,35 @@ const ImageScreen =() =>{
               {isTfReady && result === '' && <Text>Pick an image to classify!</Text>}
               {result !== '' && <Text>{result}</Text>} */}
            </View>
+           <Modal 
+              isVisible={isModalVisible}
+              animationIn="zoomInDown"
+              animationOut="zoomOutUp"
+              animationInTiming={600}
+              animationOutTiming={600}
+              backdropTransitionInTiming={600}
+              backdropTransitionOutTiming={600}
+           >
+            <View style={styles.modalStyle}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.title}>Select Tags</Text>
+                <Text style={styles.subtitle}>Click the text to select tags.</Text>
+                {tags.map((tag, index) => (
+                      <View key={index}>
+                        <TouchableOpacity>
+                        <Text style={styles.tagText}>{tag}</Text>
+                        </TouchableOpacity>
+                      </View>
+                  ))}
+                <TouchableOpacity>
+                <Text style={styles.modalText}>Description: {description}</Text>
+                </TouchableOpacity>
+                <Button title="Confirm" onPress={handleTags} />
+            </View>
+            </View>
+          </Modal>
        </View>
+       
        
     )
 
