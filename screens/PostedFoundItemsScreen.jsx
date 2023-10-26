@@ -85,7 +85,8 @@ const PostedFoundItemsScreen = () => {
       marginLeft: 8,
       marginRight: 16,
       marginBottom: 8,
-      borderRadius: 8, // Add border radius to the image
+      borderRadius: 8,
+      resizeMode: 'contain',
     },
     buttonContainer: {
       flexDirection: 'row',

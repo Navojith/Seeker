@@ -60,6 +60,7 @@ const CreateLostItemScreen = ({ navigation , route}) => {
   // const {tags , desc} = route?.params;
 
   useEffect(() =>{
+    console.log(route);
     if(route?.params){
     console.log('tags',route?.params?.tags);
     console.log('desc',route?.params?.desc);

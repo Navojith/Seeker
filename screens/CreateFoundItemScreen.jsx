@@ -28,7 +28,7 @@ import axios from 'axios';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import * as ImageManipulator from 'expo-image-manipulator';
 
-const CreateFoundItemScreen = (route) => {
+const CreateFoundItemScreen = ({route}) => {
   const navigation = useNavigation();
   // const {tags , desc} = route.params;
   // console.log('tags',tags);
@@ -62,7 +62,8 @@ const CreateFoundItemScreen = (route) => {
   useEffect(() =>{
     console.log('auto filling tags');
     console.log(route);
-    if(route?.params){
+    console.log(route.params);
+    if(route.params){
       console.log('tags',route?.params?.tags);
       console.log('desc',route?.params?.desc);
       const tags = route?.params?.tags.join(' ');
