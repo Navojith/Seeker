@@ -78,7 +78,8 @@ const LeaderboardItemScreen = ({ route }) => {
     console.log('post', postId);
 
     const postDocRef = doc(FireStore, 'lostItems', postId);
-    const postedUser = await getDoc(postDocRef);
+    const postSnap = await getDoc(postDocRef);
+    const postedUser = postSnap.data().userId;
 
     try {
       await updateDoc(postDocRef, { foundUserId: user });
