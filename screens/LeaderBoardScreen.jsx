@@ -11,6 +11,7 @@ import {
   LostItems,
   LostItem,
 } from '../constants/RouteConstants';
+import LoadingComponent from './LoadingScreen';
 
 const LeaderBoard = () => {
   const [users, setUsers] = useState([]);
@@ -212,7 +213,7 @@ const LeaderBoard = () => {
       </View>
       {loading && (
         <Text className="text-light-blue text-lg font-bold mt-5 ml-12">
-          Loading... Please wait....
+          <LoadingComponent visible={true} />
         </Text>
       )}
     </View>
