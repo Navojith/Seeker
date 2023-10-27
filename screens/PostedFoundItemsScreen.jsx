@@ -15,6 +15,7 @@ import {
   collection,
   query,
   where,
+  deleteDoc,
   getDoc,
   doc,
   updateDoc,
@@ -138,13 +139,53 @@ const PostedFoundItemsScreen = ({ route }) => {
   }
 
   useEffect(()=>{
-    console.log(pushDataObject);
-    setIsModalVisible(true);
-  }, [pushDataObject])
+    if (pushDataObject && pushDataObject.pushDataObject) {
+      const { item, postedUser, type, user} = pushDataObject.pushDataObject;
+  
+      console.log('Item:', item);
+      console.log('Posted User:', postedUser);
+      console.log('Type:', type);
+      console.log('User:', user);
+  
+      if(type == 'confirm return item'){
+        console.log("correct");
+        setIsModalVisible(true);
+      }
+    }
+   }, [pushDataObject])
 
-  const deletePost= async(item)=>{
-    console.log('delete post : ' , item );
-  }
+   const deletePost = async(pushDataObject) => 
+   {
+    if (pushDataObject && pushDataObject.pushDataObject)
+     {
+      const { item, postedUser, type, user} = pushDataObject.pushDataObject;
+      console.log(item);
+
+      const qf = query(collection(FireStore, "foundItems"), where("postId", "==", item));
+      const ql = query(collection(FireStore, "lostItems"), where("postId", "==", item));
+      const foundQuerySnapshot = await getDocs(qf);
+      const lostQuerySnapshot = await getDocs(ql);
+
+      if (!foundQuerySnapshot.empty)
+      {
+        const fdocToDelete = foundQuerySnapshot.docs[0];
+        await deleteDoc(fdocToDelete.ref);
+        setFoundItems(posts.filter((post) => post.postId !== item));
+      }else
+      {
+        if(!lostQuerySnapshot.empty)
+        {
+          const ldocToDelete = lostQuerySnapshot.docs[0];
+          await deleteDoc(ldocToDelete.ref);
+          setFoundItems(posts.filter((post) => post.postId !== item));
+        }
+      }
+        setIsModalVisible(false);
+        console.log("Document deleted with postID:", item);
+        navigation.navigate("profile")
+      }
+      
+   }
 
   const handleSecurity = async(item) => {
     console.log('handover to security');
@@ -307,7 +348,7 @@ const PostedFoundItemsScreen = ({ route }) => {
           //navigate to your page
           onPressConfirm={() =>
             // navigation.navigate(BuyBoost, { itemId: route.params.itemId })
-            {deletePost(pushDataObject.item)}
+            {deletePost(pushDataObject)}
           }
           onPressCancel={() =>
             navigation.navigate("profile")
@@ -315,7 +356,7 @@ const PostedFoundItemsScreen = ({ route }) => {
         />
       <DismissibleAlert data={status} setData={setStatus} />
     </View>
-  );
-};
+  )
+}
 
 export default PostedFoundItemsScreen;
