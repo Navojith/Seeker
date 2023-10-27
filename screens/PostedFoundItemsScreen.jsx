@@ -181,7 +181,7 @@ const PostedFoundItemsScreen = ({ route }) => {
         pushDataObject.pushDataObject;
       console.log(item);
       if (type == 'confirm return item') {
-        updatePoints(getPoints(tier), item, user, type);
+        updatePoints(getPoints(tier), item, postedUser, type);
 
         const pushData = {
           tier: tier,
