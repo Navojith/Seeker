@@ -21,14 +21,20 @@ import {
 } from 'firebase/firestore';
 import axios from 'axios';
 import getPoints from '../util/pointCalculation/getPoints';
+import { getPushDataObject } from 'native-notify';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
+import TwoButtonModal from '../components/common/modals/TwoButtonModal';
 const tempimage = require('../assets/images/PostCreation/AddImage.png');
 
 const PostedFoundItemsScreen = ({ route }) => {
   const [foundItems, setFoundItems] = useState([]);
   const navigation = useNavigation();
   const [currentUser, setCurrentUser] = useState(null);
+  const [requestedUsers , setRequestedUsers] = useState([]);
+  const [requests , setRequests] = useState([]);
   const user = route.params;
+  const pushDataObject = route.params;
+  const [isModalVisible , setIsModalVisible] = useState(false);
   const [status, setStatus] = useState({
     visibility: false,
     viewStyles: 'border border-4 border-red-600',
@@ -80,28 +86,8 @@ const PostedFoundItemsScreen = ({ route }) => {
       if (res.exists) {
         setCurrentUser(res.data());
       }
-      // else {
-      //   setError({
-      //     visibility: true,
-      //     title: 'Error',
-      //     message: 'User Information not found',
-      //     buttonText: 'Close',
-      //     titleStyles: 'text-red-500',
-      //     messageStyles: 'text-red-500',
-      //     viewStyles: 'border border-4 border-red-500',
-      //   });
-      // }
     } catch (error) {
       console.log(error);
-      // setError({
-      //   visibility: true,
-      //   title: 'Error',
-      //   message: 'Data fetching failed',
-      //   buttonText: 'Close',
-      //   titleStyles: 'text-red-500',
-      //   messageStyles: 'text-red-500',
-      //   viewStyles: 'border border-4 border-red-500',
-      // });
     }
   };
 
@@ -109,21 +95,73 @@ const PostedFoundItemsScreen = ({ route }) => {
     fetchUser();
   }, []);
 
-  const handleReturnItem = async () => {
+  const handleReturnItem = async (item) => {
     console.log('user', user);
+    console.log('userId', user.selectedUser.userId);
     console.log('current', currentUser);
+    // console.log('item:',item);
+
+    const pushData = {
+      type : 'confirm return item',
+      item : item.postId,
+      user : user.selectedUser.userId,
+      postedUser : currentUser.displayedName,
+      tier : item.tier,
+    };
+
     await axios.post(`https://app.nativenotify.com/api/indie/notification`, {
-      subID: user.userId,
+      subID: user.selectedUser.userId,
       appId: 13599,
       appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
       title: 'Seeker',
       message:
         'Did you receive your item from ' + currentUser.displayedName + '?',
+      pushData: JSON.stringify(pushData),
     });
   };
 
-  const handleSecurity = (item) => {
+  const getRequestedUsers = async(item) => {
+    // return item.postId;
+    const requestCollectionRef = collection(FireStore, "requests");
+    const q = query(requestCollectionRef, where("itemDetails", "==", item.postId) ,);
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      console.log("No matching documents.");
+    } else {
+      const requestDetails = querySnapshot.docs.map((doc) => doc.data().user);
+      // console.log(requestDetails);
+      setRequests(requestDetails);
+      console.log('getuser',requests);
+      return requests;
+    }
+  }
+
+  useEffect(()=>{
+    console.log(pushDataObject);
+    setIsModalVisible(true);
+  }, [pushDataObject])
+
+  const deletePost= async(item)=>{
+    console.log('delete post : ' , item );
+  }
+
+  const handleSecurity = async(item) => {
     console.log('handover to security');
+    console.log(item);
+    const requestedUsers = await getRequestedUsers(item);
+    console.log('req',requestedUsers);
+    await axios
+    .post(`https://app.nativenotify.com/api/indie/group/notification`, {
+      subIDs: requestedUsers,
+      appId: 13599,
+      appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
+      title: 'Seeker',
+      message:
+        'Item : ' +
+        item.itemName +
+        '\n\nYour lost item has been handed over to the security. Go to the security office to confirm and reclaim your stuff.' 
+    });
     updatePoints(getPoints(item.tier) / 2);
   };
 
@@ -239,7 +277,7 @@ const PostedFoundItemsScreen = ({ route }) => {
                 </View>
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
-                    onPress={handleReturnItem}
+                    onPress={()=>{handleReturnItem(item)}}
                     style={styles.button}
                   >
                     <Text style={{ color: 'white', fontWeight: 'bold' }}>
@@ -261,6 +299,20 @@ const PostedFoundItemsScreen = ({ route }) => {
           keyExtractor={(item, index) => item.id + index.toString()}
         />
       </SafeAreaView>
+      <TwoButtonModal
+          isVisible={isModalVisible}
+          setIsVisible={setIsModalVisible}
+          showInfoIcon={false}
+          heading={"Did you receive your item ?"}
+          //navigate to your page
+          onPressConfirm={() =>
+            // navigation.navigate(BuyBoost, { itemId: route.params.itemId })
+            {deletePost(pushDataObject.item)}
+          }
+          onPressCancel={() =>
+            navigation.navigate("profile")
+          }
+        />
       <DismissibleAlert data={status} setData={setStatus} />
     </View>
   );
