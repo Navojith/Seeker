@@ -34,6 +34,12 @@ const LeaderBoard = () => {
         params: { pushDataObject },
       });
     }
+    if (pushDataObject && pushDataObject.type === 'confirm return item') {
+      navigation.navigate('Posted Found Items', { pushDataObject });
+    }
+    if (pushDataObject && pushDataObject.type === 'congrats') {
+      navigation.navigate('Posted Found Items', { pushDataObject });
+    }
   }, [pushDataObject]);
 
   const styles = StyleSheet.create({

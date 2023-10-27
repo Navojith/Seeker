@@ -15,28 +15,36 @@ import {
   collection,
   query,
   where,
+  deleteDoc,
   getDoc,
   doc,
   updateDoc,
 } from 'firebase/firestore';
 import axios from 'axios';
 import getPoints from '../util/pointCalculation/getPoints';
+import { getPushDataObject } from 'native-notify';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
+import TwoButtonModal from '../components/common/modals/TwoButtonModal';
 const tempimage = require('../assets/images/PostCreation/AddImage.png');
 
 const PostedFoundItemsScreen = ({ route }) => {
   const [foundItems, setFoundItems] = useState([]);
   const navigation = useNavigation();
   const [currentUser, setCurrentUser] = useState(null);
+  const [requestedUsers, setRequestedUsers] = useState([]);
+  const [requests, setRequests] = useState([]);
   const user = route.params;
+  const pushDataObject = route.params;
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [status, setStatus] = useState({
     visibility: false,
-    viewStyles: 'border border-4 border-red-600',
-    title: null,
-    titleStyles: 'text-red-600',
-    message: null,
-    messageStyles: 'text-red-600 font-bold',
+    viewStyles: ` pt-8 flex justify-center border rounded-[42px] border-[6px] border-dark-blue`,
+    message:
+      'Posts can be boosted using in app points. If you have the points needed, you can boost the post absolutely free.',
     buttonText: 'Okay',
+    buttonContainerStyles: ` w-[100px] mx-auto rounded-full bg-dark-blue`,
+    buttonTextStyles: ` font-bold`,
+    messageStyles: ` text-2xl font-bold`,
   });
 
   useEffect(() => {
@@ -54,7 +62,7 @@ const PostedFoundItemsScreen = ({ route }) => {
         );
         const querySnapshot = await getDocs(q);
         const returnQuerySnapshot = await getDocs(returnQuery);
-        console.log('query', returnQuerySnapshot);
+        // console.log('query', returnQuerySnapshot);
 
         if (querySnapshot.empty && returnQuerySnapshot.empty) {
           console.log('No matching documents.');
@@ -80,28 +88,8 @@ const PostedFoundItemsScreen = ({ route }) => {
       if (res.exists) {
         setCurrentUser(res.data());
       }
-      // else {
-      //   setError({
-      //     visibility: true,
-      //     title: 'Error',
-      //     message: 'User Information not found',
-      //     buttonText: 'Close',
-      //     titleStyles: 'text-red-500',
-      //     messageStyles: 'text-red-500',
-      //     viewStyles: 'border border-4 border-red-500',
-      //   });
-      // }
     } catch (error) {
       console.log(error);
-      // setError({
-      //   visibility: true,
-      //   title: 'Error',
-      //   message: 'Data fetching failed',
-      //   buttonText: 'Close',
-      //   titleStyles: 'text-red-500',
-      //   messageStyles: 'text-red-500',
-      //   viewStyles: 'border border-4 border-red-500',
-      // });
     }
   };
 
@@ -109,42 +97,194 @@ const PostedFoundItemsScreen = ({ route }) => {
     fetchUser();
   }, []);
 
-  const handleReturnItem = async () => {
+  const handleReturnItem = async (item) => {
     console.log('user', user);
+    console.log('userId', user.selectedUser.userId);
     console.log('current', currentUser);
+    // console.log('item:',item);
+
+    const pushData = {
+      type: 'confirm return item',
+      item: item.postId,
+      itemName: item.itemName,
+      user: user.selectedUser.userId,
+      username: user.selectedUser.displayedName,
+      postedUser: currentUser.userId,
+      tier: item?.tier ?? 'free',
+    };
+
     await axios.post(`https://app.nativenotify.com/api/indie/notification`, {
-      subID: user.userId,
+      subID: user.selectedUser.userId,
       appId: 13599,
       appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
       title: 'Seeker',
       message:
         'Did you receive your item from ' + currentUser.displayedName + '?',
+      pushData: JSON.stringify(pushData),
     });
   };
 
-  const handleSecurity = (item) => {
-    console.log('handover to security');
-    updatePoints(getPoints(item.tier) / 2);
+  const getRequestedUsers = async (item) => {
+    // return item.postId;
+    const requestCollectionRef = collection(FireStore, 'requests');
+    const q = query(
+      requestCollectionRef,
+      where('itemDetails', '==', item.postId)
+    );
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      console.log('No matching documents.');
+    } else {
+      const requestDetails = querySnapshot.docs.map((doc) => doc.data().user);
+      // console.log(requestDetails);
+      setRequests(requestDetails);
+      console.log('getuser', requests);
+      return requests;
+    }
   };
 
-  const updatePoints = async (pointsGained) => {
+  useEffect(() => {
+    if (pushDataObject && pushDataObject.pushDataObject) {
+      const { type } = pushDataObject.pushDataObject;
+
+      // console.log('Item:', item);
+      // console.log('Posted User:', postedUser);
+      // console.log('Type:', type);
+      // console.log('User:', user);
+
+      if (type == 'confirm return item') {
+        console.log('correct');
+        setIsModalVisible(true);
+      }
+      if (type == 'congrats') {
+        const { tier, name, item } = pushDataObject.pushDataObject;
+        const pointsGained = getPoints(tier);
+        setStatus({
+          ...status,
+          visibility: true,
+          message:
+            'You gained ' +
+            pointsGained +
+            ' points for returning ' +
+            `${name ? name + "'s " : ''}` +
+            item,
+          buttonText: 'Okay',
+        });
+      }
+    }
+  }, [pushDataObject]);
+
+  const deletePost = async (pushDataObject) => {
+    if (pushDataObject && pushDataObject.pushDataObject) {
+      const { item, itemName, postedUser, type, user, tier, username } =
+        pushDataObject.pushDataObject;
+      console.log(item);
+      if (type == 'confirm return item') {
+        updatePoints(getPoints(tier), item, user, type);
+
+        const pushData = {
+          tier: tier,
+          name: username,
+          item: itemName,
+          type: 'congrats',
+        };
+
+        await axios.post(
+          `https://app.nativenotify.com/api/indie/notification`,
+          {
+            subID: postedUser,
+            appId: 13599,
+            appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
+            title: 'Seeker',
+            message:
+              'Congratulations!!!\nPoints awarded for the item you returned',
+            pushData: JSON.stringify(pushData),
+          }
+        );
+
+        const qf = query(
+          collection(FireStore, 'foundItems'),
+          where('postId', '==', item)
+        );
+        const ql = query(
+          collection(FireStore, 'lostItems'),
+          where('postId', '==', item)
+        );
+        const foundQuerySnapshot = await getDocs(qf);
+        const lostQuerySnapshot = await getDocs(ql);
+
+        if (!foundQuerySnapshot.empty) {
+          const fdocToDelete = foundQuerySnapshot.docs[0];
+          await deleteDoc(fdocToDelete.ref);
+          setFoundItems(posts.filter((post) => post.postId !== item));
+        } else {
+          if (!lostQuerySnapshot.empty) {
+            const ldocToDelete = lostQuerySnapshot.docs[0];
+            await deleteDoc(ldocToDelete.ref);
+            setFoundItems(posts.filter((post) => post.postId !== item));
+          }
+        }
+        setIsModalVisible(false);
+        console.log('Document deleted with postID:', item);
+        navigation.navigate('profile');
+      }
+    }
+  };
+
+  const handleSecurity = async (item) => {
+    console.log('handover to security');
+    console.log(item);
+    const requestedUsers = await getRequestedUsers(item);
+    console.log('req', requestedUsers);
+    await axios.post(
+      `https://app.nativenotify.com/api/indie/group/notification`,
+      {
+        subIDs: requestedUsers,
+        appId: 13599,
+        appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
+        title: 'Seeker',
+        message:
+          'Item : ' +
+          item.itemName +
+          '\n\nYour lost item has been handed over to the security. Go to the security office to confirm and reclaim your stuff.',
+      }
+    );
+    updatePoints(getPoints(item.tier) / 2, item);
+  };
+
+  const updatePoints = async (
+    pointsGained,
+    item,
+    user = auth.currentUser.uid,
+    type = 'security'
+  ) => {
     try {
-      const docRef = doc(FireStore, 'userDetails', auth.currentUser.uid);
+      const docRef = doc(FireStore, 'userDetails', user);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         const doc = docSnap.data();
         const newPoints = doc.points + pointsGained;
         await updateDoc(docRef, { points: newPoints });
         console.log('Document successfully updated!');
-        setStatus({
-          visibility: true,
-          viewStyles: 'border border-4 border-green-600',
-          titleStyles: 'text-green-600',
-          messageStyles: 'text-green-600 font-bold',
-          title: 'Success !',
-          message: 'You gained ' + pointsGained + ' points !',
-          buttonText: 'Okay',
-        });
+        if (type == 'security') {
+          setStatus({
+            ...status,
+            visibility: true,
+            message:
+              'You gained ' +
+              pointsGained +
+              ' points for returning ' +
+              `${
+                user?.selectedUser
+                  ? user?.selectedUser?.displayedName + "'s "
+                  : ''
+              }` +
+              item.itemName +
+              ' to the security office.',
+            buttonText: 'Okay',
+          });
+        }
       } else {
         console.log('No such document!');
       }
@@ -239,7 +379,9 @@ const PostedFoundItemsScreen = ({ route }) => {
                 </View>
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
-                    onPress={handleReturnItem}
+                    onPress={() => {
+                      handleReturnItem(item);
+                    }}
                     style={styles.button}
                   >
                     <Text style={{ color: 'white', fontWeight: 'bold' }}>
@@ -261,7 +403,25 @@ const PostedFoundItemsScreen = ({ route }) => {
           keyExtractor={(item, index) => item.id + index.toString()}
         />
       </SafeAreaView>
-      <DismissibleAlert data={status} setData={setStatus} />
+      <TwoButtonModal
+        isVisible={isModalVisible}
+        setIsVisible={setIsModalVisible}
+        showInfoIcon={false}
+        heading={'Did you receive your item ?'}
+        //navigate to your page
+        onPressConfirm={() =>
+          // navigation.navigate(BuyBoost, { itemId: route.params.itemId })
+          {
+            deletePost(pushDataObject);
+          }
+        }
+        onPressCancel={() => navigation.navigate('profile')}
+      />
+      <DismissibleAlert
+        data={status}
+        setData={setStatus}
+        onPress={() => navigation.navigate('profile')}
+      />
     </View>
   );
 };

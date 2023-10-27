@@ -11,6 +11,7 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
 } from 'firebase/firestore';
 import { FireStore, auth } from '../firebase';
 
@@ -53,6 +54,9 @@ const LostItem = ({ route }) => {
     console.log('post', postId);
 
     const postDocRef = doc(FireStore, 'lostItems', postId);
+    const postSnap = await getDoc(postDocRef);
+    const postedUser = postSnap.data().userId;
+    console.log('postSnap', postedUser);
 
     try {
       await updateDoc(postDocRef, { foundUserId: user });
@@ -61,7 +65,7 @@ const LostItem = ({ route }) => {
       console.log(db);
 
       const res = await addDoc(collection(db, 'requests'), {
-        user: user,
+        user: postedUser,
         itemDetails: postId,
       });
       console.log('requestId', res.id);
