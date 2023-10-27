@@ -20,6 +20,8 @@ import * as ImagePicker from "expo-image-picker";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import * as ImageManipulator from "expo-image-manipulator";
 import EvilIcons from "react-native-vector-icons/EvilIcons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faSignOut } from "@fortawesome/free-solid-svg-icons";
 
 const ProfileScreen = () => {
   const [user, setUser] = useState(null);
@@ -251,7 +253,7 @@ const ProfileScreen = () => {
               <Text style={styles.buttonText}>Settings</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={handleSignOut} style={styles.row}>
-            <EvilIcons name="log" size={20} color="black" />
+            <EvilIcons name="arrow-right" size={20} color="black" />
               <Text style={styles.buttonText}>Sign Out</Text>
             </TouchableOpacity>
           </View>
