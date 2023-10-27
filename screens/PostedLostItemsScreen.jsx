@@ -186,12 +186,13 @@
 import { View, Text , SafeAreaView , FlatList , Image , StyleSheet} from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { FireStore } from '../firebase';
-import { collectionGroup, getDocs , doc, deleteDoc } from 'firebase/firestore';
+import { collectionGroup, getDocs , doc, deleteDoc, query, where, collection } from 'firebase/firestore';
 import { TouchableOpacity } from 'react-native';
 import { auth } from '../firebase';
 import MainButton  from '../components/common/buttons/MainButton';
 const addimage = require("../assets/images/PostCreation/AddImage.png");
 import { useNavigation } from '@react-navigation/native';
+import TwoButtonModal from '../components/common/modals/TwoButtonModal';
 // const deleteIcon = '../assets/images/delete.png';
 const tempimage = require('../assets/delete.png');
 // const imageIcon = require('../assets/imageIcon.png');
@@ -201,6 +202,7 @@ const PostedLostItemsScreen = () => {
   const [posts , setPosts] = useState([]);
   const [selectedItem , setSelectedItem] = useState(null);
   const navigation = useNavigation();
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
 
   useEffect(() =>{
@@ -236,24 +238,33 @@ const PostedLostItemsScreen = () => {
   },[])
 
 
-  const handleDeleteItem = async(item)=>{
-    console.log('delete item');
-    console.log(item);
-    setSelectedItem(item);
-    if(selectedItem){
-      console.log('selectedItem',selectedItem);
-      try{
-        console.log(selectedItem.postId);
-        const result = await deleteDoc(doc(FireStore, "lostItems", selectedItem.postId));
-        console.log('deleted', result);
-        setPosts(posts.filter(post => post.postid !== selectedItem.postId));
-        setSelectedItem(null);  
-        // navigation.navigate("Posted Found Items" , {screen: 'Profile'});
-      }catch(error){
-        console.log(error);
-      }
-    }
+  const handleDeleteItem = (postId) => {
+    setSelectedItem(postId);
+    setIsModalVisible(true);
   }
+
+  const confirmDeleteItem = async () => {
+    try {
+      
+      const q = query(collection(FireStore, "lostItems"), where("postId", "==", selectedItem));
+      const querySnapshot = await getDocs(q);
+  
+      if (!querySnapshot.empty) {
+        const docToDelete = querySnapshot.docs[0];
+        await deleteDoc(docToDelete.ref);
+  
+        // Remove the deleted post from the state
+        setPosts(posts.filter((post) => post.postId !== selectedItem));
+        setIsModalVisible(false);
+        console.log("Document deleted with postID:", selectedItem);
+      } else {
+        console.log("No document found with postID:", postID);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
 
   const styles = StyleSheet.create({
     container:{
@@ -308,6 +319,16 @@ const PostedLostItemsScreen = () => {
 
   return (
     <View>
+       <TwoButtonModal
+        isVisible={isModalVisible}
+        setIsVisible={setIsModalVisible}
+        heading={'Delete post?'}
+        onPressConfirm={confirmDeleteItem}
+        onPressCancel={() => {
+          setIsModalVisible(false);
+        }}
+        showInfoIcon={false}
+      />
       <SafeAreaView>
       <FlatList 
         data={posts} 
@@ -330,7 +351,7 @@ const PostedLostItemsScreen = () => {
             {/*  onPress={() => removeGoal(itemData.item.key)} */}
               {/* <Text  style={styles.itemText}>Delete</Text> */}
             {/* <View styles={{height:100, width:100 , justifyContent:'center',border:'1px solid #000' , margin: 10, padding: 10}}> */}
-            <TouchableOpacity onPress={()=>{handleDeleteItem(item)}}> 
+            <TouchableOpacity onPress={()=>{handleDeleteItem(item.postId)}}> 
               <Image source={tempimage} 
                 style={styles.removeimage}
               />

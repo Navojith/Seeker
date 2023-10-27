@@ -26,9 +26,6 @@ import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import TwoButtonModal from '../components/common/modals/TwoButtonModal';
 import { PostBoosting } from '../constants/RouteConstants';
 import axios from 'axios';
-// import * as ImagePicker from 'expo-image-picker';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-// import * as ImageManipulator from 'expo-image-manipulator';
 
 const CreateLostItemScreen = ({ navigation, route }) => {
   const [selectedLocation, setSelectedLocation] = useState(data.locations[0]);
@@ -57,7 +54,6 @@ const CreateLostItemScreen = ({ navigation, route }) => {
   const [postId, setPostId] = useState('');
   const [foundItemNotifications, setFoundItemNotifications] = useState(false);
   const [lostItemNotifications, setLostItemNotifications] = useState(false);
-  // const {tags , desc} = route?.params;
 
   useEffect(() => {
     console.log(route);
@@ -79,36 +75,6 @@ const CreateLostItemScreen = ({ navigation, route }) => {
       setOtherVisibility(false);
     }
   }, [selectedLocation]);
-
-  useEffect(() => {
-    const fetchSearch = async () => {
-      try {
-        const searchCollectionRef = collection(FireStore, 'searchLostItems');
-
-        const querySnapshot = await getDocs(searchCollectionRef);
-
-        const searchDocuments = [];
-
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          searchDocuments.push({ id: doc.id, ...data });
-        });
-
-        setSearchDocuments(searchDocuments);
-
-        console.log('Fetched search documents:', searchDocuments);
-      } catch (error) {
-        console.error('Error fetching search documents:', error);
-        // Handle the error here
-      }
-    };
-
-    fetchSearch();
-  }, []);
-
-  useEffect(() => {
-    matchSearch();
-  }, [postId]);
 
   useEffect(() => {
     const getLeaderboardUsers = async () => {
@@ -159,22 +125,6 @@ const CreateLostItemScreen = ({ navigation, route }) => {
       });
   };
 
-  // const uploadImageToFirebaseStorage = async (imageUri) => {
-  //   try {
-  //     const response = await fetch(imageUri);
-  //     const blob = await response.blob();
-  //     const storageRef = ref(
-  //       storage,
-  //       `images/${auth.currentUser.uid}/${Date.now()}.jpg`
-  //     );
-  //     await uploadBytes(storageRef, blob);
-  //     return getDownloadURL(storageRef);
-  //   } catch (error) {
-  //     console.error('Error uploading image to Firebase Storage: ', error);
-  //     return null;
-  //   }
-  // };
-
   const handleSubmit = async () => {
     if (itemName === '' || description === '') {
       setError((prev) => ({
@@ -189,10 +139,6 @@ const CreateLostItemScreen = ({ navigation, route }) => {
     } else {
       try {
         setLoading(true);
-        // let imageUrl = null;
-        // if (imageUri) {
-        //   imageUrl = await uploadImageToFirebaseStorage(imageUri);
-        // }
         const res = await addDoc(collection(FireStore, 'lostItems'), {
           userId: auth.currentUser.uid,
           foundUserId: '',
@@ -218,6 +164,9 @@ const CreateLostItemScreen = ({ navigation, route }) => {
 
         // Update the document with the postId
         await updateDoc(res, { postId: pId });
+
+        // Match search-------------------------------------------
+        matchSearch(pId);
 
         setLoading(false);
         setPersistedItemName(itemName);
@@ -251,43 +200,34 @@ const CreateLostItemScreen = ({ navigation, route }) => {
   const openImagePicker = async () => {
     const screen = 'lost';
     navigation.navigate('Upload Image', { screen });
-    // let result = await ImagePicker.launchImageLibraryAsync({
-    //   mediaTypes: ImagePicker.MediaTypeOptions.All,
-    //   allowsEditing: true,
-    //   //aspect: [4, 3],
-    //   quality: 1,
-    // });
-
-    // console.log(result);
-
-    // if (!result.canceled) {
-    //   const resizedPhoto = await ImageManipulator.manipulateAsync(
-    //     result.assets[0].uri,
-    //     [{ resize: { width: 300 } }], // resize to width of 300 and preserve aspect ratio
-    //     { compress: 0.7, format: 'jpeg' }
-    //   );
-
-    //   setImageUri(resizedPhoto.uri);
-    //   console.log(resizedPhoto.uri);
-    // }
   };
 
-  const matchSearch = async () => {
-    console.log('Matching search documents...');
+  const matchSearch = async (pId) => {
+    console.log("Matching search documents...");
+    const searchDocuments = [];
 
-    if (!postId) {
-      console.log('postId is empty');
-      return;
+    try {
+      const searchCollectionRef = collection(FireStore, "searchLostItems");
+      const querySnapshot = await getDocs(searchCollectionRef);
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        searchDocuments.push({ id: doc.id, ...data });
+      });
+
+      console.log("Fetched search documents:", searchDocuments);
+    } catch (error) {
+      console.error("Error fetching search documents:", error);
+      // Handle the error here
     }
 
-    console.log('postId', postId);
+    console.log("passed postId", pId);
 
-    for (const doc of searchDocuments) {
-      const queryWords = doc.query.toLowerCase().split(' ');
+    for (const document of searchDocuments) {
+      const queryWords = document.query.toLowerCase().split(" ");
       const itemNameLower = itemName.toLowerCase();
-      const descriptionWords = description.toLowerCase().split(' ');
+      const descriptionWords = description.toLowerCase().split(" ");
 
-      // Check if any word from the query is present in any of the fields
       const isMatch = queryWords.some((word) => {
         return (
           itemNameLower.includes(word) ||
@@ -299,64 +239,50 @@ const CreateLostItemScreen = ({ navigation, route }) => {
       });
 
       if (isMatch) {
-        console.log('Match found');
-        const res = await getNotificationSettings(doc.userId);
-        console.log('lost', lostItemNotifications);
-        console.log('res', res);
-        if (lostItemNotifications) {
-          const pushData = {
-            type: 'searchFoundItem',
-            postId,
-          };
+        console.log("Match found" + document.userId);
 
-          // Add a 10-second delay because firestore is slow
-          setTimeout(() => {
-            axios.post(`https://app.nativenotify.com/api/indie/notification`, {
-              subID: doc.userId,
-              appId: 13599,
-              appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
-              title: 'Lost item matched your search',
-              message:
-                'Your search "' +
-                doc.query +
-                '" matched with "' +
-                itemName +
-                '"',
-              pushData: JSON.stringify(pushData),
-            });
-          }, 10000);
-        } else {
-          console.log('User has disabled lost item notifications');
+        try {
+          const userId = document.userId;
+          const notificationsDocRef = doc(FireStore, "notifications", userId);
+          const docSnap = await getDoc(notificationsDocRef);
+
+          if (docSnap.exists()) {
+            const notificationData = docSnap.data();
+            console.log("Notification settings:", notificationData);
+
+            if (notificationData) {
+              const permissions = notificationData;
+              if (permissions.lostItemNotifications) {
+                const pushData = {
+                  type: "searchLostItem",
+                  postId: pId,
+                };
+
+                axios.post(
+                  `https://app.nativenotify.com/api/indie/notification`,
+                  {
+                    subID: userId,
+                    appId: 13599,
+                    appToken: "gTBeP5h5evCxHcHdDs0yVQ",
+                    title: "Lost item matched your search",
+                    message:
+                      'Your search "' +
+                      document.query +
+                      '" matched with "' +
+                      itemName +
+                      '"',
+                    pushData: JSON.stringify(pushData),
+                  }
+                );
+              } else {
+                console.log("User has disabled found item notifications");
+              }
+            }
+          }
+        } catch (error) {
+          console.log(error);
         }
       }
-    }
-  };
-
-  const getNotificationSettings = async (uId) => {
-    console.log('Retrieving notification settings...');
-    console.log('uId', uId);
-    try {
-      const docRef = doc(FireStore, 'notifications', uId);
-
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        console.log('Notification settings:', data);
-        if (data) {
-          console.log(data);
-          setFoundItemNotifications(data.foundItemNotifications);
-          setLostItemNotifications(data.lostItemNotifications);
-        }
-      } else {
-        console.log('No notification settings found');
-      }
-
-      console.log('Notification settings retrieved');
-
-      return true;
-    } catch (error) {
-      console.log(error);
     }
   };
 
