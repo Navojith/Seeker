@@ -10,6 +10,7 @@ import {
 } from 'firebase/firestore';
 import { FireStore, auth } from '../firebase';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
+import { useNavigation } from '@react-navigation/native';
 const tempimage = require('../assets/images/PostCreation/AddImage.png');
 
 const FoundItem = ({ route }) => {
@@ -23,6 +24,7 @@ const FoundItem = ({ route }) => {
     message: null,
     messageStyles: 'text-red-600 font-bold',
   });
+  const navigation = useNavigation();
 
   useEffect(() => {
     console.log('fetching item details');
@@ -75,17 +77,18 @@ const FoundItem = ({ route }) => {
         viewStyles: 'border border-4 border-green-600',
         titleStyles: 'text-green-600',
         messageStyles: 'text-green-600 font-bold',
-        title: 'Success !',
-        message: 'Item Claimed !',
+        title: 'Item maked as found !',
+        message: 'Check posted found items in your profile !',
       });
     } catch (error) {
       setError((prev) => ({
         ...prev,
         visibility: true,
-        title: 'Try Again !',
-        message: "Can't claim the item !",
+        title: 'Already Claimed !',
+        message: "Posted user can not claim !",
       }));
     }
+    // navigation.goBack();
   };
 
   const styles = StyleSheet.create({
