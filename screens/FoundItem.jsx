@@ -2,12 +2,21 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { getFirestore, addDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { FireStore, auth } from "../firebase";
+import DismissibleAlert from "../components/common/alerts/DismissibleAlert";
 const tempimage = require("../assets/images/PostCreation/AddImage.png");
 
 
 const FoundItem = ({ route }) => {
 const { item, pushDataObject } = route.params;
 const [fetchedItem, setFetchedItem] = useState(null);
+const [error , setError] = useState({
+  visibility: false,
+  viewStyles: "border border-4 border-red-600",
+  title: null,
+  titleStyles: "text-red-600",
+  message: null,
+  messageStyles: "text-red-600 font-bold",
+});
 
 useEffect(() => {
   console.log("fetching item details");
@@ -54,9 +63,21 @@ useEffect(() => {
        user : currentUser,
        itemDetails : post,
       });
-      console.log('successful');
+      setError({
+        visibility: true,
+        viewStyles: "border border-4 border-green-600",
+        titleStyles: "text-green-600",
+        messageStyles: "text-green-600 font-bold",
+        title: "Success !",
+        message: "Item Claimed !",
+      });
     } catch(error){
-      console.log(error);
+      setError((prev) => ({
+        ...prev,
+        visibility: true,
+        title: "Try Again !",
+        message: "Can't claim the item !",
+      }));
     }
   }
 
@@ -116,6 +137,7 @@ useEffect(() => {
 
   return (
     <View style={styles.container}>
+      <DismissibleAlert data={error} setData={setError} />
       {fetchedItem && (
         <View style={styles.card}>
           <View style={styles.cardContent}>

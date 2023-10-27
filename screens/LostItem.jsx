@@ -14,11 +14,20 @@ import {
   getDoc,
 } from 'firebase/firestore';
 import { FireStore, auth } from '../firebase';
+import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 
 const LostItem = ({ route }) => {
   const { item, pushDataObject } = route.params;
   const [fetchedItem, setFetchedItem] = useState(null);
   const [postedUserId, setPostedUserId] = useState(null);
+  const [error, setError] = useState({
+    visibility: false,
+    viewStyles: "border border-4 border-red-600",
+    title: null,
+    titleStyles: "text-red-600",
+    message: null,
+    messageStyles: "text-red-600 font-bold",
+  });
 
   useEffect(() => {
     console.log('fetching item details');
@@ -69,9 +78,22 @@ const LostItem = ({ route }) => {
         itemDetails: postId,
       });
       console.log('requestId', res.id);
+      setError({
+        visibility: true,
+        viewStyles: "border border-4 border-green-600",
+        titleStyles: "text-green-600",
+        messageStyles: "text-green-600 font-bold",
+        title: "Success !",
+        message: "Item Returened !",
+      });
       console.log('document updated successfully');
     } catch (error) {
-      console.error(error);
+      setError((prev) => ({
+        ...prev,
+        visibility: true,
+        title: "Try Again !",
+        message: "Can't return the item !",
+      }));
     }
   };
 
@@ -131,6 +153,7 @@ const LostItem = ({ route }) => {
 
   return (
     <View style={styles.container}>
+      <DismissibleAlert data={error} setData={setError} />
       {fetchedItem && (
         <View style={styles.card}>
           <View style={styles.cardContent}>
