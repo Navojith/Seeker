@@ -144,9 +144,8 @@ const PostBoostingScreen = ({ route, navigation }) => {
       type: 'specialPost',
       item: postId,
     };
-    await axios.post(
-      `https://app.nativenotify.com/api/indie/group/notification`,
-      {
+    await axios
+      .post(`https://app.nativenotify.com/api/indie/group/notification`, {
         subIDs: leaderboardUsers,
         appId: 13599,
         appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
@@ -159,8 +158,10 @@ const PostBoostingScreen = ({ route, navigation }) => {
           '\nPoints: ' +
           points,
         pushData: JSON.stringify(pushData),
-      }
-    );
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   const updatePoints = async () => {

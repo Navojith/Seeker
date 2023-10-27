@@ -30,7 +30,7 @@ import axios from 'axios';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 // import * as ImageManipulator from 'expo-image-manipulator';
 
-const CreateLostItemScreen = ({ navigation , route}) => {
+const CreateLostItemScreen = ({ navigation, route }) => {
   const [selectedLocation, setSelectedLocation] = useState(data.locations[0]);
   const [createdItemId, setCreatedItemId] = useState(null);
   const [otherVisibility, setOtherVisibility] = useState(false);
@@ -59,17 +59,18 @@ const CreateLostItemScreen = ({ navigation , route}) => {
   const [lostItemNotifications, setLostItemNotifications] = useState(false);
   // const {tags , desc} = route?.params;
 
-  useEffect(() =>{
+  useEffect(() => {
     console.log(route);
-    if(route?.params){
-    console.log('tags',route?.params?.tags);
-    console.log('desc',route?.params?.desc);
-    const tags = route?.params?.tags.join(' ');
-    setItemName(tags);
-    setDescription(route?.params?.desc)}
+    if (route?.params) {
+      console.log('tags', route?.params?.tags);
+      console.log('desc', route?.params?.desc);
+      const tags = route?.params?.tags.join(' ');
+      setItemName(tags);
+      setDescription(route?.params?.desc);
+    }
     setImageUrl(route?.params?.img);
     console.log('img:', imageUrl);
-  },[route])
+  }, [route]);
 
   useEffect(() => {
     if (selectedLocation === 'Other') {
@@ -139,9 +140,8 @@ const CreateLostItemScreen = ({ navigation , route}) => {
       item: postId,
     };
     console.log(itemName);
-    await axios.post(
-      `https://app.nativenotify.com/api/indie/group/notification`,
-      {
+    await axios
+      .post(`https://app.nativenotify.com/api/indie/group/notification`, {
         subIDs: leaderboardUsers,
         appId: 13599,
         appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
@@ -153,8 +153,10 @@ const CreateLostItemScreen = ({ navigation , route}) => {
           selectedLocation +
           '\nPoints: 10',
         pushData: JSON.stringify(pushData),
-      }
-    );
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   // const uploadImageToFirebaseStorage = async (imageUri) => {
@@ -203,7 +205,7 @@ const CreateLostItemScreen = ({ navigation , route}) => {
           tier: 'free',
           timestamp: new Date(),
           postId: '',
-          imageUrl: imageUrl,
+          imageUrl: imageUrl ?? null,
         });
 
         console.log('id', res.id);
@@ -247,8 +249,8 @@ const CreateLostItemScreen = ({ navigation , route}) => {
   };
 
   const openImagePicker = async () => {
-    const screen = "lost";
-    navigation.navigate('Upload Image' , {screen});
+    const screen = 'lost';
+    navigation.navigate('Upload Image', { screen });
     // let result = await ImagePicker.launchImageLibraryAsync({
     //   mediaTypes: ImagePicker.MediaTypeOptions.All,
     //   allowsEditing: true,
@@ -399,7 +401,7 @@ const CreateLostItemScreen = ({ navigation , route}) => {
           />
         ) : (
           <Text>Select an Image</Text>
-         )}
+        )}
       </TouchableOpacity>
       <Text className="text-black text-lg font-bold mb-2">Item Name</Text>
       <TextInput
