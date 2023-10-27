@@ -1,137 +1,144 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
-import { getFirestore, addDoc, collection, query, where, getDocs } from "firebase/firestore";
-import { FireStore, auth } from "../firebase";
-import DismissibleAlert from "../components/common/alerts/DismissibleAlert";
-const tempimage = require("../assets/images/PostCreation/AddImage.png");
-
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import {
+  getFirestore,
+  addDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from 'firebase/firestore';
+import { FireStore, auth } from '../firebase';
+import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
+const tempimage = require('../assets/images/PostCreation/AddImage.png');
 
 const FoundItem = ({ route }) => {
-const { item, pushDataObject } = route.params;
-const [fetchedItem, setFetchedItem] = useState(null);
-const [error , setError] = useState({
-  visibility: false,
-  viewStyles: "border border-4 border-red-600",
-  title: null,
-  titleStyles: "text-red-600",
-  message: null,
-  messageStyles: "text-red-600 font-bold",
-});
+  const { item, pushDataObject } = route.params;
+  const [fetchedItem, setFetchedItem] = useState(null);
+  const [error, setError] = useState({
+    visibility: false,
+    viewStyles: 'border border-4 border-red-600',
+    title: null,
+    titleStyles: 'text-red-600',
+    message: null,
+    messageStyles: 'text-red-600 font-bold',
+  });
 
-useEffect(() => {
-  console.log("fetching item details");
-  console.log(pushDataObject);
-  if (pushDataObject && pushDataObject.postId) {
-    const fetchItemDetails = async () => {
-      try {
-        // Construct a query to find a document where 'postId' matches 'pushDataObject.postId'
-        const q = query(collection(FireStore, 'foundItems'), where('postId', '==', pushDataObject.postId));
-        
-        // Retrieve the documents that match the query
-        const querySnapshot = await getDocs(q);
+  useEffect(() => {
+    console.log('fetching item details');
+    console.log(pushDataObject);
+    if (pushDataObject && pushDataObject.postId) {
+      const fetchItemDetails = async () => {
+        try {
+          // Construct a query to find a document where 'postId' matches 'pushDataObject.postId'
+          const q = query(
+            collection(FireStore, 'foundItems'),
+            where('postId', '==', pushDataObject.postId)
+          );
 
-        // Check if any documents were found
-        if (!querySnapshot.empty) {
-          // Assuming there's only one matching document, retrieve its data
-          const itemData = querySnapshot.docs[0].data();
-          setFetchedItem(itemData);
-          console.log(itemData);
-        } else {
-          console.log('Item not found');
+          // Retrieve the documents that match the query
+          const querySnapshot = await getDocs(q);
+
+          // Check if any documents were found
+          if (!querySnapshot.empty) {
+            // Assuming there's only one matching document, retrieve its data
+            const itemData = querySnapshot.docs[0].data();
+            setFetchedItem(itemData);
+            console.log(itemData);
+          } else {
+            console.log('Item not found');
+          }
+        } catch (error) {
+          console.error('Error fetching item details:', error);
+          // Handle the error here
         }
-      } catch (error) {
-        console.error('Error fetching item details:', error);
-        // Handle the error here
-      }
-    };
-    fetchItemDetails();
-    
-  }
-  
-}, [pushDataObject]);
+      };
+      fetchItemDetails();
+    }
+  }, [pushDataObject]);
 
-  const handleClaim = async(post) =>{
-    try{
+  const handleClaim = async (post) => {
+    try {
       console.log(post);
       const currentUser = auth.currentUser.uid;
-      console.log(post , currentUser);
+      console.log(post, currentUser);
 
       const db = getFirestore();
       console.log(db);
 
-      const res = await addDoc(collection(db , 'requests'),{
-       user : currentUser,
-       itemDetails : post,
+      const res = await addDoc(collection(db, 'requests'), {
+        user: currentUser,
+        itemDetails: post,
       });
       setError({
         visibility: true,
-        viewStyles: "border border-4 border-green-600",
-        titleStyles: "text-green-600",
-        messageStyles: "text-green-600 font-bold",
-        title: "Success !",
-        message: "Item Claimed !",
+        viewStyles: 'border border-4 border-green-600',
+        titleStyles: 'text-green-600',
+        messageStyles: 'text-green-600 font-bold',
+        title: 'Success !',
+        message: 'Item Claimed !',
       });
-    } catch(error){
+    } catch (error) {
       setError((prev) => ({
         ...prev,
         visibility: true,
-        title: "Try Again !",
+        title: 'Try Again !',
         message: "Can't claim the item !",
       }));
     }
-  }
+  };
 
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     card: {
-      width: "70%",
+      width: '70%',
       padding: 16,
-      backgroundColor: "#fff",
+      backgroundColor: '#fff',
       borderRadius: 25,
       elevation: 3,
-      shadowColor: "#000",
+      shadowColor: '#000',
       shadowOffset: { width: 1, height: 1 },
       shadowOpacity: 0.3,
       shadowRadius: 2,
       borderWidth: 3,
-      borderColor: "#0369A1",
+      borderColor: '#0369A1',
     },
     itemImage: {
       width: 200,
       height: 200,
-      resizeMode: "contain",
+      resizeMode: 'contain',
       marginBottom: 8,
     },
     itemName: {
       fontSize: 20,
-      fontWeight: "bold",
+      fontWeight: 'bold',
       marginBottom: 8,
-      textAlign: "center",
+      textAlign: 'center',
     },
     itemDescription: {
-      textAlign: "left",
+      textAlign: 'left',
       marginBottom: 4, // Add spacing between field names and values
     },
     claimButtonContainer: {
       marginTop: 20,
-      alignItems: "center",
+      alignItems: 'center',
     },
     claimButton: {
-      backgroundColor: "#0369A1",
+      backgroundColor: '#0369A1',
       padding: 10,
       borderRadius: 25,
-      width: "60%",
-      alignItems: "center",
+      width: '60%',
+      alignItems: 'center',
     },
     claimButtonText: {
-      color: "white",
+      color: 'white',
       fontSize: 16,
-      fontWeight: "bold",
-      textAlign: "center",
+      fontWeight: 'bold',
+      textAlign: 'center',
     },
   });
 
@@ -142,35 +149,40 @@ useEffect(() => {
         <View style={styles.card}>
           <View style={styles.cardContent}>
             {fetchedItem.imageUrl ? (
-              <Image source={{ uri: fetchedItem.imageUrl }} style={styles.itemImage} />
+              <Image
+                source={{ uri: fetchedItem.imageUrl }}
+                style={styles.itemImage}
+              />
             ) : (
               <Image source={tempimage} style={styles.itemImage} />
             )}
           </View>
           <Text style={styles.itemName}>{fetchedItem.itemName}</Text>
           <Text style={styles.itemDescription}>
-            <Text style={{ fontWeight: "bold" }}>Color:</Text> {fetchedItem.color}
+            <Text style={{ fontWeight: 'bold' }}>Color:</Text>{' '}
+            {fetchedItem.color}
           </Text>
           <Text style={styles.itemDescription}>
-            <Text style={{ fontWeight: "bold" }}>Description:</Text>{" "}
+            <Text style={{ fontWeight: 'bold' }}>Description:</Text>{' '}
             {fetchedItem.description}
           </Text>
           <Text style={styles.itemDescription}>
-            <Text style={{ fontWeight: "bold" }}>Location:</Text>{" "}
+            <Text style={{ fontWeight: 'bold' }}>Location:</Text>{' '}
             {fetchedItem.location}
           </Text>
           <Text style={styles.itemDescription}>
-            <Text style={{ fontWeight: "bold" }}>Serial No:</Text>{" "}
+            <Text style={{ fontWeight: 'bold' }}>Serial No:</Text>{' '}
             {fetchedItem.serialNumber}
           </Text>
           <Text style={styles.itemDescription}>
-            <Text style={{ fontWeight: "bold" }}>Date:</Text>{" "}
+            <Text style={{ fontWeight: 'bold' }}>Date:</Text>{' '}
             {new Date(fetchedItem.timestamp.toDate()).toLocaleString()}
           </Text>
 
           <View style={styles.claimButtonContainer}>
-            <TouchableOpacity style={styles.claimButton}
-             onPress={()=>handleClaim(fetchedItem.postId)}
+            <TouchableOpacity
+              style={styles.claimButton}
+              onPress={() => handleClaim(fetchedItem.postId)}
             >
               <Text style={styles.claimButtonText}>Claim</Text>
             </TouchableOpacity>
@@ -189,28 +201,29 @@ useEffect(() => {
           </View>
           <Text style={styles.itemName}>{item.itemName}</Text>
           <Text style={styles.itemDescription}>
-            <Text style={{ fontWeight: "bold" }}>Color:</Text> {item.color}
+            <Text style={{ fontWeight: 'bold' }}>Color:</Text> {item.color}
           </Text>
           <Text style={styles.itemDescription}>
-            <Text style={{ fontWeight: "bold" }}>Description:</Text>{" "}
+            <Text style={{ fontWeight: 'bold' }}>Description:</Text>{' '}
             {item.description}
           </Text>
           <Text style={styles.itemDescription}>
-            <Text style={{ fontWeight: "bold" }}>Location:</Text>{" "}
+            <Text style={{ fontWeight: 'bold' }}>Location:</Text>{' '}
             {item.location}
           </Text>
           <Text style={styles.itemDescription}>
-            <Text style={{ fontWeight: "bold" }}>Serial No:</Text>{" "}
+            <Text style={{ fontWeight: 'bold' }}>Serial No:</Text>{' '}
             {item.serialNumber}
           </Text>
           <Text style={styles.itemDescription}>
-            <Text style={{ fontWeight: "bold" }}>Date:</Text>{" "}
+            <Text style={{ fontWeight: 'bold' }}>Date:</Text>{' '}
             {new Date(item.timestamp.toDate()).toLocaleString()}
           </Text>
 
           <View style={styles.claimButtonContainer}>
-            <TouchableOpacity style={styles.claimButton}
-             onPress={()=>handleClaim(item.postId)}
+            <TouchableOpacity
+              style={styles.claimButton}
+              onPress={() => handleClaim(item.postId)}
             >
               <Text style={styles.claimButtonText}>Claim</Text>
             </TouchableOpacity>

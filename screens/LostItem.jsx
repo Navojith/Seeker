@@ -16,6 +16,9 @@ import {
 import { FireStore, auth } from '../firebase';
 
 const LostItem = ({ route }) => {
+  const [componentKey, setComponentKey] = useState(
+    route.params?.key || 'initial-key'
+  );
   const { item, pushDataObject } = route.params;
   const [fetchedItem, setFetchedItem] = useState(null);
   const [postedUserId, setPostedUserId] = useState(null);

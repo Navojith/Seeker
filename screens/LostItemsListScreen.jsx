@@ -6,27 +6,27 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
-} from "react-native";
-import React, { useState, useEffect } from "react";
-import { FireStore, auth } from "../firebase";
+} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { FireStore, auth } from '../firebase';
 import {
   collectionGroup,
   getDocs,
   addDoc,
   collection,
-} from "firebase/firestore";
-const tempimage = require("../assets/images/PostCreation/AddImage.png");
-import data from "../assets/data/SLIITLocations/index.json";
-import { Picker } from "@react-native-picker/picker";
-import { useNavigation, useIsFocused } from "@react-navigation/native";
-import { LinearGradient } from "expo-linear-gradient";
-import { LostItem } from "../constants/RouteConstants";
+} from 'firebase/firestore';
+const tempimage = require('../assets/images/PostCreation/AddImage.png');
+import data from '../assets/data/SLIITLocations/index.json';
+import { Picker } from '@react-native-picker/picker';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { LostItem } from '../constants/RouteConstants';
 
 const locationOptions = data.locations;
 
 const LostItemsListScreen = () => {
   const [lostItems, setLostItems] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const userId = auth.currentUser.uid;
   const [showFilter, setShowFilter] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -43,15 +43,15 @@ const LostItemsListScreen = () => {
     searchBar: {
       height: 50,
       padding: 16,
-      backgroundColor: "#fff",
+      backgroundColor: '#fff',
       borderRadius: 10,
       elevation: 3,
-      shadowColor: "#000",
+      shadowColor: '#000',
       shadowOffset: { width: 1, height: 1 },
       shadowOpacity: 0.3,
       shadowRadius: 2,
       borderWidth: 3,
-      borderColor: "#0369A1",
+      borderColor: '#0369A1',
       marginHorizontal: 25,
       marginTop: 20,
     },
@@ -59,54 +59,54 @@ const LostItemsListScreen = () => {
       fontSize: 16,
     },
     card: {
-      width: "48%",
+      width: '48%',
       margin: 4,
     },
     cardContent: {
       padding: 16,
-      backgroundColor: "#fff",
+      backgroundColor: '#fff',
       borderRadius: 25,
     },
     itemImage: {
-      width: "100%",
+      width: '100%',
       height: 100,
-      resizeMode: "contain",
+      resizeMode: 'contain',
       marginBottom: 8,
     },
     filterButton: {
-      backgroundColor: "#0369A1",
+      backgroundColor: '#0369A1',
       padding: 10,
       margin: 10,
       marginHorizontal: 20,
       borderRadius: 25,
-      alignItems: "center",
+      alignItems: 'center',
       marginHorizontal: 40,
     },
     filterButtonText: {
-      color: "white",
+      color: 'white',
       fontSize: 16,
-      fontWeight: "bold",
+      fontWeight: 'bold',
     },
     filterModal: {
-      backgroundColor: "white",
+      backgroundColor: 'white',
       padding: 20,
       marginTop: 0,
       marginHorizontal: 20,
-      backgroundColor: "#fff",
+      backgroundColor: '#fff',
       borderRadius: 25,
       borderWidth: 3,
-      borderColor: "#0369A1",
+      borderColor: '#0369A1',
     },
   });
 
   useEffect(() => {
     const getLostItems = async () => {
-      console.log("get lost items");
+      console.log('get lost items');
       try {
-        const collectionRef = collection(FireStore, "lostItems"); // Get a reference to the collection
+        const collectionRef = collection(FireStore, 'lostItems'); // Get a reference to the collection
         const querySnapshot = await getDocs(collectionRef);
         if (querySnapshot.empty) {
-          console.log("No matching documents.");
+          console.log('No matching documents.');
         } else {
           const items = querySnapshot.docs.map((doc) => doc.data());
           //console.log('Retrieved items:', items);
@@ -122,7 +122,7 @@ const LostItemsListScreen = () => {
 
   // Filter the items based on the search query
   const filteredItems = lostItems.filter((item) => {
-    const searchWords = searchQuery.toLowerCase().split(" ");
+    const searchWords = searchQuery.toLowerCase().split(' ');
     return (
       searchWords.some(
         (word) =>
@@ -138,45 +138,45 @@ const LostItemsListScreen = () => {
 
   // Function to save the search query to Firestore
   const saveSearchQueryToFirestore = async () => {
-    if (searchQuery && searchQuery.trim() !== "") {
+    if (searchQuery && searchQuery.trim() !== '') {
       try {
-        const searchCollectionRef = collection(FireStore, "searchLostItems");
+        const searchCollectionRef = collection(FireStore, 'searchLostItems');
         await addDoc(searchCollectionRef, {
           userId: userId,
           query: searchQuery,
           timestamp: new Date(),
         });
-        console.log("Search query saved to Firestore.");
+        console.log('Search query saved to Firestore.');
       } catch (error) {
-        console.error("Error saving search query:", error);
+        console.error('Error saving search query:', error);
       }
     }
   };
 
   const getBorderColor = (tier) => {
     switch (tier) {
-      case "minor":
-        return ["#CECCCC", "#161616"];
-      case "moderate":
-        return ["#780202", "#7479F3"];
-      case "superior":
-        return ["#0066FE", "#6AA4FB"];
-      case "ultra":
-        return ["#8146FF", "#7928B9", "#902AE0"];
+      case 'minor':
+        return ['#CECCCC', '#161616'];
+      case 'moderate':
+        return ['#780202', '#7479F3'];
+      case 'superior':
+        return ['#0066FE', '#6AA4FB'];
+      case 'ultra':
+        return ['#8146FF', '#7928B9', '#902AE0'];
       default:
-        return ["#0369A1", "#0369A1"];
+        return ['#0369A1', '#0369A1'];
     }
   };
 
   const getTierValue = (tier) => {
     switch (tier) {
-      case "ultra":
+      case 'ultra':
         return 1;
-      case "superior":
+      case 'superior':
         return 2;
-      case "moderate":
+      case 'moderate':
         return 3;
-      case "minor":
+      case 'minor':
         return 4;
       default:
         return 5;
@@ -204,13 +204,10 @@ const LostItemsListScreen = () => {
         value={searchQuery}
         onEndEditing={saveSearchQueryToFirestore}
       />
-      <TouchableOpacity
-        style={styles.filterButton}
-        onPress={toggleFilter}
-      >
+      <TouchableOpacity style={styles.filterButton} onPress={toggleFilter}>
         <Text style={styles.filterButtonText}>Filter</Text>
       </TouchableOpacity>
-      {showFilter && ( 
+      {showFilter && (
         <View style={styles.filterModal}>
           <Text>Filter by Location:</Text>
 
@@ -218,9 +215,9 @@ const LostItemsListScreen = () => {
             className="border border-4 px-4 py-2 border-light-blue"
             placeholder="Select Location"
             selectedValue={selectedLocation}
-            dropdownIconColor={"black"}
-            dropdownIconRippleColor={"#0284C7"}
-            selectionColor={"#0284C7"}
+            dropdownIconColor={'black'}
+            dropdownIconRippleColor={'#0284C7'}
+            selectionColor={'#0284C7'}
             onValueChange={(itemValue) => {
               setSelectedLocation(itemValue);
             }}
