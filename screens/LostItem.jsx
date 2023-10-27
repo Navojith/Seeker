@@ -171,7 +171,7 @@ const LostItem = ({ route }) => {
           <View style={styles.claimButtonContainer}>
             <TouchableOpacity
               style={styles.claimButton}
-              onPress={() => handleClaim(item.postId)}
+              onPress={() => handleClaim(fetchedItem.postId)}
             >
               <Text style={styles.claimButtonText}>Claim</Text>
             </TouchableOpacity>
