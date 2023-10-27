@@ -5,13 +5,12 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
-} from 'react-native';
-import React, { useState, useEffect } from 'react';
-import AddImage from '../assets/images/PostCreation/AddImage.png';
-import { Picker } from '@react-native-picker/picker';
-import data from '../assets/data/SLIITLocations/index.json';
-import MainButton from '../components/common/buttons/MainButton';
-import { FireStore, auth, storage } from '../firebase';
+} from "react-native";
+import React, { useState, useEffect } from "react";
+import { Picker } from "@react-native-picker/picker";
+import data from "../assets/data/SLIITLocations/index.json";
+import MainButton from "../components/common/buttons/MainButton";
+import { FireStore, auth } from "../firebase";
 import {
   collection,
   addDoc,
@@ -20,159 +19,93 @@ import {
   getDoc,
   doc,
   query,
-  where,
-} from 'firebase/firestore';
-import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
-import { useNavigation } from '@react-navigation/native';
-import { LostItems } from '../constants/RouteConstants';
-import axios from 'axios';
-// import * as ImagePicker from 'expo-image-picker';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import * as ImageManipulator from 'expo-image-manipulator';
-import { Alert } from 'react-native';
+} from "firebase/firestore";
+import DismissibleAlert from "../components/common/alerts/DismissibleAlert";
+import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
 
-const CreateFoundItemScreen = ({route}) => {
+const CreateFoundItemScreen = ({ route }) => {
   const navigation = useNavigation();
-  // const {tags , desc} = route.params;
-  // console.log('tags',tags);
-  // console.log('desc',desc);
-
-  // console.log('imageTags',tags);
-  // console.log('imageDescription', desc);
-
   const [selectedLocation, setSelectedLocation] = useState(data.locations[0]);
   const [otherVisibility, setOtherVisibility] = useState(false);
-  const [itemName, setItemName] = useState('');
-  const [serialNumber, setSerialNumber] = useState('');
-  const [color, setColor] = useState('');
-  const [description, setDescription] = useState('');
-  const [other, setOther] = useState('');
+  const [itemName, setItemName] = useState("");
+  const [serialNumber, setSerialNumber] = useState("");
+  const [color, setColor] = useState("");
+  const [description, setDescription] = useState("");
+  const [other, setOther] = useState("");
   const [error, setError] = useState({
     visibility: false,
-    viewStyles: 'border border-4 border-red-600',
+    viewStyles: "border border-4 border-red-600",
     title: null,
-    titleStyles: 'text-red-600',
+    titleStyles: "text-red-600",
     message: null,
-    messageStyles: 'text-red-600 font-bold',
+    messageStyles: "text-red-600 font-bold",
   });
   const [loading, setLoading] = useState(false);
-  const [searchDocuments, setSearchDocuments] = useState([]);
-  const [imageUrl, setImageUrl] = useState(null);
-  const [postId, setPostId] = useState('');
-  const [foundItemNotifications, setFoundItemNotifications] = useState(false);
-  const [lostItemNotifications, setLostItemNotifications] = useState(false);
-
-  useEffect(() =>{
-    console.log('auto filling tags');
-    console.log(route);
-    console.log(route.params);
-    if(route.params){
-      console.log('tags',route?.params?.tags);
-      console.log('desc',route?.params?.desc);
-      const tags = route?.params?.tags.join(' ');
-      setItemName(tags);
-      setDescription(route?.params?.desc)
-    }
-      console.log(itemName);
-      console.log(description);
-      setImageUrl(route?.params?.img);
-      console.log('img:',imageUrl);
-  },[route])
+  const [imageUrl, setImageUrl] = useState("");
 
   useEffect(() => {
-    if (selectedLocation === 'Other') {
+    console.log("auto filling tags");
+    console.log(route);
+    console.log(route.params);
+    if (route.params) {
+      console.log("tags", route?.params?.tags);
+      console.log("desc", route?.params?.desc);
+      const tags = route?.params?.tags.join(" ");
+      setItemName(tags);
+      setDescription(route?.params?.desc);
+    }
+    console.log(itemName);
+    console.log(description);
+    setImageUrl(route?.params?.img);
+    console.log("img:", imageUrl);
+  }, [route]);
+
+  useEffect(() => {
+    if (selectedLocation === "Other") {
       setOtherVisibility(true);
     } else {
       setOtherVisibility(false);
     }
   }, [selectedLocation]);
 
-  useEffect(() => {
-    const fetchSearch = async () => {
-      try {
-        const searchCollectionRef = collection(FireStore, 'searchFoundItems');
-
-        const querySnapshot = await getDocs(searchCollectionRef);
-
-        const searchDocuments = [];
-
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          searchDocuments.push({ id: doc.id, ...data });
-        });
-
-        setSearchDocuments(searchDocuments);
-
-        console.log('Fetched search documents:', searchDocuments);
-      } catch (error) {
-        console.error('Error fetching search documents:', error);
-        // Handle the error here
-      }
-    };
-
-    fetchSearch();
-  }, []);
-
-  useEffect(() => {
-    matchSearch();
-  }, [postId]);
-
-  // const uploadImageToFirebaseStorage = async (imageUri) => {
-  //   try {
-  //     const response = await fetch(imageUri);
-  //     const blob = await response.blob();
-  //     const storageRef = ref(
-  //       storage,
-  //       `images/${auth.currentUser.uid}/${Date.now()}.jpg`
-  //     );
-  //     await uploadBytes(storageRef, blob);
-  //     return getDownloadURL(storageRef);
-  //   } catch (error) {
-  //     console.error('Error uploading image to Firebase Storage: ', error);
-  //     return null;
-  //   }
-  // };
-
   const handleSubmit = async () => {
-    if (itemName === '' || description === '') {
+    if (itemName === "" || description === "") {
       setError((prev) => ({
         ...prev,
         visibility: true,
-        title: 'Error !',
-        message: 'Please enter item name and description !',
+        title: "Error !",
+        message: "Please enter item name and description !",
       }));
     } else {
       try {
-        // setLoading(true);
-        // // let imageUrl = null;
-        // // if (imageUri) {
-        // //   imageUrl = await uploadImageToFirebaseStorage(imageUri);
-        // // }
-        // const docRef = await addDoc(collection(FireStore, 'foundItems'), {
-        //   userId: auth.currentUser.uid,
-        //   itemName: itemName,
-        //   serialNumber: serialNumber ?? null,
-        //   color: color ?? null,
-        //   location: selectedLocation,
-        //   other: other ?? null,
-        //   description: description,
-        //   timestamp: new Date(),
-        //   postId: '',
-        //   imageUrl: imageUrl,
-        // });
+        setLoading(true);
+        const docRef = await addDoc(collection(FireStore, "foundItems"), {
+          userId: auth.currentUser.uid,
+          itemName: itemName,
+          serialNumber: serialNumber ?? null,
+          color: color ?? null,
+          location: selectedLocation,
+          other: other ?? null,
+          description: description,
+          timestamp: new Date(),
+          postId: "",
+          imageUrl: imageUrl ?? "",
+        });
 
-        // console.log('id', docRef.id);
+        console.log("id", docRef.id);
 
-        // const pId = docRef.id; // Set postId after the document is added
-        // setPostId(pId);
+        const pId = docRef.id; // Set postId after the document is added
 
-        // // Update the document with the postId
-        // await updateDoc(docRef, { postId: pId });
+        // Update the document with the postId
+        await updateDoc(docRef, { postId: pId });
 
-        // //search serial no
+        // Match search-------------------------------------------
+        matchSearch(pId);
 
+        // //Search serial no ------------------------------------
         if (serialNumber) {
-          const q = query(collection(FireStore, 'userDetails'));
+          const q = query(collection(FireStore, "userDetails"));
           const querySnapshot = await getDocs(q);
           for (const document of querySnapshot.docs) {
             const data = document.data();
@@ -186,13 +119,13 @@ const CreateFoundItemScreen = ({route}) => {
                 const userId = data.userId;
                 const notificationsDocRef = doc(
                   FireStore,
-                  'notifications',
+                  "notifications",
                   userId
                 );
                 const docSnap = await getDoc(notificationsDocRef);
                 if (docSnap.exists()) {
                   const notificationData = docSnap.data();
-                  console.log('Notification settings:', notificationData);
+                  console.log("Notification settings:", notificationData);
                   if (notificationData) {
                     permissions = notificationData;
                   }
@@ -201,22 +134,23 @@ const CreateFoundItemScreen = ({route}) => {
                 console.log(error);
               }
 
-              if (permissions.lostItemNotifications) {
+              if (permissions.foundItemNotifications) {
+                console.log("post id", pId);
                 const pushData = {
-                  type: 'searchFoundItem',
-                  postId: 'OK4IDtq35rKsVyl8Zonl',
+                  type: "searchFoundItem",
+                  postId: pId,
                 };
 
-                console.log('sdddddddddddd\n', JSON.stringify(pushData));
+                console.log("sdddddddddddd\n", JSON.stringify(pushData));
 
                 axios.post(
                   `https://app.nativenotify.com/api/indie/notification`,
                   {
                     subID: data.userId,
                     appId: 13599,
-                    appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
-                    title: 'Found item',
-                    message: 'Found item with serial number ' + serialNumber,
+                    appToken: "gTBeP5h5evCxHcHdDs0yVQ",
+                    title: "Found item",
+                    message: "Found item with serial number " + serialNumber,
                     pushData: JSON.stringify(pushData),
                   }
                 );
@@ -227,25 +161,25 @@ const CreateFoundItemScreen = ({route}) => {
 
         setError({
           visibility: true,
-          viewStyles: 'border border-4 border-green-600',
-          titleStyles: 'text-green-600',
-          messageStyles: 'text-green-600 font-bold',
-          title: 'Success !',
-          message: 'Your post has been created successfully !',
+          viewStyles: "border border-4 border-green-600",
+          titleStyles: "text-green-600",
+          messageStyles: "text-green-600 font-bold",
+          title: "Success !",
+          message: "Your post has been created successfully !",
         });
         setLoading(false);
-        // setItemName('');
-        // setColor('');
-        // setDescription('');
-        // setOther('');
-        // setSerialNumber('');
+        setItemName("");
+        setColor("");
+        setDescription("");
+        setOther("");
+        setSerialNumber("");
       } catch (error) {
         console.log(error);
         setError((prev) => ({
           ...prev,
           visibility: true,
-          title: 'Error !',
-          message: error.message + ' - ' + error.code,
+          title: "Error !",
+          message: error.message + " - " + error.code,
         }));
       }
     }
@@ -253,7 +187,7 @@ const CreateFoundItemScreen = ({route}) => {
 
   const openImagePicker = () => {
     const screen = "found";
-    navigation.navigate('Upload Image', {screen});
+    navigation.navigate("Upload Image", { screen });
     // let result = await ImagePicker.launchImageLibraryAsync({
     //   mediaTypes: ImagePicker.MediaTypeOptions.All,
     //   allowsEditing: true,
@@ -275,22 +209,32 @@ const CreateFoundItemScreen = ({route}) => {
     // }
   };
 
-  const matchSearch = async () => {
-    console.log('Matching search documents...');
+  const matchSearch = async (pId) => {
+    console.log("Matching search documents...");
+    const searchDocuments = [];
 
-    if (!postId) {
-      console.log('postId is empty');
-      return;
+    try {
+      const searchCollectionRef = collection(FireStore, "searchFoundItems");
+      const querySnapshot = await getDocs(searchCollectionRef);
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        searchDocuments.push({ id: doc.id, ...data });
+      });
+
+      console.log("Fetched search documents:", searchDocuments);
+    } catch (error) {
+      console.error("Error fetching search documents:", error);
+      // Handle the error here
     }
 
-    console.log('postId', postId);
+    console.log("passed postId", pId);
 
-    for (const doc of searchDocuments) {
-      const queryWords = doc.query.toLowerCase().split(' ');
+    for (const document of searchDocuments) {
+      const queryWords = document.query.toLowerCase().split(" ");
       const itemNameLower = itemName.toLowerCase();
-      const descriptionWords = description.toLowerCase().split(' ');
+      const descriptionWords = description.toLowerCase().split(" ");
 
-      // Check if any word from the query is present in any of the fields
       const isMatch = queryWords.some((word) => {
         return (
           itemNameLower.includes(word) ||
@@ -302,56 +246,50 @@ const CreateFoundItemScreen = ({route}) => {
       });
 
       if (isMatch) {
-        console.log('Match found');
-        const res = await getNotificationSettings(doc.userId);
-        console.log('found', foundItemNotifications);
-        if (foundItemNotifications) {
-          const pushData = {
-            type: 'searchFoundItem',
-            postId,
-          };
+        console.log("Match found" + document.userId);
 
-          // Add a 10-second delay because firestore is slow
-          setTimeout(() => {
-            axios.post(`https://app.nativenotify.com/api/indie/notification`, {
-              subID: doc.userId,
-              appId: 13599,
-              appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
-              title: 'Found item matched your search',
-              message:
-                'Your search "' +
-                doc.query +
-                '" matched with "' +
-                itemName +
-                '"',
-              pushData: JSON.stringify(pushData),
-            });
-          }, 10000);
-        } else {
-          console.log('User has disabled found item notifications');
+        try {
+          const userId = document.userId;
+          const notificationsDocRef = doc(FireStore, "notifications", userId);
+          const docSnap = await getDoc(notificationsDocRef);
+
+          if (docSnap.exists()) {
+            const notificationData = docSnap.data();
+            console.log("Notification settings:", notificationData);
+
+            if (notificationData) {
+              const permissions = notificationData;
+              if (permissions.foundItemNotifications) {
+                const pushData = {
+                  type: "searchFoundItem",
+                  postId: pId,
+                };
+
+                axios.post(
+                  `https://app.nativenotify.com/api/indie/notification`,
+                  {
+                    subID: userId,
+                    appId: 13599,
+                    appToken: "gTBeP5h5evCxHcHdDs0yVQ",
+                    title: "Found item matched your search",
+                    message:
+                      'Your search "' +
+                      document.query +
+                      '" matched with "' +
+                      itemName +
+                      '"',
+                    pushData: JSON.stringify(pushData),
+                  }
+                );
+              } else {
+                console.log("User has disabled found item notifications");
+              }
+            }
+          }
+        } catch (error) {
+          console.log(error);
         }
       }
-    }
-  };
-
-  const getNotificationSettings = async (userId) => {
-    try {
-      const docRef = doc(FireStore, 'notifications', userId);
-
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        console.log('Notification settings:', data);
-        if (data) {
-          setFoundItemNotifications(data.foundItemNotifications);
-          setLostItemNotifications(data.lostItemNotifications);
-        }
-      }
-
-      console.log('Notification settings retrieved');
-    } catch (error) {
-      console.log(error);
     }
   };
 
@@ -362,10 +300,10 @@ const CreateFoundItemScreen = ({route}) => {
         onPress={openImagePicker}
         style={{
           borderWidth: 4,
-          borderColor: 'lightblue',
+          borderColor: "lightblue",
           borderRadius: 10,
           padding: 10,
-          alignItems: 'center',
+          alignItems: "center",
         }}
       >
         {imageUrl ? (
@@ -406,9 +344,9 @@ const CreateFoundItemScreen = ({route}) => {
           className="border border-4 px-4 py-2 border-light-blue"
           placeholder="Select Location"
           selectedValue={selectedLocation}
-          dropdownIconColor={'black'}
-          dropdownIconRippleColor={'#0284C7'}
-          selectionColor={'#0284C7'}
+          dropdownIconColor={"black"}
+          dropdownIconRippleColor={"#0284C7"}
+          selectionColor={"#0284C7"}
           onValueChange={(itemValue) => setSelectedLocation(itemValue)}
         >
           {data.locations.map((location, index) => (
@@ -446,8 +384,8 @@ const CreateFoundItemScreen = ({route}) => {
       )}
       <MainButton
         onPress={handleSubmit}
-        text={'Create Post'}
-        containerStyles={'mt-6 mb-12 rounded-full w-full drop-shadow-md'}
+        text={"Create Post"}
+        containerStyles={"mt-6 mb-12 rounded-full w-full drop-shadow-md"}
       />
     </ScrollView>
   );
