@@ -78,6 +78,7 @@ const LeaderboardItemScreen = ({ route }) => {
     console.log('post', postId);
 
     const postDocRef = doc(FireStore, 'lostItems', postId);
+    const postedUser = await getDoc(postDocRef);
 
     try {
       await updateDoc(postDocRef, { foundUserId: user });
@@ -86,7 +87,7 @@ const LeaderboardItemScreen = ({ route }) => {
       console.log(db);
 
       const res = await addDoc(collection(db, 'requests'), {
-        user: user,
+        user: postedUser,
         itemDetails: postId,
       });
       console.log('requestId', res.id);
