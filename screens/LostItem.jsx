@@ -11,6 +11,7 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
 } from 'firebase/firestore';
 import { FireStore, auth } from '../firebase';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
@@ -62,6 +63,9 @@ const LostItem = ({ route }) => {
     console.log('post', postId);
 
     const postDocRef = doc(FireStore, 'lostItems', postId);
+    const postedUser = await getDoc(postDocRef);
+
+    console.log('postSnapTest', postSnap.data().userId);
 
     try {
       await updateDoc(postDocRef, { foundUserId: user });
@@ -70,7 +74,7 @@ const LostItem = ({ route }) => {
       console.log(db);
 
       const res = await addDoc(collection(db, 'requests'), {
-        user: user,
+        user: postedUser,
         itemDetails: postId,
       });
       console.log('requestId', res.id);
