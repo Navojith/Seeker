@@ -417,7 +417,11 @@ const PostedFoundItemsScreen = ({ route }) => {
         }
         onPressCancel={() => navigation.navigate('profile')}
       />
-      <DismissibleAlert data={status} setData={setStatus} />
+      <DismissibleAlert
+        data={status}
+        setData={setStatus}
+        onPress={() => navigation.navigate('profile')}
+      />
     </View>
   );
 };
