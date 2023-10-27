@@ -217,12 +217,12 @@ const PostedFoundItemsScreen = ({ route }) => {
         if (!foundQuerySnapshot.empty) {
           const fdocToDelete = foundQuerySnapshot.docs[0];
           await deleteDoc(fdocToDelete.ref);
-          setFoundItems(posts.filter((post) => post.postId !== item));
+          setFoundItems(foundItems.filter((foundItem) => foundItem.postId !== item));
         } else {
           if (!lostQuerySnapshot.empty) {
             const ldocToDelete = lostQuerySnapshot.docs[0];
             await deleteDoc(ldocToDelete.ref);
-            setFoundItems(posts.filter((post) => post.postId !== item));
+            setFoundItems(foundItems.filter((foundItem) => foundItem.postId !== item));
           }
         }
         setIsModalVisible(false);
