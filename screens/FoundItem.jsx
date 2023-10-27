@@ -54,7 +54,7 @@ useEffect(() => {
        user : currentUser,
        itemDetails : post,
       });
-      console.log(res.id);
+      console.log('successful');
     } catch(error){
       console.log(error);
     }

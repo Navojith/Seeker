@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, SafeAreaView, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { FireStore, auth } from '../firebase';
 import { useNavigation} from '@react-navigation/native';
-import { getDocs, collection, query, where } from 'firebase/firestore';
+import { getDocs, collection, query, where ,getDoc, doc} from 'firebase/firestore';
+import axios from 'axios';
 const tempimage = require("../assets/images/PostCreation/AddImage.png");
 
-const PostedFoundItemsScreen = () => {
+const PostedFoundItemsScreen = ({route}) => {
   const [foundItems, setFoundItems] = useState([]);
   const navigation = useNavigation();
+  const [currentUser , setCurrentUser] = useState(null);
+  const user = route.params;
 
   useEffect(() => {
     const getFoundItems = async () => {
@@ -36,8 +39,58 @@ const PostedFoundItemsScreen = () => {
     getFoundItems();
   }, []);
 
-  const handleReturnItem = (user) =>{
-    console.log(user);
+  const fetchUser = async () => {
+    try 
+    {
+      // setLoading(true);
+      const uuid = auth.currentUser.uid;
+      const res = await getDoc(doc(FireStore, 'userDetails', uuid));
+      if (res.exists)
+      {
+        setCurrentUser(res.data());
+      } 
+      // else {
+      //   setError({
+      //     visibility: true,
+      //     title: 'Error',
+      //     message: 'User Information not found',
+      //     buttonText: 'Close',
+      //     titleStyles: 'text-red-500',
+      //     messageStyles: 'text-red-500',
+      //     viewStyles: 'border border-4 border-red-500',
+      //   });
+      // }
+    } catch (error) {
+      console.log(error);
+      // setError({
+      //   visibility: true,
+      //   title: 'Error',
+      //   message: 'Data fetching failed',
+      //   buttonText: 'Close',
+      //   titleStyles: 'text-red-500',
+      //   messageStyles: 'text-red-500',
+      //   viewStyles: 'border border-4 border-red-500',
+      // });
+    }}
+
+    useEffect(()=>{
+      fetchUser();
+    },[])
+  
+  const handleReturnItem = async() =>{
+    console.log('user',user);
+    console.log('current',currentUser);
+    await axios.post(
+      `https://app.nativenotify.com/api/indie/notification`,
+      {
+        subIDs: user.userId,
+        appId: 13599,
+        appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
+        title: 'Seeker',
+        message:
+          'Did you receive your item from ' + currentUser.displayedName + '?'
+      }
+    );
   }
 
   const handleSecurity = () =>{

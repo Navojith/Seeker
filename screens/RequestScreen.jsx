@@ -24,93 +24,137 @@ const RequestScreen = ({route}) => {
   //   setIsSelected() --- user Id
   // }
 
+  // useEffect(() => {
+  //   setLoading(true);
+  //   const getRequests = async()=>{
+  //     try
+  //     {
+  //       console.log("get requests");
+  //       const requestCollectionRef = collection(FireStore, "requests");
+  //       const q = query(requestCollectionRef, where("itemDetails", "==", item.postId));
+  //       const querySnapshot = await getDocs(q);
+  //       console.log('querySnapshot',querySnapshot);
+
+  //       const requestDetails = querySnapshot.docs.map((doc) => doc.data());
+  //       console.log('user',requestDetails);
+  //       setRequests(requestDetails);
+  //       console.log('request',requestDetails.length);
+
+  //       if(requestDetails.length === 1)
+  //       {
+  //         console.log('user return the item');
+
+  //         const itemDetailsPromises = requestDetails.map(async(request)=>{
+  //           const itemCollectionRef = collection(FireStore , "lostItems");
+  //           const l = query(itemCollectionRef, where("foundUserId" , "==" , request.user), where("postId" , "==" , item.postId ));
+  //           const foundUserSnapshot = await getDocs(l);
+  //           console.log(foundUserSnapshot);
+
+  //           if(foundUserSnapshot.empty)
+  //           {
+  //             console.log('not a returned item');
+  //           }else
+  //           {
+  //             const postDetails = foundUserSnapshot.docs.map((doc)=> doc.data().userId);
+  //             console.log(postDetails);
+  //             console.log('returned');    
+              
+  //             const userDetailsPromises = postDetails.map(async (userId) => {
+  //               const userCollectionRef = collection(FireStore, "userDetails");
+  //               const userQuery = query(userCollectionRef, where("userId", "==", userId));
+  //               const userSnapshot = await getDocs(userQuery);
+              
+  //               if (!userSnapshot.empty)
+  //               {
+  //                 const userData = userSnapshot.docs[0].data();
+  //                 return userData;
+  //               }
+  //             })
+  //             const userDetails = await Promise.all(userDetailsPromises);
+  //             setUserDetails(userDetails);
+  //             console.log(userDetails);
+  //             setLoading(false);
+  //           }
+
+  //           const foundUserDetails =  await Promise.all(itemDetailsPromises);
+  //           console.log('userDetails',foundUserDetails);
+  //         })
+  //       } else
+  //       {
+  //         const userDetailsPromises = requests.map(async (request)=>{
+  //           const userCollectionRef = collection(FireStore,"userDetails");
+  //           const x = query(userCollectionRef,where("userId","==",request.user));
+  //           const userSnapshot = await getDocs(x);
+
+  //           if (userSnapshot.empty) {
+  //             console.log('User details not found');
+  //           } else {
+  //             console.log('user found')
+  //             const newUser = userSnapshot.docs.map((doc)=> doc.data());
+  //             console.log(newUser);
+  //             // return newUser[0];
+  //             setUserDetails([...userDetails , newUser]);
+  //             // console.log(userDetails);
+  //           }
+  //           console.log('userDetails',userDetails);  
+  //         });
+
+  //         const userDetails = await Promise.all(userDetailsPromises);
+  //         const filteredUserDetails = userDetails.filter((user) => user !== null);
+  //         setUserDetails(filteredUserDetails);
+  //         // console.log('filtered user',userDetails);
+  //         setLoading(false);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching found items:", error);
+  //     }
+  //   };
+  //   getRequests();
+  // } ,[]);
+
   useEffect(() => {
-    setLoading(true);
     const getRequests = async()=>{
-      try
-      {
-        console.log("get requests");
-        const requestCollectionRef = collection(FireStore, "requests");
-        const q = query(requestCollectionRef, where("itemDetails", "==", item.postId));
-        const querySnapshot = await getDocs(q);
-        console.log('querySnapshot',querySnapshot);
+      try{
+      console.log("get requests");
+      const requestCollectionRef = collection(FireStore, "requests");
+      const q = query(requestCollectionRef, where("itemDetails", "==", item.postId) ,);
+      const querySnapshot = await getDocs(q);
 
-        const requestDetails = querySnapshot.docs.map((doc) => doc.data());
-        console.log('user',requestDetails);
+      if (querySnapshot.empty) {
+        console.log("No matching documents.");
+      } else {
+        const requestDetails = querySnapshot.docs.map((doc) => doc.data().user);
+        console.log(requestDetails);
         setRequests(requestDetails);
-        console.log('request',requestDetails.length);
+        console.log(requests);
 
-        if(requestDetails.length === 1)
-        {
-          console.log('user return the item');
+        const userDetailsPromises = requestDetails.map(async (user)=>{
+          const userCollectionRef = collection(FireStore,"userDetails");
+          const x = query(userCollectionRef,where("userId","==",user));
+          const userSnapshot = await getDocs(x);
 
-          const itemDetailsPromises = requestDetails.map(async(request)=>{
-            const itemCollectionRef = collection(FireStore , "lostItems");
-            const l = query(itemCollectionRef, where("foundUserId" , "==" , request.user), where("postId" , "==" , item.postId ));
-            const foundUserSnapshot = await getDocs(l);
-            console.log(foundUserSnapshot);
+          if (userSnapshot.empty) {
+            console.log(`User details not found`);
+          } else {
+            const newUser = userSnapshot.docs.map((doc)=> doc.data());
+            console.log(newUser);
+            return newUser[0];
+            // setUserDetails([...userDetails , newUser]);
+          }
+          console.log(userDetails);
+        });
 
-            if(foundUserSnapshot.empty)
-            {
-              console.log('not a returned item');
-            }else
-            {
-              const postDetails = foundUserSnapshot.docs.map((doc)=> doc.data().userId);
-              console.log(postDetails);
-              console.log('returned');    
-              
-              const userDetailsPromises = postDetails.map(async (userId) => {
-                const userCollectionRef = collection(FireStore, "userDetails");
-                const userQuery = query(userCollectionRef, where("userId", "==", userId));
-                const userSnapshot = await getDocs(userQuery);
-              
-                if (!userSnapshot.empty)
-                {
-                  const userData = userSnapshot.docs[0].data();
-                  return userData;
-                }
-              })
-              const userDetails = await Promise.all(userDetailsPromises);
-              setUserDetails(userDetails);
-              console.log(userDetails);
-              setLoading(false);
-            }
-
-            const foundUserDetails =  await Promise.all(itemDetailsPromises);
-            console.log('userDetails',foundUserDetails);
-          })
-        } else
-        {
-          const userDetailsPromises = requests.map(async (request)=>{
-            const userCollectionRef = collection(FireStore,"userDetails");
-            const x = query(userCollectionRef,where("userId","==",request.user));
-            const userSnapshot = await getDocs(x);
-
-            if (userSnapshot.empty) {
-              console.log('User details not found');
-            } else {
-              console.log('user found')
-              const newUser = userSnapshot.docs.map((doc)=> doc.data());
-              console.log(newUser);
-              // return newUser[0];
-              setUserDetails([...userDetails , newUser]);
-              // console.log(userDetails);
-            }
-            console.log('userDetails',userDetails);  
-          });
-
-          const userDetails = await Promise.all(userDetailsPromises);
-          const filteredUserDetails = userDetails.filter((user) => user !== null);
-          setUserDetails(filteredUserDetails);
-          // console.log('filtered user',userDetails);
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error("Error fetching found items:", error);
+        const userDetails = await Promise.all(userDetailsPromises);
+        const filteredUserDetails = userDetails.filter((user) => user !== null);
+        setUserDetails(filteredUserDetails);
+        console.log(userDetails);
       }
+    } catch (error) {
+      console.error("Error fetching found items:", error);
+    }
     };
     getRequests();
-  } ,[]);
+  } ,[])
 
   const selectUser = async(item) =>{
     // setUser(item);
