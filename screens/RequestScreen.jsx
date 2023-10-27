@@ -228,7 +228,6 @@ const RequestScreen = ({route}) => {
       {loading &&(
       <Text>loading..</Text>)}
       <SafeAreaView>
-        <Text style={styles.itemDetails}>To select the owner , Click on the request</Text>
     <FlatList 
         data={userDetails} 
         renderItem={({item})=>(

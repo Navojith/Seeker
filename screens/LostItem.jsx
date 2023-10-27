@@ -22,6 +22,14 @@ const LostItem = ({ route }) => {
   const { item, pushDataObject } = route.params;
   const [fetchedItem, setFetchedItem] = useState(null);
   const [postedUserId, setPostedUserId] = useState(item.userId);
+  const [error, setError] = useState({
+    visibility: false,
+    viewStyles: 'border border-4 border-red-600',
+    title: null,
+    titleStyles: 'text-red-600',
+    message: null,
+    messageStyles: 'text-red-600 font-bold',
+  });
 
   useEffect(() => {
     console.log('fetching item details');
@@ -74,8 +82,22 @@ const LostItem = ({ route }) => {
       });
       console.log('requestId', res.id);
       console.log('document updated successfully');
+      setError({
+        visibility: true,
+        viewStyles: 'border border-4 border-green-600',
+        titleStyles: 'text-green-600',
+        messageStyles: 'text-green-600 font-bold',
+        title: 'Item Marked as found !',
+        message: 'Check posted found items in your profile !',
+      });
     } catch (error) {
       console.error(error);
+      setError((prev) => ({
+        ...prev,
+        visibility: true,
+        title: 'Already returned !',
+        message: "Posted user can not mark as found !",
+      }));
     }
   };
 
