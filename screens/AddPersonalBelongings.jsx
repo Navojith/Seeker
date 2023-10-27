@@ -31,10 +31,6 @@ const AddPBModal = ({ isVisible, setIsVisible, navigation, setRandomVal }) => {
         });
         setLoading(false);
         Alert.alert('Success', 'Device Added Successfully');
-        navigation.navigate(Profile, {
-          // Generate a unique key to force remount of the component
-          key: `orders-${Math.random()}`,
-        });
         setIsVisible(false);
         setRandomVal(Math.random());
       } catch (error) {
