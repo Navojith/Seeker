@@ -327,6 +327,7 @@ const PostedLostItemsScreen = () => {
         onPressCancel={() => {
           setIsModalVisible(false);
         }}
+        showInfoIcon={false}
       />
       <SafeAreaView>
       <FlatList 
