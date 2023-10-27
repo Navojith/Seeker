@@ -54,7 +54,7 @@ const CreateFoundItemScreen = ({route}) => {
   });
   const [loading, setLoading] = useState(false);
   const [searchDocuments, setSearchDocuments] = useState([]);
-  const [imageUri, setImageUri] = useState(null);
+  const [imageUrl, setImageUrl] = useState(null);
   const [postId, setPostId] = useState('');
   const [foundItemNotifications, setFoundItemNotifications] = useState(false);
   const [lostItemNotifications, setLostItemNotifications] = useState(false);
@@ -68,9 +68,12 @@ const CreateFoundItemScreen = ({route}) => {
       console.log('desc',route?.params?.desc);
       const tags = route?.params?.tags.join(' ');
       setItemName(tags);
-      setDescription(route?.params?.desc)}
+      setDescription(route?.params?.desc)
+    }
       console.log(itemName);
       console.log(description);
+      setImageUrl(route?.params?.img);
+      console.log('img:',imageUrl);
   },[route])
 
   useEffect(() => {
@@ -111,21 +114,21 @@ const CreateFoundItemScreen = ({route}) => {
     matchSearch();
   }, [postId]);
 
-  const uploadImageToFirebaseStorage = async (imageUri) => {
-    try {
-      const response = await fetch(imageUri);
-      const blob = await response.blob();
-      const storageRef = ref(
-        storage,
-        `images/${auth.currentUser.uid}/${Date.now()}.jpg`
-      );
-      await uploadBytes(storageRef, blob);
-      return getDownloadURL(storageRef);
-    } catch (error) {
-      console.error('Error uploading image to Firebase Storage: ', error);
-      return null;
-    }
-  };
+  // const uploadImageToFirebaseStorage = async (imageUri) => {
+  //   try {
+  //     const response = await fetch(imageUri);
+  //     const blob = await response.blob();
+  //     const storageRef = ref(
+  //       storage,
+  //       `images/${auth.currentUser.uid}/${Date.now()}.jpg`
+  //     );
+  //     await uploadBytes(storageRef, blob);
+  //     return getDownloadURL(storageRef);
+  //   } catch (error) {
+  //     console.error('Error uploading image to Firebase Storage: ', error);
+  //     return null;
+  //   }
+  // };
 
   const handleSubmit = async () => {
     if (itemName === '' || description === '') {
@@ -138,10 +141,10 @@ const CreateFoundItemScreen = ({route}) => {
     } else {
       try {
         setLoading(true);
-        let imageUrl = null;
-        if (imageUri) {
-          imageUrl = await uploadImageToFirebaseStorage(imageUri);
-        }
+        // let imageUrl = null;
+        // if (imageUri) {
+        //   imageUrl = await uploadImageToFirebaseStorage(imageUri);
+        // }
         const docRef = await addDoc(collection(FireStore, 'foundItems'), {
           userId: auth.currentUser.uid,
           itemName: itemName,
@@ -341,14 +344,14 @@ const CreateFoundItemScreen = ({route}) => {
           alignItems: 'center',
         }}
       >
-        {/* {imageUri ? (
+        {imageUrl ? (
           <Image
-            source={{ uri: imageUri }}
+            source={{ uri: imageUrl }}
             style={{ width: 200, height: 200 }}
           />
-        ) : ( */}
+        ) : (
           <Text>Select an Image</Text>
-        {/* )} */}
+        )}
       </TouchableOpacity>
       <Text className="text-black text-lg font-bold mb-2">Item Name</Text>
       <TextInput
