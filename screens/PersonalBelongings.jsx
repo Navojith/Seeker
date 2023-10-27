@@ -16,6 +16,7 @@ import { auth } from '../firebase';
 import { getDoc, doc, updateDoc, arrayRemove } from 'firebase/firestore';
 import { FireStore } from '../firebase';
 import TwoButtonModal from '../components/common/modals/TwoButtonModal';
+import {  useIsFocused } from "@react-navigation/native";
 
 const PersonalBelongings = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -31,6 +32,7 @@ const PersonalBelongings = ({ navigation }) => {
   });
   const [modalIsVisible, setModalIsVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -66,7 +68,7 @@ const PersonalBelongings = ({ navigation }) => {
       }
     };
     fetchUser();
-  }, []);
+  }, [isFocused]);
 
   const handleDelete = async () => {
     if (toBeDeleted !== null) {
@@ -142,7 +144,7 @@ const PersonalBelongings = ({ navigation }) => {
         onPressConfirm={handleDelete}
       />
       <DismissibleAlert data={error} setData={setError} />
-      {data.length ? (
+      {data ? (
         <View>
           <FlatList
             data={data}
@@ -178,7 +180,7 @@ const PersonalBelongings = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
             )}
-            keyExtractor={({ index }) => index}
+            keyExtractor={(item, index) => item.id + index.toString()}
           />
         </View>
       ) : (
