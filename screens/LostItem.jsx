@@ -65,7 +65,7 @@ const LostItem = ({ route }) => {
       console.log(db);
 
       const res = await addDoc(collection(db, 'requests'), {
-        user: user,
+        user: postedUser,
         itemDetails: postId,
       });
       console.log('requestId', res.id);
