@@ -38,6 +38,16 @@ const PostedFoundItemsScreen = ({ route }) => {
   const user = route.params;
   const pushDataObject = route.params;
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [info , setInfo] = useState({ 
+    visibility: false,
+    viewStyles: ` pt-8 flex justify-center border rounded-[42px] border-[6px] border-dark-blue`,
+    message:
+      'Click on the item post to review requests and choose the item owner to return. Click handover to security if you handover the item to security',
+    buttonText: 'Okay',
+    buttonContainerStyles: ` w-[100px] mx-auto rounded-full bg-dark-blue`,
+    buttonTextStyles: ` font-bold`,
+    messageStyles: ` text-2xl font-bold`,
+  });
   const [status, setStatus] = useState({
     visibility: false,
     viewStyles: ` pt-8 flex justify-center border rounded-[42px] border-[6px] border-dark-blue`,
@@ -85,6 +95,10 @@ const PostedFoundItemsScreen = ({ route }) => {
   }, []);
 
   const fetchUser = async () => {
+    setInfo({
+      ...info,
+      visibility: true,
+  });
     try {
       const uuid = auth.currentUser.uid;
       const res = await getDoc(doc(FireStore, 'userDetails', uuid));
@@ -369,6 +383,7 @@ const PostedFoundItemsScreen = ({ route }) => {
 
   return (
     <View>
+      <DismissibleAlert data={info} setData={setInfo} />
       <SafeAreaView>
         <FlatList
           data={foundItems}
