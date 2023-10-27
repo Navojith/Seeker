@@ -11,7 +11,7 @@ import { Alert } from 'react-native';
 import { auth } from '../firebase';
 import { Profile } from '../constants/RouteConstants';
 
-const AddPBModal = ({ isVisible, setIsVisible, navigation }) => {
+const AddPBModal = ({ isVisible, setIsVisible, navigation, setRandomVal }) => {
   const [type, setType] = useState(PersonalBelongingsTypes.Laptop);
   const [name, setName] = useState('');
   const [serialNo, setSerialNo] = useState('');
@@ -31,8 +31,12 @@ const AddPBModal = ({ isVisible, setIsVisible, navigation }) => {
         });
         setLoading(false);
         Alert.alert('Success', 'Device Added Successfully');
+        navigation.navigate(Profile, {
+          // Generate a unique key to force remount of the component
+          key: `orders-${Math.random()}`,
+        });
         setIsVisible(false);
-        navigation.navigate(Profile);
+        setRandomVal(Math.random());
       } catch (error) {
         Alert.alert('Error', error.message);
       }

@@ -23,14 +23,6 @@ const LostScreen = () => {
       <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
         <Text style={styles.buttonText}>+</Text>
       </TouchableOpacity>
-
-      {/* Temparary added for testing purposes */}
-      <TouchableOpacity
-        style={styles.Temp}
-        onPress={() => navigation.navigate(BuyBoost)}
-      >
-        <Text style={styles.buttonTextTemp}>Temp</Text>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -59,25 +51,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 40,
     // fontWeight: 'bold',
-  },
-
-  //Temparary added for testing purposes
-  buttonTextTemp: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-
-  Temp: {
-    position: 'absolute',
-    bottom: 25,
-    left: 25,
-    backgroundColor: '#0369A1',
-    borderRadius: 50,
-    width: 60,
-    height: 60,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 5,
   },
 });
 

@@ -16,9 +16,13 @@ import { auth } from '../firebase';
 import { getDoc, doc, updateDoc, arrayRemove } from 'firebase/firestore';
 import { FireStore } from '../firebase';
 import TwoButtonModal from '../components/common/modals/TwoButtonModal';
-import {  useIsFocused } from "@react-navigation/native";
+import { useIsFocused } from '@react-navigation/native';
+import { Profile } from '../constants/RouteConstants';
 
-const PersonalBelongings = ({ navigation }) => {
+const PersonalBelongings = ({ navigation, route }) => {
+  const [componentKey, setComponentKey] = useState(
+    route.params?.key || 'initial-key'
+  );
   const [loading, setLoading] = useState(false);
   const [toBeDeleted, setToBeDeleted] = useState(null);
   const [data, setData] = useState([]);
@@ -33,6 +37,7 @@ const PersonalBelongings = ({ navigation }) => {
   const [modalIsVisible, setModalIsVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const isFocused = useIsFocused();
+  const [randomVal, setRandomVal] = useState(Math.random());
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -40,6 +45,7 @@ const PersonalBelongings = ({ navigation }) => {
         setLoading(true);
         const uuid = auth.currentUser.uid;
         const res = await getDoc(doc(FireStore, 'userDetails', uuid));
+        setComponentKey(route.params?.key || 'initial-key');
         if (res.exists) {
           setData(res.data().devices);
         } else {
@@ -68,7 +74,13 @@ const PersonalBelongings = ({ navigation }) => {
       }
     };
     fetchUser();
-  }, [isFocused]);
+
+    return () => {
+      // Clear the orders data when the component is unmounted
+      setData(null);
+      setLoading(true);
+    };
+  }, [isFocused, componentKey, route.params?.key, randomVal]);
 
   const handleDelete = async () => {
     if (toBeDeleted !== null) {
@@ -104,6 +116,7 @@ const PersonalBelongings = ({ navigation }) => {
       } finally {
         setDeleteModalVisible(false);
         setToBeDeleted(null);
+        setRandomVal(Math.random());
       }
     } else {
       setError({
@@ -129,6 +142,7 @@ const PersonalBelongings = ({ navigation }) => {
         isVisible={modalIsVisible}
         setIsVisible={setModalIsVisible}
         navigation={navigation}
+        setRandomVal={setRandomVal}
       />
       <TouchableOpacity
         style={styles.Temp}
