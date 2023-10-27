@@ -191,14 +191,18 @@ const ImageScreen =({route}) =>{
           tagText: {
             padding: 5,
             margin: 5,
-            borderColor: 'gray',
+            borderColor: '#0284C7',
             borderWidth: 1,
             borderRadius: 5,
           },
           selectedTag: {
-            backgroundColor: 'blue', 
+            backgroundColor: '#0284C7', 
             color: 'white',
         },
+        selectedDescription: {
+          backgroundColor: '#0284C7', 
+          color: 'white',
+      },
       })
 
     return(
@@ -249,7 +253,11 @@ const ImageScreen =({route}) =>{
                       </View>
                   ))}
                 <TouchableOpacity onPress={handleDescription}>
-                <Text style={styles.modalText}>Description: {description}</Text>
+                <Text style={styles.modalText}>Description: </Text>
+                <Text style={[
+                  styles.tagText,
+                  selectedDescription.includes(description) ? styles.selectedDescription : null
+                ]}>{description}</Text>
                 </TouchableOpacity>
                 <Button title="Confirm" onPress={handleTags} />
             </View>
