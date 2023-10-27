@@ -26,15 +26,16 @@ import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import TwoButtonModal from '../components/common/modals/TwoButtonModal';
 import { PostBoosting } from '../constants/RouteConstants';
 import axios from 'axios';
-import * as ImagePicker from 'expo-image-picker';
+// import * as ImagePicker from 'expo-image-picker';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import * as ImageManipulator from 'expo-image-manipulator';
+// import * as ImageManipulator from 'expo-image-manipulator';
 
-const CreateLostItemScreen = ({ navigation }) => {
+const CreateLostItemScreen = ({ navigation, route }) => {
   const [selectedLocation, setSelectedLocation] = useState(data.locations[0]);
   const [createdItemId, setCreatedItemId] = useState(null);
   const [otherVisibility, setOtherVisibility] = useState(false);
   const [itemName, setItemName] = useState('');
+  const [persistedItemName, setPersistedItemName] = useState('');
   const [serialNumber, setSerialNumber] = useState('');
   const [color, setColor] = useState('');
   const [description, setDescription] = useState('');
@@ -51,11 +52,25 @@ const CreateLostItemScreen = ({ navigation }) => {
   const [leaderboardUsers, setLeaderboardUsers] = useState([]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [imageUri, setImageUri] = useState(null);
+  const [imageUrl, setImageUrl] = useState(null);
   const [searchDocuments, setSearchDocuments] = useState([]);
   const [postId, setPostId] = useState('');
   const [foundItemNotifications, setFoundItemNotifications] = useState(false);
   const [lostItemNotifications, setLostItemNotifications] = useState(false);
+  // const {tags , desc} = route?.params;
+
+  useEffect(() => {
+    console.log(route);
+    if (route?.params) {
+      console.log('tags', route?.params?.tags);
+      console.log('desc', route?.params?.desc);
+      const tags = route?.params?.tags.join(' ');
+      setItemName(tags);
+      setDescription(route?.params?.desc);
+    }
+    setImageUrl(route?.params?.img);
+    console.log('img:', imageUrl);
+  }, [route]);
 
   useEffect(() => {
     if (selectedLocation === 'Other') {
@@ -124,35 +139,41 @@ const CreateLostItemScreen = ({ navigation }) => {
       type: 'specialPost',
       item: postId,
     };
-
-    const res = await axios.post(
-      `https://app.nativenotify.com/api/indie/group/notification`,
-      {
+    console.log(itemName);
+    await axios
+      .post(`https://app.nativenotify.com/api/indie/group/notification`, {
         subIDs: leaderboardUsers,
         appId: 13599,
         appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
         title: 'Seeker',
-        message: 'Lost item reported near you',
+        message:
+          'Lost item reported near you\n\nItem: ' +
+          persistedItemName +
+          '\nLocation: ' +
+          selectedLocation +
+          '\nPoints: 10',
         pushData: JSON.stringify(pushData),
-      }
-    );
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
-  const uploadImageToFirebaseStorage = async (imageUri) => {
-    try {
-      const response = await fetch(imageUri);
-      const blob = await response.blob();
-      const storageRef = ref(
-        storage,
-        `images/${auth.currentUser.uid}/${Date.now()}.jpg`
-      );
-      await uploadBytes(storageRef, blob);
-      return getDownloadURL(storageRef);
-    } catch (error) {
-      console.error('Error uploading image to Firebase Storage: ', error);
-      return null;
-    }
-  };
+  // const uploadImageToFirebaseStorage = async (imageUri) => {
+  //   try {
+  //     const response = await fetch(imageUri);
+  //     const blob = await response.blob();
+  //     const storageRef = ref(
+  //       storage,
+  //       `images/${auth.currentUser.uid}/${Date.now()}.jpg`
+  //     );
+  //     await uploadBytes(storageRef, blob);
+  //     return getDownloadURL(storageRef);
+  //   } catch (error) {
+  //     console.error('Error uploading image to Firebase Storage: ', error);
+  //     return null;
+  //   }
+  // };
 
   const handleSubmit = async () => {
     if (itemName === '' || description === '') {
@@ -168,10 +189,10 @@ const CreateLostItemScreen = ({ navigation }) => {
     } else {
       try {
         setLoading(true);
-        let imageUrl = null;
-        if (imageUri) {
-          imageUrl = await uploadImageToFirebaseStorage(imageUri);
-        }
+        // let imageUrl = null;
+        // if (imageUri) {
+        //   imageUrl = await uploadImageToFirebaseStorage(imageUri);
+        // }
         const res = await addDoc(collection(FireStore, 'lostItems'), {
           userId: auth.currentUser.uid,
           foundUserId: '',
@@ -184,7 +205,7 @@ const CreateLostItemScreen = ({ navigation }) => {
           tier: 'free',
           timestamp: new Date(),
           postId: '',
-          imageUrl: imageUrl,
+          imageUrl: imageUrl ?? null,
         });
 
         console.log('id', res.id);
@@ -193,12 +214,13 @@ const CreateLostItemScreen = ({ navigation }) => {
 
         setCreatedItemId(pId);
         setPostId(pId);
-        handleNotification(pId);
+        // handleNotification(pId);
 
         // Update the document with the postId
         await updateDoc(res, { postId: pId });
 
         setLoading(false);
+        setPersistedItemName(itemName);
         setItemName('');
         setColor('');
         setDescription('');
@@ -219,29 +241,35 @@ const CreateLostItemScreen = ({ navigation }) => {
 
   const handleBoosting = () => {
     setIsModalVisible(false);
-    navigation.navigate(PostBoosting, { itemId: createdItemId });
+    navigation.navigate(PostBoosting, {
+      itemId: createdItemId,
+      itemName: persistedItemName,
+      location: selectedLocation,
+    });
   };
 
   const openImagePicker = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      //aspect: [4, 3],
-      quality: 1,
-    });
+    const screen = 'lost';
+    navigation.navigate('Upload Image', { screen });
+    // let result = await ImagePicker.launchImageLibraryAsync({
+    //   mediaTypes: ImagePicker.MediaTypeOptions.All,
+    //   allowsEditing: true,
+    //   //aspect: [4, 3],
+    //   quality: 1,
+    // });
 
-    console.log(result);
+    // console.log(result);
 
-    if (!result.canceled) {
-      const resizedPhoto = await ImageManipulator.manipulateAsync(
-        result.assets[0].uri,
-        [{ resize: { width: 300 } }], // resize to width of 300 and preserve aspect ratio
-        { compress: 0.7, format: 'jpeg' }
-      );
+    // if (!result.canceled) {
+    //   const resizedPhoto = await ImageManipulator.manipulateAsync(
+    //     result.assets[0].uri,
+    //     [{ resize: { width: 300 } }], // resize to width of 300 and preserve aspect ratio
+    //     { compress: 0.7, format: 'jpeg' }
+    //   );
 
-      setImageUri(resizedPhoto.uri);
-      console.log(resizedPhoto.uri);
-    }
+    //   setImageUri(resizedPhoto.uri);
+    //   console.log(resizedPhoto.uri);
+    // }
   };
 
   const matchSearch = async () => {
@@ -343,6 +371,7 @@ const CreateLostItemScreen = ({ navigation }) => {
         }
         onPressConfirm={handleBoosting}
         onPressCancel={() => {
+          handleNotification(createdItemId);
           setError({
             visibility: true,
             viewStyles: 'border border-4 border-green-600',
@@ -365,9 +394,9 @@ const CreateLostItemScreen = ({ navigation }) => {
           alignItems: 'center',
         }}
       >
-        {imageUri ? (
+        {imageUrl ? (
           <Image
-            source={{ uri: imageUri }}
+            source={{ uri: imageUrl }}
             style={{ width: 200, height: 200, resizeMode: 'contain' }}
           />
         ) : (

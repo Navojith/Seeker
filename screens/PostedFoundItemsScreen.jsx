@@ -1,40 +1,157 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, SafeAreaView, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  SafeAreaView,
+  FlatList,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import { FireStore, auth } from '../firebase';
-import { useNavigation} from '@react-navigation/native';
-import { getDocs, collection, query, where } from 'firebase/firestore';
-const tempimage = require("../assets/images/PostCreation/AddImage.png");
+import { useNavigation } from '@react-navigation/native';
+import {
+  getDocs,
+  collection,
+  query,
+  where,
+  getDoc,
+  doc,
+  updateDoc,
+} from 'firebase/firestore';
+import axios from 'axios';
+import getPoints from '../util/pointCalculation/getPoints';
+import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
+const tempimage = require('../assets/images/PostCreation/AddImage.png');
 
-const PostedFoundItemsScreen = () => {
+const PostedFoundItemsScreen = ({ route }) => {
   const [foundItems, setFoundItems] = useState([]);
   const navigation = useNavigation();
+  const [currentUser, setCurrentUser] = useState(null);
+  const user = route.params;
+  const [status, setStatus] = useState({
+    visibility: false,
+    viewStyles: 'border border-4 border-red-600',
+    title: null,
+    titleStyles: 'text-red-600',
+    message: null,
+    messageStyles: 'text-red-600 font-bold',
+    buttonText: 'Okay',
+  });
 
   useEffect(() => {
     const getFoundItems = async () => {
       try {
-        const collectionRef = collection(FireStore, "foundItems");
-        const q = query(collectionRef, where("userId", "==", auth.currentUser.uid));
-        const returnCollectionRef = collection(FireStore, "lostItems");
-        const returnQuery = query(returnCollectionRef, where("foundUserId", "==" ,auth.currentUser.uid ));
+        const collectionRef = collection(FireStore, 'foundItems');
+        const q = query(
+          collectionRef,
+          where('userId', '==', auth.currentUser.uid)
+        );
+        const returnCollectionRef = collection(FireStore, 'lostItems');
+        const returnQuery = query(
+          returnCollectionRef,
+          where('foundUserId', '==', auth.currentUser.uid)
+        );
         const querySnapshot = await getDocs(q);
         const returnQuerySnapshot = await getDocs(returnQuery);
-        console.log('query',returnQuerySnapshot);
+        console.log('query', returnQuerySnapshot);
 
         if (querySnapshot.empty && returnQuerySnapshot.empty) {
-          console.log("No matching documents.");
+          console.log('No matching documents.');
         } else {
           const lostItems = querySnapshot.docs.map((doc) => doc.data());
-          const foundItems = returnQuerySnapshot.docs.map((doc)=>doc.data());
+          const foundItems = returnQuerySnapshot.docs.map((doc) => doc.data());
           const items = lostItems.concat(foundItems);
           console.log(items);
           setFoundItems(items);
         }
       } catch (error) {
-        console.error("Error fetching found items:", error);
+        console.error('Error fetching found items:', error);
       }
     };
     getFoundItems();
   }, []);
+
+  const fetchUser = async () => {
+    try {
+      // setLoading(true);
+      const uuid = auth.currentUser.uid;
+      const res = await getDoc(doc(FireStore, 'userDetails', uuid));
+      if (res.exists) {
+        setCurrentUser(res.data());
+      }
+      // else {
+      //   setError({
+      //     visibility: true,
+      //     title: 'Error',
+      //     message: 'User Information not found',
+      //     buttonText: 'Close',
+      //     titleStyles: 'text-red-500',
+      //     messageStyles: 'text-red-500',
+      //     viewStyles: 'border border-4 border-red-500',
+      //   });
+      // }
+    } catch (error) {
+      console.log(error);
+      // setError({
+      //   visibility: true,
+      //   title: 'Error',
+      //   message: 'Data fetching failed',
+      //   buttonText: 'Close',
+      //   titleStyles: 'text-red-500',
+      //   messageStyles: 'text-red-500',
+      //   viewStyles: 'border border-4 border-red-500',
+      // });
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  const handleReturnItem = async () => {
+    console.log('user', user);
+    console.log('current', currentUser);
+    await axios.post(`https://app.nativenotify.com/api/indie/notification`, {
+      subID: user.userId,
+      appId: 13599,
+      appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
+      title: 'Seeker',
+      message:
+        'Did you receive your item from ' + currentUser.displayedName + '?',
+    });
+  };
+
+  const handleSecurity = (item) => {
+    console.log('handover to security');
+    updatePoints(getPoints(item.tier) / 2);
+  };
+
+  const updatePoints = async (pointsGained) => {
+    try {
+      const docRef = doc(FireStore, 'userDetails', auth.currentUser.uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const doc = docSnap.data();
+        const newPoints = doc.points + pointsGained;
+        await updateDoc(docRef, { points: newPoints });
+        console.log('Document successfully updated!');
+        setStatus({
+          visibility: true,
+          viewStyles: 'border border-4 border-green-600',
+          titleStyles: 'text-green-600',
+          messageStyles: 'text-green-600 font-bold',
+          title: 'Success !',
+          message: 'You gained ' + pointsGained + ' points !',
+          buttonText: 'Okay',
+        });
+      } else {
+        console.log('No such document!');
+      }
+    } catch (error) {
+      console.error('Error updating document: ', error);
+    }
+  };
 
   const styles = StyleSheet.create({
     container: {
@@ -45,7 +162,6 @@ const PostedFoundItemsScreen = () => {
     itemText: {
       fontSize: 16,
       margin: 2,
-      
     },
     postDetails: {
       height: 40,
@@ -77,19 +193,19 @@ const PostedFoundItemsScreen = () => {
       marginLeft: 8,
       marginRight: 16,
       marginBottom: 8,
-      borderRadius: 8, // Add border radius to the image
+      borderRadius: 8,
+      resizeMode: 'contain',
     },
     buttonContainer: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      
     },
     button: {
       backgroundColor: '#0369a1',
       color: '#fff',
       borderRadius: 20, // Increase border radius for curved buttons
       padding: 8,
-      paddingHorizontal: 15
+      paddingHorizontal: 15,
     },
   });
 
@@ -99,32 +215,44 @@ const PostedFoundItemsScreen = () => {
         <FlatList
           data={foundItems}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={()=>navigation.navigate('Requests', {item})}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Requests', { item })}
+            >
               <View key={item.id} style={styles.card}>
                 <View style={styles.itemDetails}>
-                  <Image source={{uri:item.imageUrl}} style={styles.itemImage} />
+                  {item.imageUrl ? (
+                    <Image
+                      source={{ uri: item.imageUrl }}
+                      style={styles.itemImage}
+                    />
+                  ) : (
+                    <Image source={tempimage} style={styles.itemImage} />
+                  )}
+                  {/* <Image source={{uri:item.imageUrl}} style={styles.itemImage} /> */}
                   <View style={styles.postDetails}>
                     <Text style={styles.itemText}>Item: {item.itemName}</Text>
                     {/* <Text style={styles.itemText}>Item: {item.postId}</Text> */}
-                    <Text style={styles.itemText}>Location: {item.location}</Text>
+                    <Text style={styles.itemText}>
+                      Location: {item.location}
+                    </Text>
                   </View>
                 </View>
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
-                    onPress={() => {
-                      console.log("Return to owner");
-                    }}
+                    onPress={handleReturnItem}
                     style={styles.button}
                   >
-                    <Text style={{ color: 'white', fontWeight: 'bold' }}>Return to Owner</Text>
+                    <Text style={{ color: 'white', fontWeight: 'bold' }}>
+                      Return to Owner
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    onPress={() => {
-                      console.log("Handover to Security");
-                    }}
+                    onPress={() => handleSecurity(item)}
                     style={styles.button}
                   >
-                    <Text style={{ color: 'white', fontWeight: 'bold' }}>Handover to Security</Text>
+                    <Text style={{ color: 'white', fontWeight: 'bold' }}>
+                      Handover to Security
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -133,6 +261,7 @@ const PostedFoundItemsScreen = () => {
           keyExtractor={(item, index) => item.id + index.toString()}
         />
       </SafeAreaView>
+      <DismissibleAlert data={status} setData={setStatus} />
     </View>
   );
 };

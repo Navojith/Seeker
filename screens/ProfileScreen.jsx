@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -7,31 +7,31 @@ import {
   TouchableOpacity,
   Image,
   Text,
-  ActivityIndicator,
-} from 'react-native';
-import { auth, FireStore, storage } from '../firebase';
-import CustomHeader from '../components/header';
-import { useNavigation } from '@react-navigation/native';
-import { unregisterIndieDevice } from 'native-notify';
-import { doc, getDoc, updateDoc, collection } from 'firebase/firestore';
-import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
-import UserIcon from '../assets/images/UserImg';
-import { Settings } from '../constants/RouteConstants';
-import * as ImagePicker from 'expo-image-picker';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import * as ImageManipulator from 'expo-image-manipulator';
-import EvilIcons from 'react-native-vector-icons/EvilIcons';
+} from "react-native";
+import { auth, FireStore, storage } from "../firebase";
+import CustomHeader from "../components/header";
+import { useNavigation } from "@react-navigation/native";
+import { unregisterIndieDevice } from "native-notify";
+import { doc, getDoc, updateDoc, collection } from "firebase/firestore";
+import DismissibleAlert from "../components/common/alerts/DismissibleAlert";
+import UserIcon from "../assets/images/UserImg";
+import { Settings } from "../constants/RouteConstants";
+import * as ImagePicker from "expo-image-picker";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import * as ImageManipulator from "expo-image-manipulator";
+import EvilIcons from "react-native-vector-icons/EvilIcons";
+import { ActivityIndicator } from "react-native";
 
 const ProfileScreen = () => {
   const [user, setUser] = useState(null);
   const navigation = useNavigation();
   const [error, setError] = useState({
     visibility: false,
-    viewStyles: 'border border-4 border-red-600',
+    viewStyles: "border border-4 border-red-600",
     title: null,
-    titleStyles: 'text-red-600',
+    titleStyles: "text-red-600",
     message: null,
-    messageStyles: 'text-red-600 font-bold',
+    messageStyles: "text-red-600 font-bold",
   });
   const [loading, setLoading] = useState(false);
   const [imageUri, setImageUri] = useState(null);
@@ -39,58 +39,54 @@ const ProfileScreen = () => {
   const styles = StyleSheet.create({
     container: {
       marginTop: 130,
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: "center",
+      alignItems: "center",
     },
     profileDetails: {
       fontSize: 20,
-      fontWeight: 'bold',
+      fontWeight: "bold",
       margin: 2,
-      color: '#333', // Adjust the color as needed
+      color: "#333", // Adjust the color as needed
     },
     phoneDetails: {
       fontSize: 16, // You can adjust the font size
-      color: '#666', // Adjust the color
+      color: "#666", // Adjust the color
     },
     pointsDetails: {
       fontSize: 18, // You can adjust the font size
-      fontWeight: 'bold',
-      color: '#FF5733', // Adjust the color
+      fontWeight: "bold",
+      color: "#FF5733", // Adjust the color
     },
     card: {
-      backgroundColor: '#F0F9FF',
+      backgroundColor: "#F0F9FF",
       borderRadius: 10,
       padding: 20,
       margin: 20,
-      borderColor: '#0284C7',
+      borderColor: "#0284C7",
       borderWidth: 3,
     },
     row: {
-      flexDirection: 'row',
+      flexDirection: "row",
       padding: 15,
       borderBottomWidth: 1,
-      borderBottomColor: '#ccc',
+      borderBottomColor: "#ccc",
     },
     buttonText: {
-      color: '#000',
-      fontWeight: 'bold',
+      color: "#000",
+      fontWeight: "bold",
     },
   });
 
   const handlePostedLostItems = () => {
-    navigation.navigate('Posted Lost Items');
+    navigation.navigate("Posted Lost Items");
   };
 
   const handlePostedFoundItems = () => {
-    navigation.navigate('Posted Found Items');
-  };
-
-  const handleUploadedImage = () => {
-    navigation.navigate('Upload Image');
+    navigation.navigate("Posted Found Items");
   };
 
   const handlePersonalBelongings = () => {
-    navigation.navigate('Personal Belongings');
+    navigation.navigate("Personal Belongings");
   };
 
   const handleSettings = () => {
@@ -102,29 +98,29 @@ const ProfileScreen = () => {
       try {
         setLoading(true);
         const uuid = auth.currentUser.uid;
-        const res = await getDoc(doc(FireStore, 'userDetails', uuid));
+        const res = await getDoc(doc(FireStore, "userDetails", uuid));
         if (res.exists) {
           setUser(res.data());
         } else {
           setError({
             visibility: true,
-            title: 'Error',
-            message: 'User Information not found',
-            buttonText: 'Close',
-            titleStyles: 'text-red-500',
-            messageStyles: 'text-red-500',
-            viewStyles: 'border border-4 border-red-500',
+            title: "Error",
+            message: "User Information not found",
+            buttonText: "Close",
+            titleStyles: "text-red-500",
+            messageStyles: "text-red-500",
+            viewStyles: "border border-4 border-red-500",
           });
         }
       } catch (error) {
         setError({
           visibility: true,
-          title: 'Error',
-          message: 'Data fetching failed',
-          buttonText: 'Close',
-          titleStyles: 'text-red-500',
-          messageStyles: 'text-red-500',
-          viewStyles: 'border border-4 border-red-500',
+          title: "Error",
+          message: "Data fetching failed",
+          buttonText: "Close",
+          titleStyles: "text-red-500",
+          messageStyles: "text-red-500",
+          viewStyles: "border border-4 border-red-500",
         });
       } finally {
         setLoading(false);
@@ -138,12 +134,12 @@ const ProfileScreen = () => {
     unregisterIndieDevice(
       auth.currentUser.uid,
       13599,
-      'gTBeP5h5evCxHcHdDs0yVQ'
+      "gTBeP5h5evCxHcHdDs0yVQ"
     );
     auth
       .signOut()
       .then(() => {
-        console.log('Signed out');
+        console.log("Signed out");
       })
       .catch((error) => {
         console.log(error.code, error.message);
@@ -162,12 +158,12 @@ const ProfileScreen = () => {
       const resizedPhoto = await ImageManipulator.manipulateAsync(
         result.assets[0].uri,
         [{ resize: { width: 300 } }],
-        { compress: 0.7, format: 'jpeg' }
+        { compress: 0.7, format: "jpeg" }
       );
 
       try {
         const downUrl = await uploadImageToFirebaseStorage(resizedPhoto.uri);
-        const userRef = doc(FireStore, 'userDetails', auth.currentUser.uid);
+        const userRef = doc(FireStore, "userDetails", auth.currentUser.uid);
 
         await updateDoc(userRef, {
           avatarUrl: downUrl,
@@ -175,7 +171,7 @@ const ProfileScreen = () => {
 
         setImageUri(downUrl);
       } catch (error) {
-        console.error('Error updating profile picture:', error);
+        console.error("Error updating profile picture:", error);
       }
     }
   };
@@ -189,10 +185,10 @@ const ProfileScreen = () => {
         `images/${auth.currentUser.uid}/${Date.now()}.jpg`
       );
       await uploadBytes(storageRef, blob);
-      console.log('uploaded to firebase');
+      console.log("uploaded to firebase");
       return getDownloadURL(storageRef);
     } catch (error) {
-      console.error('Error uploading image to Firebase Storage: ', error);
+      console.error("Error uploading image to Firebase Storage: ", error);
       return null;
     }
   };
@@ -220,7 +216,7 @@ const ProfileScreen = () => {
             </TouchableOpacity>
             <Text style={styles.profileDetails}>{user.displayedName}</Text>
             <Text style={styles.phoneDetails}>
-              {user.phoneNo ?? user.email ?? ''}
+              {user.phoneNo ?? user.email ?? ""}
             </Text>
             <Text style={styles.pointsDetails}>Points: {user.points ?? 0}</Text>
           </View>
@@ -247,24 +243,30 @@ const ProfileScreen = () => {
               <EvilIcons name="location" size={20} color="black" />
               <Text style={styles.buttonText}>Posted Found Items</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.row} onPress={handleUploadedImage}>
+            {/* <TouchableOpacity style={styles.row} onPress={handleUploadedImage}>
               <EvilIcons name="image" size={20} color="black" />
               <Text style={styles.buttonText}>Upload Image</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <TouchableOpacity style={styles.row} onPress={handleSettings}>
               <EvilIcons name="gear" size={20} color="black" />
               <Text style={styles.buttonText}>Settings</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleSignOut} style={styles.row}>
+            <EvilIcons name="arrow-right" size={20} color="black" />
+              <Text style={styles.buttonText}>Sign Out</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
       </SafeAreaView>
     </>
   ) : (
-    <View className="flex flex-col flex-1 items-center justify-center">
-      {loading && <ActivityIndicator size="large" color="#0369A1" />}
-      <TouchableOpacity onPress={handleSignOut} style={styles.itemButton}>
+    <View >
+      {loading && (
+        <ActivityIndicator size="large" color="#0369A1"/>
+      )}
+      {/* <TouchableOpacity onPress={handleSignOut} style={styles.itemButton}>
         <Text style={styles.buttonText}>Sign Out</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 };

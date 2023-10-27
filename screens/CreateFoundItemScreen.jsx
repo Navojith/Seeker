@@ -26,13 +26,19 @@ import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import { useNavigation } from '@react-navigation/native';
 import { LostItems } from '../constants/RouteConstants';
 import axios from 'axios';
-import * as ImagePicker from 'expo-image-picker';
+// import * as ImagePicker from 'expo-image-picker';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { Alert } from 'react-native';
 
-const CreateFoundItemScreen = () => {
+const CreateFoundItemScreen = ({route}) => {
   const navigation = useNavigation();
+  // const {tags , desc} = route.params;
+  // console.log('tags',tags);
+  // console.log('desc',desc);
+
+  // console.log('imageTags',tags);
+  // console.log('imageDescription', desc);
 
   const [selectedLocation, setSelectedLocation] = useState(data.locations[0]);
   const [otherVisibility, setOtherVisibility] = useState(false);
@@ -51,10 +57,27 @@ const CreateFoundItemScreen = () => {
   });
   const [loading, setLoading] = useState(false);
   const [searchDocuments, setSearchDocuments] = useState([]);
-  const [imageUri, setImageUri] = useState(null);
+  const [imageUrl, setImageUrl] = useState(null);
   const [postId, setPostId] = useState('');
   const [foundItemNotifications, setFoundItemNotifications] = useState(false);
   const [lostItemNotifications, setLostItemNotifications] = useState(false);
+
+  useEffect(() =>{
+    console.log('auto filling tags');
+    console.log(route);
+    console.log(route.params);
+    if(route.params){
+      console.log('tags',route?.params?.tags);
+      console.log('desc',route?.params?.desc);
+      const tags = route?.params?.tags.join(' ');
+      setItemName(tags);
+      setDescription(route?.params?.desc)
+    }
+      console.log(itemName);
+      console.log(description);
+      setImageUrl(route?.params?.img);
+      console.log('img:',imageUrl);
+  },[route])
 
   useEffect(() => {
     if (selectedLocation === 'Other') {
@@ -94,21 +117,21 @@ const CreateFoundItemScreen = () => {
     matchSearch();
   }, [postId]);
 
-  const uploadImageToFirebaseStorage = async (imageUri) => {
-    try {
-      const response = await fetch(imageUri);
-      const blob = await response.blob();
-      const storageRef = ref(
-        storage,
-        `images/${auth.currentUser.uid}/${Date.now()}.jpg`
-      );
-      await uploadBytes(storageRef, blob);
-      return getDownloadURL(storageRef);
-    } catch (error) {
-      console.error('Error uploading image to Firebase Storage: ', error);
-      return null;
-    }
-  };
+  // const uploadImageToFirebaseStorage = async (imageUri) => {
+  //   try {
+  //     const response = await fetch(imageUri);
+  //     const blob = await response.blob();
+  //     const storageRef = ref(
+  //       storage,
+  //       `images/${auth.currentUser.uid}/${Date.now()}.jpg`
+  //     );
+  //     await uploadBytes(storageRef, blob);
+  //     return getDownloadURL(storageRef);
+  //   } catch (error) {
+  //     console.error('Error uploading image to Firebase Storage: ', error);
+  //     return null;
+  //   }
+  // };
 
   const handleSubmit = async () => {
     if (itemName === '' || description === '') {
@@ -121,10 +144,10 @@ const CreateFoundItemScreen = () => {
     } else {
       try {
         // setLoading(true);
-        // let imageUrl = null;
-        // if (imageUri) {
-        //   imageUrl = await uploadImageToFirebaseStorage(imageUri);
-        // }
+        // // let imageUrl = null;
+        // // if (imageUri) {
+        // //   imageUrl = await uploadImageToFirebaseStorage(imageUri);
+        // // }
         // const docRef = await addDoc(collection(FireStore, 'foundItems'), {
         //   userId: auth.currentUser.uid,
         //   itemName: itemName,
@@ -228,26 +251,28 @@ const CreateFoundItemScreen = () => {
     }
   };
 
-  const openImagePicker = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      //aspect: [4, 3],
-      quality: 1,
-    });
+  const openImagePicker = () => {
+    const screen = "found";
+    navigation.navigate('Upload Image', {screen});
+    // let result = await ImagePicker.launchImageLibraryAsync({
+    //   mediaTypes: ImagePicker.MediaTypeOptions.All,
+    //   allowsEditing: true,
+    //   //aspect: [4, 3],
+    //   quality: 1,
+    // });
 
-    console.log(result);
+    // console.log(result);
 
-    if (!result.canceled) {
-      const resizedPhoto = await ImageManipulator.manipulateAsync(
-        result.assets[0].uri,
-        [{ resize: { width: 300 } }], // resize to width of 300 and preserve aspect ratio
-        { compress: 0.7, format: 'jpeg' }
-      );
+    // if (!result.canceled) {
+    //   const resizedPhoto = await ImageManipulator.manipulateAsync(
+    //     result.assets[0].uri,
+    //     [{ resize: { width: 300 } }], // resize to width of 300 and preserve aspect ratio
+    //     { compress: 0.7, format: 'jpeg' }
+    //   );
 
-      setImageUri(resizedPhoto.uri);
-      console.log(resizedPhoto.uri);
-    }
+    //   setImageUri(resizedPhoto.uri);
+    //   console.log(resizedPhoto.uri);
+    // }
   };
 
   const matchSearch = async () => {
@@ -343,9 +368,9 @@ const CreateFoundItemScreen = () => {
           alignItems: 'center',
         }}
       >
-        {imageUri ? (
+        {imageUrl ? (
           <Image
-            source={{ uri: imageUri }}
+            source={{ uri: imageUrl }}
             style={{ width: 200, height: 200 }}
           />
         ) : (

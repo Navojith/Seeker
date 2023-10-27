@@ -1,14 +1,13 @@
-import { getFirestore, doc, getDoc } from '@firebase/firestore';
-import { async } from '@firebase/util';
-import React, { useEffect, useState } from 'react';
 import {
-  View,
-  ScrollView,
-  Text,
-  Image,
-  TextInput,
-  TouchableOpacity,
-} from 'react-native';
+  getFirestore,
+  doc,
+  getDoc,
+  updateDoc,
+  addDoc,
+  collection,
+} from '@firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
 import * as Location from 'expo-location';
 import { getDistanceFromLatLonInKm } from '../util/distance/getDistance';
 import siteLocation from '../assets/data/SLIITLocations/location.json';
@@ -19,8 +18,9 @@ import MinorIcon from '../assets/images/Tiers/Minor.jsx';
 import getPoints from '../util/pointCalculation/getPoints';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import { useNavigation } from '@react-navigation/native';
-import { LeaderBoard } from '../constants/RouteConstants';
+import { LeaderBoard, Profile } from '../constants/RouteConstants';
 import { LostItem } from '../constants/RouteConstants';
+import { FireStore, auth } from '../firebase';
 
 const LeaderboardItemScreen = ({ route }) => {
   const nav = useNavigation();
@@ -46,8 +46,10 @@ const LeaderboardItemScreen = ({ route }) => {
       const docRef = doc(getFirestore(), 'lostItems', pushDataObject?.item);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        setItem(docSnap.data());
-        getPermissions();
+        if (!item) {
+          setItem(docSnap.data());
+        }
+        item && getPermissions();
         console.log('Document data:', docSnap.data());
       } else {
         console.log('No such document!');
@@ -68,14 +70,37 @@ const LeaderboardItemScreen = ({ route }) => {
     return () => {
       clearInterval(locationInterval);
     };
-  }, []);
+  }, [item]);
+
+  const addFoundUser = async (postId) => {
+    const user = auth.currentUser.uid;
+    console.log('user', user);
+    console.log('post', postId);
+
+    const postDocRef = doc(FireStore, 'lostItems', postId);
+
+    try {
+      await updateDoc(postDocRef, { foundUserId: user });
+
+      const db = getFirestore();
+      console.log(db);
+
+      const res = await addDoc(collection(db, 'requests'), {
+        user: user,
+        itemDetails: postId,
+      });
+      console.log('requestId', res.id);
+      console.log('document updated successfully');
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const trackLocation = async () => {
     let currentLocation = await Location.getCurrentPositionAsync({
       accuracy: Location.Accuracy.Highest,
     });
-    // console.log(currentLocation.coords);
-    // console.log(item.location);
+
     item
       ? (console.log(siteLocation.locations[item.location]),
         console.log(
@@ -108,6 +133,13 @@ const LeaderboardItemScreen = ({ route }) => {
   const handleNotFound = () => {
     setShowInfoLevelModal((prev) => ({ ...prev, visibility: true }));
     clearInterval(locationInterval);
+  };
+
+  const handleFound = () => {
+    clearInterval(locationInterval);
+    addFoundUser(item.postId);
+    nav.goBack();
+    nav.navigate(Profile, { screen: 'Posted Found Items' });
   };
 
   const handleNavigation = () => {
@@ -173,11 +205,14 @@ const LeaderboardItemScreen = ({ route }) => {
               <View className="flex-row p-1 gap-x-4">
                 <View className="flex-row">
                   <Text className="font-bold text-xl">Color:</Text>
-                  <Text className="text-xl"> {item.color ?? 'Not stated'}</Text>
+                  <Text className="text-xl">
+                    {' '}
+                    {item.color.length ? item.color : 'Not Given'}
+                  </Text>
                 </View>
                 <View className="flex-row ">
                   <Text className="font-bold text-xl">Brand:</Text>
-                  <Text className="text-xl"> {item.brand ?? 'Not stated'}</Text>
+                  <Text className="text-xl"> {item.brand ?? 'Not Given'}</Text>
                 </View>
               </View>
             </View>
@@ -203,7 +238,7 @@ const LeaderboardItemScreen = ({ route }) => {
           <View className="flex-row mt-[2vh] mx-auto">
             <TouchableOpacity
               className={` w-[38vw] rounded-3xl py-1 pb-3 px-4 bg-dark-blue mx-auto mr-[2vw]`}
-              onPress={() => clearInterval(locationInterval)}
+              onPress={handleFound}
             >
               <Text className={`text-2xl text-center font-bold text-white`}>
                 Found
