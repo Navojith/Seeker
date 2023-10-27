@@ -3,8 +3,9 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import ProfileScreen from '../screens/ProfileScreen';
 import ProfileIcon from 'react-native-vector-icons/EvilIcons';
-import LeaderBoardIcon from 'react-native-vector-icons/SimpleLineIcons';
+import LeaderBoardIcon from '../assets/icons/LeaderboadIcon';
 import LeaderBoardScreen from '../screens/LeaderBoardScreen';
+import CustomHeader from '../components/header';
 import FoundScreen from '../screens/FoundScreen';
 import LostItemStack from './LostItemStack';
 import {
@@ -14,7 +15,10 @@ import {
   LostItems,
 } from '../constants/RouteConstants';
 import { ScreenContainer } from 'react-native-screens';
-import Header from '../components/header'
+import PostedItemStack from './PostedItemStack';
+import FoundItemStack from './FoundItemStack';
+import FoundIcon from '../assets/icons/FoundIcon';
+import LostIcon from '../assets/icons/LostIcon';
 
 const Tab = createBottomTabNavigator();
 
@@ -41,6 +45,10 @@ const UserStack = () => {
             fontSize: 14,
           },
           tabBarHideOnKeyboard: true,
+          headerShown:
+            route.name !== LostItems && route.name !== FoundItems
+              ? true
+              : false,
         })}
         sceneContainerStyle={{ backgroundColor: '#F0F9FF' }}
       >
@@ -48,56 +56,49 @@ const UserStack = () => {
           name={LeaderBoard}
           component={LeaderBoardScreen}
           options={{
+            header: () => <CustomHeader title="Leaderboard" />,
             tabBarIcon: () => <LeaderBoardIcon name="chart" size={30} />,
-            headerStyle: {
-              backgroundColor: '#0369A1',
-            },
-            headerTintColor: '#fff', // Change this color for the text/icon color
-            headerTitleStyle: {
-              fontWeight: 'bold',
-              fontSize: 28,
-            },
-            headerTitleAlign: 'center',
           }}
         />
         <Tab.Screen
           name={FoundItems}
-          component={FoundScreen}
+          component={FoundItemStack}
           options={{
-            tabBarIcon: () => <ProfileIcon name="user" size={48} />,
-            headerStyle: {
-              backgroundColor: '#0369A1',
-            },
-            headerTintColor: '#fff', // Change this color for the text/icon color
-            headerTitleStyle: {
-              fontWeight: 'bold',
-              fontSize: 28,
-            },
-            headerTitleAlign: 'center',
+            tabBarIcon: () => <FoundIcon name="found" size={48} />,
+            // headerStyle: {
+            //   backgroundColor: '#0369A1',
+            // },
+            // headerTintColor: '#fff', // Change this color for the text/icon color
+            // headerTitleStyle: {
+            //   fontWeight: 'bold',
+            //   fontSize: 28,
+            // },
+            // headerTitleAlign: 'center',
           }}
         />
         <Tab.Screen
           name={LostItems}
           component={LostItemStack}
           options={{
-            tabBarIcon: () => <ProfileIcon name="user" size={48} />,
-            headerStyle: {
-              backgroundColor: '#0369A1',
-            },
-            headerTintColor: '#fff', // Change this color for the text/icon color
-            headerTitleStyle: {
-              fontWeight: 'bold',
-              fontSize: 28,
-            },
-            headerTitleAlign: 'center',
+            tabBarIcon: () => <LostIcon name="found" size={48} />,
+            // headerStyle: {
+            //   backgroundColor: '#0369A1',
+            // },
+            // headerTintColor: '#fff', // Change this color for the text/icon color
+            // headerTitleStyle: {
+            //   fontWeight: 'bold',
+            //   fontSize: 28,
+            // },
+            // headerTitleAlign: 'center',
           }}
         />
         <Tab.Screen
           name={Profile}
-          component={ProfileScreen}
+          component={PostedItemStack}
           options={{
-            header: () => <Header title="Profile" />,
+            // header: () => <Header title="Profile" />,
             tabBarIcon: () => <ProfileIcon name="user" size={48} />,
+            headerShown: false,
           }}
         />
       </Tab.Navigator>

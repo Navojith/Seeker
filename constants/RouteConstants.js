@@ -13,3 +13,17 @@ export const Profile = 'Profile';
 export const Login = 'Login';
 
 export const Register = 'Register';
+
+export const BuyBoost = 'purchase-boost';
+
+export const PostBoosting = 'Post Boosting';
+
+export const LostItem = 'Lost Item';
+
+export const LeaderboardPost = 'leaderboardPost';
+
+export const PersonalBelongings = 'Personal Belongings';
+
+export const FoundItem = 'Found Item';
+
+export const Settings = 'Settings';

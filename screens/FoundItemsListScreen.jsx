@@ -19,13 +19,12 @@ const tempimage = require("../assets/images/PostCreation/AddImage.png");
 import data from "../assets/data/SLIITLocations/index.json";
 import { Picker } from "@react-native-picker/picker";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
-import { LinearGradient } from "expo-linear-gradient";
-import { LostItem } from "../constants/RouteConstants";
+import { FoundItem } from "../constants/RouteConstants";
 
 const locationOptions = data.locations;
 
-const LostItemsListScreen = () => {
-  const [lostItems, setLostItems] = useState([]);
+const FoundItemsListScreen = () => {
+  const [foundItems, setFoundItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const userId = auth.currentUser.uid;
   const [showFilter, setShowFilter] = useState(false);
@@ -59,13 +58,18 @@ const LostItemsListScreen = () => {
       fontSize: 16,
     },
     card: {
-      width: "48%",
       margin: 4,
-    },
-    cardContent: {
+      width: "48%", // Adjust as needed to fit two cards per row
       padding: 16,
       backgroundColor: "#fff",
       borderRadius: 25,
+      elevation: 3,
+      shadowColor: "#000",
+      shadowOffset: { width: 1, height: 1 },
+      shadowOpacity: 0.3,
+      shadowRadius: 2,
+      borderWidth: 3,
+      borderColor: "#0369A1",
     },
     itemImage: {
       width: "100%",
@@ -101,16 +105,16 @@ const LostItemsListScreen = () => {
 
   useEffect(() => {
     const getLostItems = async () => {
-      console.log("get lost items");
+      console.log("get found items");
       try {
-        const collectionRef = collection(FireStore, "lostItems"); // Get a reference to the collection
+        const collectionRef = collection(FireStore, "foundItems"); // Get a reference to the collection
         const querySnapshot = await getDocs(collectionRef);
         if (querySnapshot.empty) {
           console.log("No matching documents.");
         } else {
           const items = querySnapshot.docs.map((doc) => doc.data());
           //console.log('Retrieved items:', items);
-          setLostItems(items);
+          setFoundItems(items);
         }
       } catch (error) {
         console.error(error);
@@ -121,7 +125,7 @@ const LostItemsListScreen = () => {
   }, [isFocused]); //can add isFocused here to reload the screen once an item is added. for now removed since its making api calls often
 
   // Filter the items based on the search query
-  const filteredItems = lostItems.filter((item) => {
+  const filteredItems = foundItems.filter((item) => {
     const searchWords = searchQuery.toLowerCase().split(" ");
     return (
       searchWords.some(
@@ -140,7 +144,7 @@ const LostItemsListScreen = () => {
   const saveSearchQueryToFirestore = async () => {
     if (searchQuery && searchQuery.trim() !== "") {
       try {
-        const searchCollectionRef = collection(FireStore, "searchLostItems");
+        const searchCollectionRef = collection(FireStore, "searchFoundItems");
         await addDoc(searchCollectionRef, {
           userId: userId,
           query: searchQuery,
@@ -152,44 +156,6 @@ const LostItemsListScreen = () => {
       }
     }
   };
-
-  const getBorderColor = (tier) => {
-    switch (tier) {
-      case "minor":
-        return ["#CECCCC", "#161616"];
-      case "moderate":
-        return ["#780202", "#7479F3"];
-      case "superior":
-        return ["#0066FE", "#6AA4FB"];
-      case "ultra":
-        return ["#8146FF", "#7928B9", "#902AE0"];
-      default:
-        return ["#0369A1", "#0369A1"];
-    }
-  };
-
-  const getTierValue = (tier) => {
-    switch (tier) {
-      case "ultra":
-        return 1;
-      case "superior":
-        return 2;
-      case "moderate":
-        return 3;
-      case "minor":
-        return 4;
-      default:
-        return 5;
-    }
-  };
-
-  const sortedItems = filteredItems.sort((item1, item2) => {
-    const tierValue1 = getTierValue(item1.tier);
-    const tierValue2 = getTierValue(item2.tier);
-
-    // Compare the tier values and return the comparison result
-    return tierValue1 - tierValue2;
-  });
 
   const toggleFilter = () => {
     setShowFilter(!showFilter);
@@ -204,10 +170,7 @@ const LostItemsListScreen = () => {
         value={searchQuery}
         onEndEditing={saveSearchQueryToFirestore}
       />
-      <TouchableOpacity
-        style={styles.filterButton}
-        onPress={toggleFilter}
-      >
+      <TouchableOpacity style={styles.filterButton} onPress={toggleFilter}>
         <Text style={styles.filterButtonText}>Filter</Text>
       </TouchableOpacity>
       {showFilter && ( 
@@ -243,32 +206,27 @@ const LostItemsListScreen = () => {
 
       <View style={styles.container}>
         <FlatList
-          data={sortedItems}
+          data={filteredItems}
           numColumns={2}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.card}
               onPress={() => {
-                navigation.navigate(LostItem, { item });
+                navigation.navigate(FoundItem, { item });
               }}
             >
-              <LinearGradient
-                style={{ padding: 5, borderRadius: 25 }}
-                colors={getBorderColor(item.tier)}
-              >
-                <View style={styles.cardContent}>
-                  {item.imageUrl ? (
-                    <Image
-                      source={{ uri: item.imageUrl }}
-                      style={styles.itemImage}
-                    />
-                  ) : (
-                    <Image source={tempimage} style={styles.itemImage} />
-                  )}
-                  <Text style={styles.itemText}>{item.itemName}</Text>
-                  {/* Other item details */}
-                </View>
-              </LinearGradient>
+              <View>
+                {item.imageUrl ? (
+                  <Image
+                    source={{ uri: item.imageUrl }}
+                    style={styles.itemImage}
+                  />
+                ) : (
+                  <Image source={tempimage} style={styles.itemImage} />
+                )}
+                <Text style={styles.itemText}>{item.itemName}</Text>
+                {/* Other item details */}
+              </View>
             </TouchableOpacity>
           )}
           keyExtractor={(item, index) => item.id + index.toString()}
@@ -278,4 +236,4 @@ const LostItemsListScreen = () => {
   );
 };
 
-export default LostItemsListScreen;
+export default FoundItemsListScreen;

@@ -1,0 +1,72 @@
+{
+  "locations": {
+    "Back Gate": {
+      "lat": 6.9146,
+      "lng": 79.9735
+    },
+    "Bird Nest": {
+      "lat": 6.9154,
+      "lng": 79.973
+    },
+    "Business building": {
+      "lat": 6.9154,
+      "lng": 79.973
+    },
+    "Car Park": {
+      "lat": 6.9146,
+      "lng": 79.9735
+    },
+    "Engineering Building": {
+      "lat": 6.916,
+      "lng": 79.9733
+    },
+    "Auditorium": {
+      "lat": 6.9144,
+      "lng": 79.9729
+    },
+    "Humanities Building": {
+      "lat": 6.9156,
+      "lng": 79.974
+    },
+    "Juice Bar": {
+      "lat": 6.9154,
+      "lng": 79.9734
+    },
+    "Library": {
+      "lat": 6.9155,
+      "lng": 79.9739
+    },
+    "Main Building": {
+      "lat": 6.9148,
+      "lng": 79.9732
+    },
+    "Main Building Canteen": {
+      "lat": 6.9149,
+      "lng": 79.9733
+    },
+    "Main Gate": {
+      "lat": 6.9142,
+      "lng": 79.9723
+    },
+    "New Building": {
+      "lat": 6.9156,
+      "lng": 79.9738
+    },
+    "New Building Canteen": {
+      "lat": 6.9156,
+      "lng": 79.9737
+    },
+    "Perera & Sons": {
+      "lat": 6.9148,
+      "lng": 79.9731
+    },
+    "Study Area": {
+      "lat": 6.9153,
+      "lng": 79.973
+    },
+    "Other": {
+      "lat": 6.9153,
+      "lng": 79.973
+    }
+  }
+}
