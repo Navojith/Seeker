@@ -141,7 +141,7 @@ const LeaderboardItemScreen = ({ route }) => {
     clearInterval(locationInterval);
     addFoundUser(item.postId);
     nav.goBack();
-    nav.navigate(Profile, { screen: 'Posted Found Items' });
+    nav.navigate(Profile);
   };
 
   const handleNavigation = () => {

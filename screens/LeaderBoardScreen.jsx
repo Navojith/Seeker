@@ -1,4 +1,4 @@
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Image } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { FireStore, auth } from '../firebase';
 import { getDocs, collection, query, orderBy, limit } from 'firebase/firestore';
@@ -171,33 +171,6 @@ const LeaderBoard = () => {
     // }, [pushDataObject, isFocused]);
   }, [pushDataObject]);
 
-  // useEffect(() => {
-  //   getPermissions = async () => {
-  //     let { status } = await Location.requestForegroundPermissionsAsync();
-  //     if (status !== 'granted') {
-  //       console.log('Permission to access location was denied');
-  //     }
-  //     let currentLocation = await Location.getCurrentPositionAsync({
-  //       accuracy: Location.Accuracy.Highest,
-  //       maximumAge: 10000,
-  //       timeout: 5000,
-  //     });
-  //     setLocation(currentLocation);
-  //     console.log(currentLocation.coords);
-  //     console.log(siteLocation.locations.Auditorium);
-  //     console.log(
-  //       getDistanceFromLatLonInKm(
-  //         currentLocation.coords.latitude,
-  //         currentLocation.coords.longitude,
-  //         siteLocation.locations.Auditorium.lat,
-  //         siteLocation.locations.Auditorium.lng
-  //       ) * 1000
-  //     );
-  //   };
-
-  //   getPermissions();
-  // }, []);
-
   return (
     <View style={styles.pageStyle}>
       <View
@@ -217,8 +190,14 @@ const LeaderBoard = () => {
             <View style={styles.itemStyle}>
               <View>
                 <View style={styles.picItem}>
-                  <UserIcon />
-                  {/* <Image style={{ height: 40, width: 40 }} source={UserIcon} /> */}
+                  {item.avatarUrl ? (
+                    <Image
+                      style={{ height: 50, width: 50, borderRadius: 100 }}
+                      source={{ uri: item.avatarUrl }}
+                    />
+                  ) : (
+                    <UserIcon />
+                  )}
                 </View>
               </View>
 
