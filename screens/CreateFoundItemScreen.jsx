@@ -23,7 +23,7 @@ import {
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
-import { FoundItem } from '../constants/RouteConstants';
+import { FoundItems } from '../constants/RouteConstants';
 
 const CreateFoundItemScreen = ({ route }) => {
   const navigation = useNavigation();
@@ -174,7 +174,7 @@ const CreateFoundItemScreen = ({ route }) => {
         setDescription('');
         setOther('');
         setSerialNumber('');
-        navigation.navigate(FoundItem, {
+        navigation.navigate(FoundItems, {
           // Generate a unique key to force remount of the component
           key: `orders-${Math.random()}`,
         });

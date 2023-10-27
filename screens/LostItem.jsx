@@ -21,7 +21,7 @@ const LostItem = ({ route }) => {
   );
   const { item, pushDataObject } = route.params;
   const [fetchedItem, setFetchedItem] = useState(null);
-  const [postedUserId, setPostedUserId] = useState(null);
+  const [postedUserId, setPostedUserId] = useState(item.userId);
 
   useEffect(() => {
     console.log('fetching item details');
@@ -59,6 +59,7 @@ const LostItem = ({ route }) => {
     const postDocRef = doc(FireStore, 'lostItems', postId);
     const postSnap = await getDoc(postDocRef);
     const postedUser = postSnap.data().userId;
+    setPostedUserId(postedUser);
     console.log('postSnap', postedUser);
 
     try {
@@ -131,6 +132,11 @@ const LostItem = ({ route }) => {
       textAlign: 'center',
     },
   });
+
+  console.log(
+    'condition',
+    postedUserId && postedUserId === auth.currentUser.uid
+  );
 
   return (
     <View style={styles.container}>
@@ -209,16 +215,18 @@ const LostItem = ({ route }) => {
             {new Date(item.timestamp.toDate()).toLocaleString()}
           </Text>
 
-          <View style={styles.claimButtonContainer}>
-            <TouchableOpacity
-              style={styles.claimButton}
-              onPress={() => {
-                addFoundUser(item.postId);
-              }}
-            >
-              <Text style={styles.claimButtonText}>Return</Text>
-            </TouchableOpacity>
-          </View>
+          {postedUserId !== auth.currentUser.uid && (
+            <View style={styles.claimButtonContainer}>
+              <TouchableOpacity
+                style={styles.claimButton}
+                onPress={() => {
+                  addFoundUser(item.postId);
+                }}
+              >
+                <Text style={styles.claimButtonText}>Return</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       )}
     </View>
