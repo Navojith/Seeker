@@ -106,9 +106,11 @@ const PostedFoundItemsScreen = ({ route }) => {
     const pushData = {
       type: 'confirm return item',
       item: item.postId,
+      itemName: item.itemName,
       user: user.selectedUser.userId,
-      postedUser: currentUser.displayedName,
-      tier: item.tier,
+      username: user.selectedUser.displayedName,
+      postedUser: currentUser.userId,
+      tier: item?.tier ?? 'free',
     };
 
     await axios.post(`https://app.nativenotify.com/api/indie/notification`, {
@@ -142,54 +144,93 @@ const PostedFoundItemsScreen = ({ route }) => {
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     if (pushDataObject && pushDataObject.pushDataObject) {
-      const { item, postedUser, type, user} = pushDataObject.pushDataObject;
-  
-      console.log('Item:', item);
-      console.log('Posted User:', postedUser);
-      console.log('Type:', type);
-      console.log('User:', user);
-  
-      if(type == 'confirm return item'){
-        console.log("correct");
+      const { type } = pushDataObject.pushDataObject;
+
+      // console.log('Item:', item);
+      // console.log('Posted User:', postedUser);
+      // console.log('Type:', type);
+      // console.log('User:', user);
+
+      if (type == 'confirm return item') {
+        console.log('correct');
         setIsModalVisible(true);
       }
+      if (type == 'congrats') {
+        const { tier, name, item } = pushDataObject.pushDataObject;
+        const pointsGained = getPoints(tier);
+        setStatus({
+          ...status,
+          visibility: true,
+          message:
+            'You gained ' +
+            pointsGained +
+            ' points for returning ' +
+            `${name ? name + "'s " : ''}` +
+            item,
+          buttonText: 'Okay',
+        });
+      }
     }
-   }, [pushDataObject])
+  }, [pushDataObject]);
 
-   const deletePost = async(pushDataObject) => 
-   {
-    if (pushDataObject && pushDataObject.pushDataObject)
-     {
-      const { item, postedUser, type, user} = pushDataObject.pushDataObject;
+  const deletePost = async (pushDataObject) => {
+    if (pushDataObject && pushDataObject.pushDataObject) {
+      const { item, itemName, postedUser, type, user, tier, username } =
+        pushDataObject.pushDataObject;
       console.log(item);
+      if (type == 'confirm return item') {
+        updatePoints(getPoints(tier), item, user, type);
 
-      const qf = query(collection(FireStore, "foundItems"), where("postId", "==", item));
-      const ql = query(collection(FireStore, "lostItems"), where("postId", "==", item));
-      const foundQuerySnapshot = await getDocs(qf);
-      const lostQuerySnapshot = await getDocs(ql);
+        const pushData = {
+          tier: tier,
+          name: username,
+          item: itemName,
+          type: 'congrats',
+        };
 
-      if (!foundQuerySnapshot.empty)
-      {
-        const fdocToDelete = foundQuerySnapshot.docs[0];
-        await deleteDoc(fdocToDelete.ref);
-        setFoundItems(posts.filter((post) => post.postId !== item));
-      }else
-      {
-        if(!lostQuerySnapshot.empty)
-        {
-          const ldocToDelete = lostQuerySnapshot.docs[0];
-          await deleteDoc(ldocToDelete.ref);
+        await axios.post(
+          `https://app.nativenotify.com/api/indie/notification`,
+          {
+            subID: postedUser,
+            appId: 13599,
+            appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
+            title: 'Seeker',
+            message:
+              'Congratulations!!!\nPoints awarded for the item you returned',
+            pushData: JSON.stringify(pushData),
+          }
+        );
+
+        const qf = query(
+          collection(FireStore, 'foundItems'),
+          where('postId', '==', item)
+        );
+        const ql = query(
+          collection(FireStore, 'lostItems'),
+          where('postId', '==', item)
+        );
+        const foundQuerySnapshot = await getDocs(qf);
+        const lostQuerySnapshot = await getDocs(ql);
+
+        if (!foundQuerySnapshot.empty) {
+          const fdocToDelete = foundQuerySnapshot.docs[0];
+          await deleteDoc(fdocToDelete.ref);
           setFoundItems(posts.filter((post) => post.postId !== item));
+        } else {
+          if (!lostQuerySnapshot.empty) {
+            const ldocToDelete = lostQuerySnapshot.docs[0];
+            await deleteDoc(ldocToDelete.ref);
+            setFoundItems(posts.filter((post) => post.postId !== item));
+          }
         }
-      }
         setIsModalVisible(false);
-        console.log("Document deleted with postID:", item);
-        navigation.navigate("profile")
+        console.log('Document deleted with postID:', item);
+        navigation.navigate('profile');
       }
-      
-   }
+    }
+  };
 
   const handleSecurity = async (item) => {
     console.log('handover to security');
@@ -212,31 +253,38 @@ const PostedFoundItemsScreen = ({ route }) => {
     updatePoints(getPoints(item.tier) / 2, item);
   };
 
-  const updatePoints = async (pointsGained, item) => {
+  const updatePoints = async (
+    pointsGained,
+    item,
+    user = auth.currentUser.uid,
+    type = 'security'
+  ) => {
     try {
-      const docRef = doc(FireStore, 'userDetails', auth.currentUser.uid);
+      const docRef = doc(FireStore, 'userDetails', user);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         const doc = docSnap.data();
         const newPoints = doc.points + pointsGained;
         await updateDoc(docRef, { points: newPoints });
         console.log('Document successfully updated!');
-        setStatus({
-          ...status,
-          visibility: true,
-          message:
-            'You gained ' +
-            pointsGained +
-            ' points for returning ' +
-            `${
-              user?.selectedUser
-                ? user?.selectedUser?.displayedName + "'s "
-                : ''
-            }` +
-            item.itemName +
-            ' to the security office.',
-          buttonText: 'Okay',
-        });
+        if (type == 'security') {
+          setStatus({
+            ...status,
+            visibility: true,
+            message:
+              'You gained ' +
+              pointsGained +
+              ' points for returning ' +
+              `${
+                user?.selectedUser
+                  ? user?.selectedUser?.displayedName + "'s "
+                  : ''
+              }` +
+              item.itemName +
+              ' to the security office.',
+            buttonText: 'Okay',
+          });
+        }
       } else {
         console.log('No such document!');
       }
@@ -356,21 +404,22 @@ const PostedFoundItemsScreen = ({ route }) => {
         />
       </SafeAreaView>
       <TwoButtonModal
-          isVisible={isModalVisible}
-          setIsVisible={setIsModalVisible}
-          showInfoIcon={false}
-          heading={"Did you receive your item ?"}
-          //navigate to your page
-          onPressConfirm={() =>
-            // navigation.navigate(BuyBoost, { itemId: route.params.itemId })
-            {deletePost(pushDataObject)}
+        isVisible={isModalVisible}
+        setIsVisible={setIsModalVisible}
+        showInfoIcon={false}
+        heading={'Did you receive your item ?'}
+        //navigate to your page
+        onPressConfirm={() =>
+          // navigation.navigate(BuyBoost, { itemId: route.params.itemId })
+          {
+            deletePost(pushDataObject);
           }
         }
         onPressCancel={() => navigation.navigate('profile')}
       />
       <DismissibleAlert data={status} setData={setStatus} />
     </View>
-  )
-}
+  );
+};
 
 export default PostedFoundItemsScreen;
