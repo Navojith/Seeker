@@ -20,8 +20,4 @@ React native (Expo) + NativeWind
 You can use Android Studio Virtual Device Manager or Physical Device for testing <br />
 First launch the Android Device, then `yarn start` and press `a` to preview
 
-# DB Credentials
-<ul>
-  <li>Gmail : seekerlostandfound@gmail.com</li>
-  <li>Password: Qwerty@123</li>
-</ul>
+
