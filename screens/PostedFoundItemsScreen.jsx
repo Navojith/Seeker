@@ -25,6 +25,7 @@ import getPoints from '../util/pointCalculation/getPoints';
 import { getPushDataObject } from 'native-notify';
 import DismissibleAlert from '../components/common/alerts/DismissibleAlert';
 import TwoButtonModal from '../components/common/modals/TwoButtonModal';
+import LoadingComponent from './LoadingScreen';
 const tempimage = require('../assets/images/PostCreation/AddImage.png');
 
 const PostedFoundItemsScreen = ({ route }) => {
@@ -33,9 +34,20 @@ const PostedFoundItemsScreen = ({ route }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [requestedUsers, setRequestedUsers] = useState([]);
   const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(false);
   const user = route.params;
   const pushDataObject = route.params;
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [info , setInfo] = useState({ 
+    visibility: false,
+    viewStyles: ` pt-8 flex justify-center border rounded-[42px] border-[6px] border-dark-blue`,
+    message:
+      'Click on the item post to review requests and choose the item owner to return. Click handover to security if you handover the item to security',
+    buttonText: 'Okay',
+    buttonContainerStyles: ` w-[100px] mx-auto rounded-full bg-dark-blue`,
+    buttonTextStyles: ` font-bold`,
+    messageStyles: ` text-2xl font-bold`,
+  });
   const [status, setStatus] = useState({
     visibility: false,
     viewStyles: ` pt-8 flex justify-center border rounded-[42px] border-[6px] border-dark-blue`,
@@ -50,6 +62,7 @@ const PostedFoundItemsScreen = ({ route }) => {
   useEffect(() => {
     const getFoundItems = async () => {
       try {
+        setLoading(true);
         const collectionRef = collection(FireStore, 'foundItems');
         const q = query(
           collectionRef,
@@ -73,6 +86,7 @@ const PostedFoundItemsScreen = ({ route }) => {
           console.log(items);
           setFoundItems(items);
         }
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching found items:', error);
       }
@@ -81,8 +95,11 @@ const PostedFoundItemsScreen = ({ route }) => {
   }, []);
 
   const fetchUser = async () => {
+    setInfo({
+      ...info,
+      visibility: true,
+  });
     try {
-      // setLoading(true);
       const uuid = auth.currentUser.uid;
       const res = await getDoc(doc(FireStore, 'userDetails', uuid));
       if (res.exists) {
@@ -98,6 +115,7 @@ const PostedFoundItemsScreen = ({ route }) => {
   }, []);
 
   const handleReturnItem = async (item) => {
+    // setLoading(true);
     console.log('user', user);
     console.log('userId', user.selectedUser.userId);
     console.log('current', currentUser);
@@ -113,15 +131,18 @@ const PostedFoundItemsScreen = ({ route }) => {
       tier: item?.tier ?? 'free',
     };
 
-    await axios.post(`https://app.nativenotify.com/api/indie/notification`, {
-      subID: user.selectedUser.userId,
-      appId: 13599,
-      appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
-      title: 'Seeker',
-      message:
-        'Did you receive your item from ' + currentUser.displayedName + '?',
-      pushData: JSON.stringify(pushData),
-    });
+    await axios
+      .post(`https://app.nativenotify.com/api/indie/notification`, {
+        subID: user.selectedUser.userId,
+        appId: 13599,
+        appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
+        title: 'Seeker',
+        message:
+          'Did you receive your item from ' + currentUser.displayedName + '?',
+        pushData: JSON.stringify(pushData),
+      })
+      .catch((err) => console.log(err));
+    // setLoading(false);
   };
 
   const getRequestedUsers = async (item) => {
@@ -176,6 +197,7 @@ const PostedFoundItemsScreen = ({ route }) => {
   }, [pushDataObject]);
 
   const deletePost = async (pushDataObject) => {
+    setLoading(true);
     if (pushDataObject && pushDataObject.pushDataObject) {
       const { item, itemName, postedUser, type, user, tier, username } =
         pushDataObject.pushDataObject;
@@ -217,14 +239,19 @@ const PostedFoundItemsScreen = ({ route }) => {
         if (!foundQuerySnapshot.empty) {
           const fdocToDelete = foundQuerySnapshot.docs[0];
           await deleteDoc(fdocToDelete.ref);
-          setFoundItems(foundItems.filter((foundItem) => foundItem.postId !== item));
+          setFoundItems(
+            foundItems.filter((foundItem) => foundItem.postId !== item)
+          );
         } else {
           if (!lostQuerySnapshot.empty) {
             const ldocToDelete = lostQuerySnapshot.docs[0];
             await deleteDoc(ldocToDelete.ref);
-            setFoundItems(foundItems.filter((foundItem) => foundItem.postId !== item));
+            setFoundItems(
+              foundItems.filter((foundItem) => foundItem.postId !== item)
+            );
           }
         }
+        setLoading(false);
         setIsModalVisible(false);
         console.log('Document deleted with postID:', item);
         navigation.navigate('profile');
@@ -233,24 +260,28 @@ const PostedFoundItemsScreen = ({ route }) => {
   };
 
   const handleSecurity = async (item) => {
+    setLoading(true);
     console.log('handover to security');
     console.log(item);
     const requestedUsers = await getRequestedUsers(item);
     console.log('req', requestedUsers);
-    await axios.post(
-      `https://app.nativenotify.com/api/indie/group/notification`,
-      {
-        subIDs: requestedUsers,
-        appId: 13599,
-        appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
-        title: 'Seeker',
-        message:
-          'Item : ' +
-          item.itemName +
-          '\n\nYour lost item has been handed over to the security. Go to the security office to confirm and reclaim your stuff.',
-      }
-    );
-    updatePoints(getPoints(item.tier) / 2, item);
+
+    requestedUsers?.length &&
+      (await axios.post(
+        `https://app.nativenotify.com/api/indie/group/notification`,
+        {
+          subIDs: requestedUsers,
+          appId: 13599,
+          appToken: 'gTBeP5h5evCxHcHdDs0yVQ',
+          title: 'Seeker',
+          message:
+            'Item : ' +
+            item.itemName +
+            '\n\nYour lost item has been handed over to the security. Go to the security office to confirm and reclaim your stuff.',
+        }
+      ));
+
+    updatePoints(getPoints(item?.tier ?? 'free') / 2, item);
   };
 
   const updatePoints = async (
@@ -288,6 +319,7 @@ const PostedFoundItemsScreen = ({ route }) => {
       } else {
         console.log('No such document!');
       }
+      setLoading(false);
     } catch (error) {
       console.error('Error updating document: ', error);
     }
@@ -351,6 +383,7 @@ const PostedFoundItemsScreen = ({ route }) => {
 
   return (
     <View>
+      <DismissibleAlert data={info} setData={setInfo} />
       <SafeAreaView>
         <FlatList
           data={foundItems}
@@ -422,6 +455,7 @@ const PostedFoundItemsScreen = ({ route }) => {
         setData={setStatus}
         onPress={() => navigation.navigate('profile')}
       />
+      <LoadingComponent visible={loading} />
     </View>
   );
 };

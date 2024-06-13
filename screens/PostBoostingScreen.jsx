@@ -20,11 +20,13 @@ import TwoButtonModal from '../components/common/modals/TwoButtonModal';
 import { BuyBoost } from '../constants/RouteConstants';
 import axios from 'axios';
 import getTier from '../util/pointCalculation/getTier';
+import LoadingComponent from './LoadingScreen';
 
 const PostBoostingScreen = ({ route, navigation }) => {
   const [level, setLevel] = useState(1);
   const [needed, setNeeded] = useState(10);
   const [available, setAvailable] = useState('');
+  const [loading, setLoading] = useState(false);
   const [leaderboardUsers, setLeaderboardUsers] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [showInfoLevelModal, setShowInfoLevelModal] = useState({
@@ -73,6 +75,7 @@ const PostBoostingScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     async function getPoints() {
+      setLoading(true);
       try {
         const querySnapshot = await getDocs(
           collectionGroup(FireStore, 'userDetails')
@@ -93,11 +96,13 @@ const PostBoostingScreen = ({ route, navigation }) => {
       } catch (error) {
         console.log(error);
       }
+      setLoading(false);
     }
     getPoints();
   }, []);
 
   useEffect(() => {
+    setLoading(true);
     const getLeaderboardUsers = async () => {
       try {
         const leadeboardQuery = query(
@@ -117,9 +122,11 @@ const PostBoostingScreen = ({ route, navigation }) => {
       }
     };
     getLeaderboardUsers();
+    setLoading(false);
   }, []);
 
   const handleConfirm = () => {
+    setLoading(true);
     if (available >= needed) {
       updatePoints();
       updatePost();
@@ -132,6 +139,7 @@ const PostBoostingScreen = ({ route, navigation }) => {
     } else {
       setIsModalVisible(true);
     }
+    setLoading(false);
   };
 
   const handleNotification = async (
@@ -162,10 +170,12 @@ const PostBoostingScreen = ({ route, navigation }) => {
       .catch((error) => {
         console.log(error);
       });
+    setLoading(false);
   };
 
   const updatePoints = async () => {
     try {
+      setLoading(true);
       const docRef = doc(FireStore, 'userDetails', auth.currentUser.uid);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
@@ -192,6 +202,7 @@ const PostBoostingScreen = ({ route, navigation }) => {
 
   const updatePost = async () => {
     try {
+      setLoading(true);
       const docRef = doc(FireStore, 'lostItems', route.params.itemId);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
@@ -309,6 +320,7 @@ const PostBoostingScreen = ({ route, navigation }) => {
         setData={setStatus}
         onPress={handleNavigation}
       />
+      <LoadingComponent visible={loading} />
     </View>
   );
 };

@@ -16,9 +16,20 @@ import {
 import { FireStore, auth } from '../firebase';
 
 const LostItem = ({ route }) => {
+  const [componentKey, setComponentKey] = useState(
+    route.params?.key || 'initial-key'
+  );
   const { item, pushDataObject } = route.params;
   const [fetchedItem, setFetchedItem] = useState(null);
-  const [postedUserId, setPostedUserId] = useState(null);
+  const [postedUserId, setPostedUserId] = useState(item.userId);
+  const [error, setError] = useState({
+    visibility: false,
+    viewStyles: 'border border-4 border-red-600',
+    title: null,
+    titleStyles: 'text-red-600',
+    message: null,
+    messageStyles: 'text-red-600 font-bold',
+  });
 
   useEffect(() => {
     console.log('fetching item details');
@@ -56,6 +67,7 @@ const LostItem = ({ route }) => {
     const postDocRef = doc(FireStore, 'lostItems', postId);
     const postSnap = await getDoc(postDocRef);
     const postedUser = postSnap.data().userId;
+    setPostedUserId(postedUser);
     console.log('postSnap', postedUser);
 
     try {
@@ -70,8 +82,22 @@ const LostItem = ({ route }) => {
       });
       console.log('requestId', res.id);
       console.log('document updated successfully');
+      setError({
+        visibility: true,
+        viewStyles: 'border border-4 border-green-600',
+        titleStyles: 'text-green-600',
+        messageStyles: 'text-green-600 font-bold',
+        title: 'Item Marked as found !',
+        message: 'Check posted found items in your profile !',
+      });
     } catch (error) {
       console.error(error);
+      setError((prev) => ({
+        ...prev,
+        visibility: true,
+        title: 'Already returned !',
+        message: "Posted user can not mark as found !",
+      }));
     }
   };
 
@@ -128,6 +154,11 @@ const LostItem = ({ route }) => {
       textAlign: 'center',
     },
   });
+
+  console.log(
+    'condition',
+    postedUserId && postedUserId === auth.currentUser.uid
+  );
 
   return (
     <View style={styles.container}>
@@ -206,16 +237,18 @@ const LostItem = ({ route }) => {
             {new Date(item.timestamp.toDate()).toLocaleString()}
           </Text>
 
-          <View style={styles.claimButtonContainer}>
-            <TouchableOpacity
-              style={styles.claimButton}
-              onPress={() => {
-                addFoundUser(item.postId);
-              }}
-            >
-              <Text style={styles.claimButtonText}>Return</Text>
-            </TouchableOpacity>
-          </View>
+          {postedUserId !== auth.currentUser.uid && (
+            <View style={styles.claimButtonContainer}>
+              <TouchableOpacity
+                style={styles.claimButton}
+                onPress={() => {
+                  addFoundUser(item.postId);
+                }}
+              >
+                <Text style={styles.claimButtonText}>Return</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       )}
     </View>

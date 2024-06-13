@@ -1,4 +1,12 @@
-import { StyleSheet, Text, View, FlatList, Image, Alert } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  Image,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { PersonalBelongingsTypes } from '../constants/PersonalBelongingsTypes';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -8,8 +16,13 @@ import { auth } from '../firebase';
 import { getDoc, doc, updateDoc, arrayRemove } from 'firebase/firestore';
 import { FireStore } from '../firebase';
 import TwoButtonModal from '../components/common/modals/TwoButtonModal';
+import { useIsFocused } from '@react-navigation/native';
+import { Profile } from '../constants/RouteConstants';
 
-const PersonalBelongings = ({ navigation }) => {
+const PersonalBelongings = ({ navigation, route }) => {
+  const [componentKey, setComponentKey] = useState(
+    route.params?.key || 'initial-key'
+  );
   const [loading, setLoading] = useState(false);
   const [toBeDeleted, setToBeDeleted] = useState(null);
   const [data, setData] = useState([]);
@@ -23,6 +36,8 @@ const PersonalBelongings = ({ navigation }) => {
   });
   const [modalIsVisible, setModalIsVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const isFocused = useIsFocused();
+  const [randomVal, setRandomVal] = useState(Math.random());
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -30,6 +45,7 @@ const PersonalBelongings = ({ navigation }) => {
         setLoading(true);
         const uuid = auth.currentUser.uid;
         const res = await getDoc(doc(FireStore, 'userDetails', uuid));
+        setComponentKey(route.params?.key || 'initial-key');
         if (res.exists) {
           setData(res.data().devices);
         } else {
@@ -58,7 +74,13 @@ const PersonalBelongings = ({ navigation }) => {
       }
     };
     fetchUser();
-  }, []);
+
+    return () => {
+      // Clear the orders data when the component is unmounted
+      setData(null);
+      setLoading(true);
+    };
+  }, [isFocused, componentKey, route.params?.key, randomVal]);
 
   const handleDelete = async () => {
     if (toBeDeleted !== null) {
@@ -94,6 +116,7 @@ const PersonalBelongings = ({ navigation }) => {
       } finally {
         setDeleteModalVisible(false);
         setToBeDeleted(null);
+        setRandomVal(Math.random());
       }
     } else {
       setError({
@@ -113,12 +136,13 @@ const PersonalBelongings = ({ navigation }) => {
     setToBeDeleted(item);
   };
 
-  return (
+  return !loading ? (
     <View style={styles.mainContainer}>
       <AddPBModal
         isVisible={modalIsVisible}
         setIsVisible={setModalIsVisible}
         navigation={navigation}
+        setRandomVal={setRandomVal}
       />
       <TouchableOpacity
         style={styles.Temp}
@@ -134,7 +158,7 @@ const PersonalBelongings = ({ navigation }) => {
         onPressConfirm={handleDelete}
       />
       <DismissibleAlert data={error} setData={setError} />
-      {data.length ? (
+      {data ? (
         <View>
           <FlatList
             data={data}
@@ -170,7 +194,7 @@ const PersonalBelongings = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
             )}
-            keyExtractor={({ index }) => index}
+            keyExtractor={(item, index) => item.id + index.toString()}
           />
         </View>
       ) : (
@@ -178,6 +202,10 @@ const PersonalBelongings = ({ navigation }) => {
           <Text className="text-lg font-bold">No Personal Belongings</Text>
         </View>
       )}
+    </View>
+  ) : (
+    <View style={styles.flexCenteredContainer}>
+      <ActivityIndicator size="large" color="#0369A1" />
     </View>
   );
 };

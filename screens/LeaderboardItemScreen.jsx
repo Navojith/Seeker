@@ -21,6 +21,7 @@ import { useNavigation } from '@react-navigation/native';
 import { LeaderBoard, Profile } from '../constants/RouteConstants';
 import { LostItem } from '../constants/RouteConstants';
 import { FireStore, auth } from '../firebase';
+import LoadingComponent from './LoadingScreen';
 
 const LeaderboardItemScreen = ({ route }) => {
   const nav = useNavigation();
@@ -38,6 +39,14 @@ const LeaderboardItemScreen = ({ route }) => {
     buttonContainerStyles: ` w-[100px] mx-auto rounded-full bg-dark-blue`,
     buttonTextStyles: ` font-bold`,
     messageStyles: ` text-2xl font-bold`,
+  });
+  const [error, setError] = useState({
+    visibility: false,
+    viewStyles: 'border border-4 border-red-600',
+    title: null,
+    titleStyles: 'text-red-600',
+    message: null,
+    messageStyles: 'text-red-600 font-bold',
   });
 
   useEffect(() => {
@@ -62,6 +71,7 @@ const LeaderboardItemScreen = ({ route }) => {
       } else {
         console.log('Permission to access location was granted');
         setLocationInterval(setInterval(trackLocation, 1000));
+        setLoading(false);
       }
     };
     setLoading(true);
@@ -140,8 +150,15 @@ const LeaderboardItemScreen = ({ route }) => {
   const handleFound = () => {
     clearInterval(locationInterval);
     addFoundUser(item.postId);
-    nav.goBack();
-    nav.navigate(Profile);
+    setError({
+      visibility: true,
+      viewStyles: 'border border-4 border-green-600',
+      titleStyles: 'text-green-600',
+      messageStyles: 'text-green-600 font-bold',
+      title: 'Item marked as found !',
+      message: 'Check posted found items in your profile !',
+      buttonText: 'Okay',
+    });
   };
 
   const handleNavigation = () => {
@@ -261,6 +278,15 @@ const LeaderboardItemScreen = ({ route }) => {
               onPress={handleNavigation}
             />
           </View>
+          <LoadingComponent visible={loading} />
+          <DismissibleAlert
+            data={error}
+            setData={setError}
+            onPress={() => {
+              nav.goBack();
+              nav.navigate(Profile);
+            }}
+          />
         </View>
       )}
     </View>
