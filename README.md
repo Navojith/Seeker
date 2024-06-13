@@ -1,10 +1,3 @@
-Use dev branch
-
-# Use Yarn always
-
-# Colors => tailwindcss.config.js
-
-# Button => Use provided buttons/alertboxes (pass props) in components/common/ (create new buttons/alerts if needed)
 
 React native (Expo) + NativeWind
 
